@@ -1,61 +1,53 @@
 export type IBSType = 'IBS-C' | 'IBS-D' | 'IBS-M';
-
-export type Symptom = 
-  | 'bloating'
-  | 'gas'
-  | 'cramping'
-  | 'diarrhea'
-  | 'constipation'
-  | 'nausea'
-  | 'fatigue'
-  | 'urgency';
-
 export type SeverityLevel = 'mild' | 'moderate' | 'severe';
+export type FoodStatus = 'safe' | 'caution' | 'avoid';
+export type PortionSize = 'S' | 'M' | 'L';
 
-export type FoodStatus = 'recommended' | 'caution' | 'avoid';
-
-export interface UserProfile {
+export interface Profile {
   id: string;
-  ibsType: IBSType;
-  symptoms: Symptom[];
+  user_id: string;
+  ibs_type: IBSType;
   severity: SeverityLevel;
-  knownTriggers: string[];
-  createdAt: Date;
+  symptoms: string[];
+  trigger_sensitivities: string[];
+  created_at: string;
+  updated_at: string;
 }
 
-export interface Food {
+export interface FoodReference {
   id: string;
   name: string;
-  category: string;
-  fodmapLevel: 'low' | 'moderate' | 'high';
-  defaultStatus: FoodStatus;
-  notes: string;
+  default_status: FoodStatus;
+  fodmap_note: string;
+  created_at: string;
 }
 
 export interface MealLog {
   id: string;
-  userId: string;
-  foodName: string;
-  portionSize: string;
-  time: Date;
-  symptomSeverity: number;
+  user_id: string;
+  food_name: string;
+  portion: PortionSize;
+  eaten_at: string;
   notes: string;
+  created_at: string;
 }
 
-export interface ToleranceScore {
+export interface SymptomLog {
   id: string;
-  userId: string;
-  foodName: string;
-  score: number;
-  reactionCount: number;
-  lastUpdated: Date;
+  meal_log_id: string;
+  bloating_0_10: number;
+  pain_0_10: number;
+  stool_issue: boolean;
+  recorded_at: string;
 }
 
-export interface MealSuggestion {
-  id: string;
-  mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack';
-  name: string;
-  description: string;
-  ingredients: string[];
-  toleranceScore: number;
+export interface MealLogWithSymptoms extends MealLog {
+  symptom_logs?: SymptomLog[];
+}
+
+export interface ToleranceData {
+  food_name: string;
+  tolerance_percent: number;
+  status: FoodStatus;
+  meal_count: number;
 }

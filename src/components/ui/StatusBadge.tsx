@@ -6,25 +6,24 @@ import { CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
 interface StatusBadgeProps {
   status: FoodStatus;
   size?: 'sm' | 'md' | 'lg';
-  showIcon?: boolean;
   className?: string;
 }
 
 const statusConfig = {
-  recommended: {
-    label: 'Recommended',
+  safe: {
+    label: 'Safe',
     icon: CheckCircle,
-    className: 'status-recommended',
+    className: 'bg-success/15 text-success border-success/30',
   },
   caution: {
     label: 'Caution',
     icon: AlertTriangle,
-    className: 'status-caution',
+    className: 'bg-caution/15 text-caution border-caution/30',
   },
   avoid: {
     label: 'Avoid',
     icon: XCircle,
-    className: 'status-avoid',
+    className: 'bg-destructive/15 text-destructive border-destructive/30',
   },
 };
 
@@ -34,7 +33,7 @@ const sizeConfig = {
   lg: 'px-4 py-1.5 text-base',
 };
 
-export function StatusBadge({ status, size = 'md', showIcon = true, className }: StatusBadgeProps) {
+export function StatusBadge({ status, size = 'md', className }: StatusBadgeProps) {
   const config = statusConfig[status];
   const Icon = config.icon;
 
@@ -45,11 +44,11 @@ export function StatusBadge({ status, size = 'md', showIcon = true, className }:
       sizeConfig[size],
       className
     )}>
-      {showIcon && <Icon className={cn(
+      <Icon className={cn(
         size === 'sm' && 'w-3 h-3',
         size === 'md' && 'w-4 h-4',
         size === 'lg' && 'w-5 h-5',
-      )} />}
+      )} />
       {config.label}
     </span>
   );

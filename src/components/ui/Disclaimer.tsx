@@ -1,31 +1,21 @@
 import React from 'react';
-import { Info } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { DISCLAIMER_TEXT } from '@/data/constants';
 
 interface DisclaimerProps {
   className?: string;
-  compact?: boolean;
 }
 
-export function Disclaimer({ className, compact = false }: DisclaimerProps) {
+export function Disclaimer({ className }: DisclaimerProps) {
   return (
     <div className={cn(
-      "flex items-start gap-3 p-4 bg-accent/50 rounded-xl border border-accent",
-      compact && "p-3",
+      "flex items-start gap-3 p-3 bg-accent/50 rounded-xl border border-accent",
       className
     )}>
-      <Info className={cn(
-        "text-accent-foreground flex-shrink-0 mt-0.5",
-        compact ? "w-4 h-4" : "w-5 h-5"
-      )} />
-      <p className={cn(
-        "text-accent-foreground leading-relaxed",
-        compact ? "text-xs" : "text-sm"
-      )}>
-        {compact 
-          ? "Educational tool only. Not medical advice."
-          : "This app is an educational tool to help you understand and track your diet. It does not provide medical diagnoses or replace professional healthcare advice. Always consult your doctor before making significant dietary changes."
-        }
+      <AlertTriangle className="w-4 h-4 text-accent-foreground flex-shrink-0 mt-0.5" />
+      <p className="text-xs text-accent-foreground leading-relaxed">
+        {DISCLAIMER_TEXT}
       </p>
     </div>
   );

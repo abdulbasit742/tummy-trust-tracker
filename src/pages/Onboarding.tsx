@@ -1,24 +1,28 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '@/contexts/UserContext';
-import { IBSType, Symptom, SeverityLevel } from '@/types';
-import { IBS_TYPES, SYMPTOMS, SEVERITY_LEVELS, COMMON_TRIGGERS } from '@/data/mockData';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { IBS_TYPES, SYMPTOMS, SEVERITY_LEVELS, COMMON_TRIGGERS, DISCLAIMER_TEXT } from '@/data/constants';
+import { IBSType, SeverityLevel } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Disclaimer } from '@/components/ui/Disclaimer';
-import { ArrowRight, ArrowLeft, Heart, Sparkles } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Heart } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 type Step = 'welcome' | 'ibs-type' | 'symptoms' | 'severity' | 'triggers';
 
 export default function Onboarding() {
   const navigate = useNavigate();
-  const { completeOnboarding } = useUser();
+  const { user, refreshProfile } = useAuth();
+  const { toast } = useToast();
   
   const [step, setStep] = useState<Step>('welcome');
   const [ibsType, setIbsType] = useState<IBSType | null>(null);
-  const [symptoms, setSymptoms] = useState<Symptom[]>([]);
+  const [symptoms, setSymptoms] = useState<string[]>([]);
   const [severity, setSeverity] = useState<SeverityLevel | null>(null);
   const [triggers, setTriggers] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const steps: Step[] = ['welcome', 'ibs-type', 'symptoms', 'severity', 'triggers'];
   const currentIndex = steps.indexOf(step);
@@ -51,23 +55,44 @@ export default function Onboarding() {
     }
   };
 
-  const handleComplete = () => {
-    if (ibsType && severity) {
-      completeOnboarding({
-        ibsType,
-        symptoms,
-        severity,
-        knownTriggers: triggers,
+  const handleComplete = async () => {
+    if (!user || !ibsType || !severity) return;
+    
+    setIsSubmitting(true);
+    
+    const { error } = await supabase
+      .from('profiles')
+      .insert({
+        user_id: user.id,
+        ibs_type: ibsType,
+        severity: severity,
+        symptoms: symptoms,
+        trigger_sensitivities: triggers,
       });
-      navigate('/');
+
+    if (error) {
+      toast({
+        title: "Error saving profile",
+        description: error.message,
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+      return;
     }
+
+    await refreshProfile();
+    toast({
+      title: "Profile created!",
+      description: "Welcome to IBS Diet Companion.",
+    });
+    navigate('/');
   };
 
-  const toggleSymptom = (symptom: Symptom) => {
+  const toggleSymptom = (symptomId: string) => {
     setSymptoms(prev => 
-      prev.includes(symptom) 
-        ? prev.filter(s => s !== symptom)
-        : [...prev, symptom]
+      prev.includes(symptomId) 
+        ? prev.filter(s => s !== symptomId)
+        : [...prev, symptomId]
     );
   };
 
@@ -93,7 +118,7 @@ export default function Onboarding() {
         </div>
       )}
 
-      <div className="flex-1 flex flex-col px-4 py-6">
+      <div className="flex-1 flex flex-col px-4 py-6 overflow-y-auto">
         {/* Welcome Step */}
         {step === 'welcome' && (
           <div className="flex-1 flex flex-col justify-center animate-fade-in">
@@ -101,27 +126,12 @@ export default function Onboarding() {
               <div className="w-20 h-20 gradient-calm rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-elevated">
                 <Heart className="w-10 h-10 text-primary-foreground" />
               </div>
-              <h1 className="font-display text-3xl font-bold text-foreground mb-3">
-                IBS Diet Companion
+              <h1 className="font-display text-2xl font-bold text-foreground mb-3">
+                Let's personalize your experience
               </h1>
-              <p className="text-muted-foreground text-lg leading-relaxed">
-                Your personal guide to understanding and managing your IBS through better food choices.
+              <p className="text-muted-foreground leading-relaxed">
+                Answer a few questions to help us tailor recommendations for you.
               </p>
-            </div>
-
-            <div className="space-y-4 mb-8">
-              <div className="flex items-center gap-3 bg-card p-4 rounded-xl shadow-soft">
-                <Sparkles className="w-6 h-6 text-primary flex-shrink-0" />
-                <span className="text-foreground">Track meals and symptoms</span>
-              </div>
-              <div className="flex items-center gap-3 bg-card p-4 rounded-xl shadow-soft">
-                <Sparkles className="w-6 h-6 text-primary flex-shrink-0" />
-                <span className="text-foreground">Discover your personal triggers</span>
-              </div>
-              <div className="flex items-center gap-3 bg-card p-4 rounded-xl shadow-soft">
-                <Sparkles className="w-6 h-6 text-primary flex-shrink-0" />
-                <span className="text-foreground">Get personalized meal suggestions</span>
-              </div>
             </div>
 
             <Disclaimer className="mb-8" />
@@ -131,10 +141,10 @@ export default function Onboarding() {
         {/* IBS Type Step */}
         {step === 'ibs-type' && (
           <div className="flex-1 flex flex-col animate-fade-in">
-            <h2 className="font-display text-2xl font-bold text-foreground mb-2">
+            <h2 className="font-display text-xl font-bold text-foreground mb-2">
               What's your IBS type?
             </h2>
-            <p className="text-muted-foreground mb-6">
+            <p className="text-muted-foreground text-sm mb-6">
               This helps us provide more relevant recommendations.
             </p>
 
@@ -144,7 +154,7 @@ export default function Onboarding() {
                   key={type.value}
                   onClick={() => setIbsType(type.value as IBSType)}
                   className={cn(
-                    "w-full text-left p-4 rounded-2xl border-2 transition-all duration-200",
+                    "w-full text-left p-4 rounded-xl border-2 transition-all duration-200",
                     ibsType === type.value
                       ? "border-primary bg-primary/5 shadow-soft"
                       : "border-border bg-card hover:border-primary/50"
@@ -165,10 +175,10 @@ export default function Onboarding() {
         {/* Symptoms Step */}
         {step === 'symptoms' && (
           <div className="flex-1 flex flex-col animate-fade-in">
-            <h2 className="font-display text-2xl font-bold text-foreground mb-2">
+            <h2 className="font-display text-xl font-bold text-foreground mb-2">
               Common symptoms
             </h2>
-            <p className="text-muted-foreground mb-6">
+            <p className="text-muted-foreground text-sm mb-6">
               Select all that apply to you.
             </p>
 
@@ -176,15 +186,14 @@ export default function Onboarding() {
               {SYMPTOMS.map((symptom) => (
                 <button
                   key={symptom.id}
-                  onClick={() => toggleSymptom(symptom.id as Symptom)}
+                  onClick={() => toggleSymptom(symptom.id)}
                   className={cn(
-                    "flex items-center gap-2 p-4 rounded-2xl border-2 transition-all duration-200",
-                    symptoms.includes(symptom.id as Symptom)
+                    "flex items-center justify-center p-4 rounded-xl border-2 transition-all duration-200",
+                    symptoms.includes(symptom.id)
                       ? "border-primary bg-primary/5 shadow-soft"
                       : "border-border bg-card hover:border-primary/50"
                   )}
                 >
-                  <span className="text-xl">{symptom.icon}</span>
                   <span className="font-medium text-foreground text-sm">
                     {symptom.label}
                   </span>
@@ -197,10 +206,10 @@ export default function Onboarding() {
         {/* Severity Step */}
         {step === 'severity' && (
           <div className="flex-1 flex flex-col animate-fade-in">
-            <h2 className="font-display text-2xl font-bold text-foreground mb-2">
+            <h2 className="font-display text-xl font-bold text-foreground mb-2">
               Symptom severity
             </h2>
-            <p className="text-muted-foreground mb-6">
+            <p className="text-muted-foreground text-sm mb-6">
               How would you describe your typical symptoms?
             </p>
 
@@ -210,7 +219,7 @@ export default function Onboarding() {
                   key={level.value}
                   onClick={() => setSeverity(level.value as SeverityLevel)}
                   className={cn(
-                    "w-full text-left p-4 rounded-2xl border-2 transition-all duration-200",
+                    "w-full text-left p-4 rounded-xl border-2 transition-all duration-200",
                     severity === level.value
                       ? "border-primary bg-primary/5 shadow-soft"
                       : "border-border bg-card hover:border-primary/50"
@@ -231,10 +240,10 @@ export default function Onboarding() {
         {/* Triggers Step */}
         {step === 'triggers' && (
           <div className="flex-1 flex flex-col animate-fade-in">
-            <h2 className="font-display text-2xl font-bold text-foreground mb-2">
+            <h2 className="font-display text-xl font-bold text-foreground mb-2">
               Known triggers
             </h2>
-            <p className="text-muted-foreground mb-6">
+            <p className="text-muted-foreground text-sm mb-6">
               Select any foods you already know trigger your symptoms (optional).
             </p>
 
@@ -263,7 +272,7 @@ export default function Onboarding() {
             <Button
               variant="outline"
               onClick={handleBack}
-              className="flex-1"
+              className="flex-1 h-12 rounded-xl"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
@@ -271,13 +280,13 @@ export default function Onboarding() {
           )}
           <Button
             onClick={handleNext}
-            disabled={!canContinue()}
+            disabled={!canContinue() || isSubmitting}
             className={cn(
-              "flex-1 gradient-calm text-primary-foreground border-0",
+              "flex-1 h-12 rounded-xl gradient-calm text-primary-foreground border-0",
               currentIndex === 0 && "w-full"
             )}
           >
-            {step === 'triggers' ? 'Get Started' : 'Continue'}
+            {isSubmitting ? 'Saving...' : step === 'triggers' ? 'Get Started' : 'Continue'}
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>

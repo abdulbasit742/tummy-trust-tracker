@@ -1,16 +1,24 @@
 import React from 'react';
-import { useUser } from '@/contexts/UserContext';
+import { useAuth } from '@/contexts/AuthContext';
 import Onboarding from './Onboarding';
-import Home from './Home';
+import Dashboard from './Dashboard';
 
 const Index = () => {
-  const { isOnboarded } = useUser();
+  const { profile, isLoading } = useAuth();
 
-  if (!isOnboarded) {
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-pulse-soft text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!profile) {
     return <Onboarding />;
   }
 
-  return <Home />;
+  return <Dashboard />;
 };
 
 export default Index;
