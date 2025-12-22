@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { SymptomLog, ToleranceData, FoodStatus } from '@/types';
+import { normalizeFoodName, displayFoodName, calculateSymptomScore } from './utils/foodUtils';
 
 export async function calculateToleranceScores(userId: string): Promise<ToleranceData[]> {
   // Fetch all meal logs with their symptom logs
@@ -17,29 +18,33 @@ export async function calculateToleranceScores(userId: string): Promise<Toleranc
 
   if (symptomError) return [];
 
-  // Group symptoms by food name
-  const foodSymptoms: Record<string, { symptoms: SymptomLog[]; count: number }> = {};
+  // Group symptoms by normalized food name
+  const foodSymptoms: Record<string, { symptoms: SymptomLog[]; count: number; displayName: string }> = {};
 
   mealLogs.forEach(meal => {
     const mealSymptoms = symptomLogs?.filter(s => s.meal_log_id === meal.id) || [];
-    const foodKey = meal.food_name.toLowerCase().trim();
+    const normalizedName = normalizeFoodName(meal.food_name);
     
-    if (!foodSymptoms[foodKey]) {
-      foodSymptoms[foodKey] = { symptoms: [], count: 0 };
+    if (!foodSymptoms[normalizedName]) {
+      foodSymptoms[normalizedName] = { 
+        symptoms: [], 
+        count: 0, 
+        displayName: displayFoodName(meal.food_name) 
+      };
     }
     
-    foodSymptoms[foodKey].symptoms.push(...mealSymptoms);
-    foodSymptoms[foodKey].count++;
+    foodSymptoms[normalizedName].symptoms.push(...mealSymptoms);
+    foodSymptoms[normalizedName].count++;
   });
 
   // Calculate tolerance for each food
   const toleranceData: ToleranceData[] = [];
 
-  Object.entries(foodSymptoms).forEach(([foodName, data]) => {
+  Object.entries(foodSymptoms).forEach(([normalizedName, data]) => {
     if (data.symptoms.length === 0) {
       // No symptoms logged yet - can't determine personal tolerance
       toleranceData.push({
-        food_name: foodName.charAt(0).toUpperCase() + foodName.slice(1),
+        food_name: data.displayName,
         tolerance_percent: 50,
         status: 'caution',
         meal_count: data.count,
@@ -48,10 +53,9 @@ export async function calculateToleranceScores(userId: string): Promise<Toleranc
       return;
     }
 
-    // Calculate average symptom score
-    // symptom_score = (bloating + pain) / 2 + (stool_issue ? 2 : 0)
+    // Calculate average symptom score using the standard formula
     const avgScore = data.symptoms.reduce((sum, s) => {
-      const score = (s.bloating_0_10 + s.pain_0_10) / 2 + (s.stool_issue ? 2 : 0);
+      const score = calculateSymptomScore(s.bloating_0_10, s.pain_0_10, s.stool_issue);
       return sum + score;
     }, 0) / data.symptoms.length;
 
@@ -65,7 +69,7 @@ export async function calculateToleranceScores(userId: string): Promise<Toleranc
     else status = 'avoid';
 
     toleranceData.push({
-      food_name: foodName.charAt(0).toUpperCase() + foodName.slice(1),
+      food_name: data.displayName,
       tolerance_percent: tolerancePercent,
       status,
       meal_count: data.count,
@@ -85,4 +89,10 @@ export function getStatusFromTolerance(percent: number): FoodStatus {
   if (percent >= 70) return 'safe';
   if (percent >= 40) return 'caution';
   return 'avoid';
+}
+
+export function getToleranceLabel(percent: number): string {
+  if (percent >= 70) return 'Generally safe';
+  if (percent >= 40) return 'Moderate trigger';
+  return 'Strong trigger';
 }
