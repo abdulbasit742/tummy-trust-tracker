@@ -50,4 +50,5 @@ export interface ToleranceData {
   tolerance_percent: number;
   status: FoodStatus;
   meal_count: number;
+  symptom_log_count: number;
 }

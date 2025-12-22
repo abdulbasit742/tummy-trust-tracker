@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { MobileLayout } from '@/components/layout/MobileLayout';
-import { ToleranceBar } from '@/components/ui/ToleranceBar';
 import { Disclaimer } from '@/components/ui/Disclaimer';
 import { Button } from '@/components/ui/button';
 import { calculateToleranceScores } from '@/lib/toleranceEngine';
@@ -20,10 +18,11 @@ export default function Suggestions() {
   const [toleranceData, setToleranceData] = useState<ToleranceData[]>([]);
   const [defaultSafeFoods, setDefaultSafeFoods] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     loadData();
-  }, [user]);
+  }, [user, refreshKey]);
 
   const loadData = async () => {
     setIsLoading(true);
@@ -46,9 +45,9 @@ export default function Suggestions() {
   };
 
   const safeFoods = useMemo(() => {
-    // Use personal safe foods (tolerance >= 70) or fallback to default
+    // Use personal safe foods (tolerance >= 70 with >=2 logs) or fallback to default
     const personalSafe = toleranceData
-      .filter(t => t.tolerance_percent >= 70)
+      .filter(t => t.tolerance_percent >= 70 && t.symptom_log_count >= 2)
       .map(t => t.food_name);
     
     if (personalSafe.length >= 3) {
@@ -66,16 +65,12 @@ export default function Suggestions() {
     const shuffled = shuffle(safeFoods);
 
     // Simple templates: pick random safe foods for each meal
-    const breakfast = shuffled.slice(0, 2);
-    const lunch = shuffled.slice(2, 5).length >= 2 ? shuffled.slice(2, 5) : shuffled.slice(0, 3);
-    const dinner = shuffled.slice(5, 8).length >= 2 ? shuffled.slice(5, 8) : shuffled.slice(0, 3);
-
     return [
-      { mealType: 'breakfast', foods: breakfast.length >= 1 ? breakfast : shuffled.slice(0, 2) },
-      { mealType: 'lunch', foods: lunch.length >= 2 ? lunch : shuffled.slice(0, 3) },
-      { mealType: 'dinner', foods: dinner.length >= 2 ? dinner : shuffled.slice(0, 3) },
+      { mealType: 'breakfast', foods: shuffled.slice(0, 2) },
+      { mealType: 'lunch', foods: shuffled.slice(2, 5).length >= 2 ? shuffled.slice(2, 5) : shuffled.slice(0, 3) },
+      { mealType: 'dinner', foods: shuffled.length > 5 ? shuffled.slice(5, 8) : shuffled.slice(0, 3) },
     ];
-  }, [safeFoods]);
+  }, [safeFoods, refreshKey]);
 
   const getMealIcon = (type: string) => {
     switch (type) {
@@ -95,9 +90,11 @@ export default function Suggestions() {
     }
   };
 
+  const hasPersonalData = toleranceData.filter(t => t.tolerance_percent >= 70 && t.symptom_log_count >= 2).length >= 3;
+
   return (
     <MobileLayout>
-      <div className="px-4 py-6 space-y-6">
+      <div className="px-4 py-6 space-y-5">
         {/* Header */}
         <div className="flex items-center justify-between animate-fade-in">
           <div>
@@ -105,13 +102,13 @@ export default function Suggestions() {
               Daily Suggestions
             </h1>
             <p className="text-muted-foreground text-sm mt-1">
-              Based on your safe foods
+              {hasPersonalData ? 'Based on your safe foods' : 'Based on default safe foods'}
             </p>
           </div>
           <Button
             variant="outline"
             size="icon"
-            onClick={loadData}
+            onClick={() => setRefreshKey(k => k + 1)}
             className="rounded-xl"
           >
             <RefreshCw className="w-4 h-4" />
@@ -134,7 +131,7 @@ export default function Suggestions() {
               No safe foods yet
             </h3>
             <p className="text-muted-foreground text-sm">
-              Log some meals with symptoms to discover your safe foods, or we'll use general low-FODMAP recommendations.
+              Log meals with symptoms to discover your safe foods.
             </p>
           </div>
         ) : (
@@ -155,7 +152,7 @@ export default function Suggestions() {
                 </div>
                 
                 <div className="flex flex-wrap gap-2">
-                  {suggestion.foods.map((food, i) => (
+                  {suggestion.foods.filter(f => f).map((food, i) => (
                     <span 
                       key={i}
                       className="px-3 py-1.5 bg-success/10 text-success text-sm font-medium rounded-full"
@@ -168,11 +165,12 @@ export default function Suggestions() {
             ))}
 
             {/* Personal foods indicator */}
-            {toleranceData.filter(t => t.tolerance_percent >= 70).length >= 3 && (
-              <p className="text-xs text-muted-foreground text-center">
-                ✨ Suggestions based on your {toleranceData.filter(t => t.tolerance_percent >= 70).length} personal safe foods
-              </p>
-            )}
+            <p className="text-xs text-muted-foreground text-center">
+              {hasPersonalData 
+                ? `✨ Based on your ${toleranceData.filter(t => t.tolerance_percent >= 70).length} personal safe foods`
+                : `📚 Using ${defaultSafeFoods.length} default safe foods`
+              }
+            </p>
           </div>
         )}
 

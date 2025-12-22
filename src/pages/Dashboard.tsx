@@ -4,11 +4,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { ToleranceBar } from '@/components/ui/ToleranceBar';
+import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Disclaimer } from '@/components/ui/Disclaimer';
 import { Button } from '@/components/ui/button';
-import { calculateToleranceScores } from '@/lib/toleranceEngine';
-import { MealLog, ToleranceData } from '@/types';
-import { Search, PlusCircle, TrendingUp, TrendingDown, Calendar } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { calculateToleranceScores, shouldUsePersonalTolerance } from '@/lib/toleranceEngine';
+import { MealLog, ToleranceData, FoodReference, FoodStatus } from '@/types';
+import { Search, PlusCircle, TrendingUp, TrendingDown, Calendar, Database, X } from 'lucide-react';
 import { format, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -18,7 +20,11 @@ export default function Dashboard() {
   
   const [todayMeals, setTodayMeals] = useState<MealLog[]>([]);
   const [toleranceData, setToleranceData] = useState<ToleranceData[]>([]);
+  const [foods, setFoods] = useState<FoodReference[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Starter foods search
+  const [foodSearch, setFoodSearch] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -48,15 +54,38 @@ export default function Dashboard() {
     const scores = await calculateToleranceScores(user.id);
     setToleranceData(scores);
 
+    // Fetch food reference
+    const { data: foodData } = await supabase
+      .from('food_reference')
+      .select('*')
+      .order('name');
+    setFoods((foodData as FoodReference[]) || []);
+
     setIsLoading(false);
+  };
+
+  const getStatusInfo = (foodName: string, defaultStatus: FoodStatus): { status: FoodStatus; isPersonal: boolean } => {
+    const personal = toleranceData.find(
+      t => t.food_name.toLowerCase() === foodName.toLowerCase()
+    );
+    
+    if (shouldUsePersonalTolerance(personal)) {
+      return { status: personal!.status, isPersonal: true };
+    }
+    
+    return { status: defaultStatus, isPersonal: false };
   };
 
   const safeFoods = toleranceData.filter(t => t.tolerance_percent >= 70).slice(0, 5);
   const triggerFoods = toleranceData.filter(t => t.tolerance_percent < 40).slice(0, 5);
 
+  const filteredFoods = foodSearch.trim()
+    ? foods.filter(f => f.name.toLowerCase().includes(foodSearch.toLowerCase())).slice(0, 6)
+    : [];
+
   return (
     <MobileLayout>
-      <div className="px-4 py-6 space-y-6">
+      <div className="px-4 py-6 space-y-5">
         {/* Header */}
         <div className="animate-fade-in">
           <h1 className="font-display text-2xl font-bold text-foreground">
@@ -74,22 +103,73 @@ export default function Dashboard() {
             className="h-auto py-4 flex flex-col items-center gap-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 border-0"
           >
             <Search className="w-6 h-6" />
-            <span className="font-semibold">Food Check</span>
+            <span className="font-semibold text-sm">Food Check</span>
           </Button>
           <Button
             onClick={() => navigate('/log-meal')}
             className="h-auto py-4 flex flex-col items-center gap-2 rounded-xl bg-success/10 text-success hover:bg-success/20 border-0"
           >
             <PlusCircle className="w-6 h-6" />
-            <span className="font-semibold">Log Meal</span>
+            <span className="font-semibold text-sm">Log Meal</span>
           </Button>
+        </div>
+
+        {/* Starter Foods Search */}
+        <div className="animate-slide-up" style={{ animationDelay: '0.05s' }}>
+          <div className="flex items-center gap-2 mb-2">
+            <Database className="w-4 h-4 text-primary" />
+            <h2 className="font-display text-sm font-semibold text-foreground">
+              Starter Foods ({foods.length})
+            </h2>
+          </div>
+          
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              value={foodSearch}
+              onChange={(e) => setFoodSearch(e.target.value)}
+              placeholder="Quick search foods..."
+              className="pl-9 pr-9 h-10 rounded-xl bg-card border-border text-sm"
+            />
+            {foodSearch && (
+              <button
+                onClick={() => setFoodSearch('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+              >
+                <X className="w-4 h-4 text-muted-foreground" />
+              </button>
+            )}
+          </div>
+
+          {/* Search Results */}
+          {filteredFoods.length > 0 && (
+            <div className="mt-2 bg-card rounded-xl border border-border divide-y divide-border">
+              {filteredFoods.map((food) => {
+                const { status, isPersonal } = getStatusInfo(food.name, food.default_status as FoodStatus);
+                return (
+                  <div 
+                    key={food.id}
+                    className="flex items-center justify-between p-3"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <span className="font-medium text-foreground text-sm">{food.name}</span>
+                      {isPersonal && (
+                        <span className="text-xs text-primary ml-1">• Personal</span>
+                      )}
+                    </div>
+                    <StatusBadge status={status} size="sm" />
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Today's Meals */}
         <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <Calendar className="w-5 h-5 text-primary" />
-            <h2 className="font-display text-lg font-semibold text-foreground">
+          <div className="flex items-center gap-2 mb-2">
+            <Calendar className="w-4 h-4 text-primary" />
+            <h2 className="font-display text-sm font-semibold text-foreground">
               Today's Meals
             </h2>
           </div>
@@ -99,15 +179,15 @@ export default function Dashboard() {
               <div className="h-4 bg-muted rounded w-3/4"></div>
             </div>
           ) : todayMeals.length > 0 ? (
-            <div className="bg-card rounded-xl p-4 border border-border space-y-3">
+            <div className="bg-card rounded-xl border border-border divide-y divide-border">
               {todayMeals.map((meal) => (
                 <div 
                   key={meal.id}
-                  className="flex items-center justify-between py-2 border-b border-border last:border-0"
+                  className="flex items-center justify-between p-3"
                 >
                   <div>
-                    <span className="font-medium text-foreground">{meal.food_name}</span>
-                    <span className="text-sm text-muted-foreground ml-2">({meal.portion})</span>
+                    <span className="font-medium text-foreground text-sm">{meal.food_name}</span>
+                    <span className="text-xs text-muted-foreground ml-1">({meal.portion})</span>
                   </div>
                   <span className="text-xs text-muted-foreground">
                     {format(new Date(meal.eaten_at), 'h:mm a')}
@@ -116,11 +196,11 @@ export default function Dashboard() {
               ))}
             </div>
           ) : (
-            <div className="bg-card rounded-xl p-6 border border-border text-center">
+            <div className="bg-card rounded-xl p-4 border border-border text-center">
               <p className="text-muted-foreground text-sm">No meals logged today</p>
               <Button 
                 variant="link" 
-                className="mt-2 text-primary"
+                className="mt-1 text-primary text-sm p-0 h-auto"
                 onClick={() => navigate('/log-meal')}
               >
                 Log your first meal
@@ -131,15 +211,15 @@ export default function Dashboard() {
 
         {/* Top Safe Foods */}
         <div className="animate-slide-up" style={{ animationDelay: '0.15s' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <TrendingUp className="w-5 h-5 text-success" />
-            <h2 className="font-display text-lg font-semibold text-foreground">
+          <div className="flex items-center gap-2 mb-2">
+            <TrendingUp className="w-4 h-4 text-success" />
+            <h2 className="font-display text-sm font-semibold text-foreground">
               Top 5 Safe Foods
             </h2>
           </div>
 
           {safeFoods.length > 0 ? (
-            <div className="bg-card rounded-xl p-4 border border-border space-y-3">
+            <div className="bg-card rounded-xl p-3 border border-border space-y-3">
               {safeFoods.map((food) => (
                 <div key={food.food_name}>
                   <div className="flex items-center justify-between mb-1">
@@ -152,7 +232,7 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="bg-card rounded-xl p-4 border border-border text-center">
-              <p className="text-muted-foreground text-sm">
+              <p className="text-muted-foreground text-xs">
                 Log meals with symptoms to discover your safe foods
               </p>
             </div>
@@ -161,15 +241,15 @@ export default function Dashboard() {
 
         {/* Top Trigger Foods */}
         <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <TrendingDown className="w-5 h-5 text-destructive" />
-            <h2 className="font-display text-lg font-semibold text-foreground">
+          <div className="flex items-center gap-2 mb-2">
+            <TrendingDown className="w-4 h-4 text-destructive" />
+            <h2 className="font-display text-sm font-semibold text-foreground">
               Top 5 Triggers
             </h2>
           </div>
 
           {triggerFoods.length > 0 ? (
-            <div className="bg-card rounded-xl p-4 border border-border space-y-3">
+            <div className="bg-card rounded-xl p-3 border border-border space-y-3">
               {triggerFoods.map((food) => (
                 <div key={food.food_name}>
                   <div className="flex items-center justify-between mb-1">
@@ -182,7 +262,7 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="bg-card rounded-xl p-4 border border-border text-center">
-              <p className="text-muted-foreground text-sm">
+              <p className="text-muted-foreground text-xs">
                 No trigger foods identified yet
               </p>
             </div>
