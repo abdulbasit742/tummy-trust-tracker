@@ -6,12 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
+import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { PORTION_SIZES } from '@/data/constants';
-import { FoodReference, PortionSize } from '@/types';
+import { FoodReference, PortionSize, FoodStatus } from '@/types';
 import { useToast } from '@/hooks/use-toast';
-import { Utensils, CheckCircle, AlertCircle } from 'lucide-react';
+import { Utensils, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type Step = 'meal' | 'symptoms';
@@ -52,7 +53,10 @@ export default function LogMeal() {
 
   const suggestions = foods
     .filter(f => f.name.toLowerCase().includes(foodName.toLowerCase()))
-    .slice(0, 5);
+    .slice(0, 6);
+
+  const selectedFoodRef = foods.find(f => f.name.toLowerCase() === foodName.toLowerCase());
+  const isCustomFood = foodName.trim().length >= 2 && !selectedFoodRef;
 
   const handleMealSubmit = async () => {
     if (!user || !foodName.trim() || !portion) {
@@ -149,7 +153,7 @@ export default function LogMeal() {
 
   return (
     <MobileLayout>
-      <div className="px-4 py-6 space-y-6">
+      <div className="px-4 py-6 space-y-5">
         {/* Header */}
         <div className="animate-fade-in">
           <h1 className="font-display text-2xl font-bold text-foreground">
@@ -176,7 +180,7 @@ export default function LogMeal() {
 
         {step === 'meal' ? (
           <>
-            {/* Food Name */}
+            {/* Food Name with Autocomplete */}
             <div className="animate-slide-up space-y-2">
               <label className="flex items-center gap-2 text-sm font-medium text-foreground">
                 <Utensils className="w-4 h-4 text-primary" />
@@ -191,12 +195,13 @@ export default function LogMeal() {
                   }}
                   onFocus={() => setShowSuggestions(true)}
                   onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                  placeholder="What did you eat?"
+                  placeholder="Type to search (e.g. Rice, Daal)"
                   className="h-12 rounded-xl bg-card border-border"
                 />
                 
-                {showSuggestions && foodName && suggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-xl shadow-elevated border border-border overflow-hidden z-10">
+                {/* Autocomplete Dropdown */}
+                {showSuggestions && foodName.length >= 1 && suggestions.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-xl shadow-elevated border border-border overflow-hidden z-10 max-h-[200px] overflow-y-auto">
                     {suggestions.map((food) => (
                       <button
                         key={food.id}
@@ -204,14 +209,33 @@ export default function LogMeal() {
                           setFoodName(food.name);
                           setShowSuggestions(false);
                         }}
-                        className="w-full text-left px-4 py-3 hover:bg-muted transition-colors text-sm"
+                        className="w-full text-left px-4 py-3 hover:bg-muted transition-colors flex items-center justify-between"
                       >
-                        {food.name}
+                        <span className="text-sm text-foreground">{food.name}</span>
+                        <StatusBadge status={food.default_status as FoodStatus} size="sm" />
                       </button>
                     ))}
                   </div>
                 )}
               </div>
+
+              {/* Custom food notice */}
+              {isCustomFood && (
+                <div className="flex items-start gap-2 p-2 bg-caution/10 rounded-lg">
+                  <Info className="w-4 h-4 text-caution flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-muted-foreground">
+                    Custom food - will be tracked as "Caution" until you log reactions.
+                  </p>
+                </div>
+              )}
+
+              {/* Selected food preview */}
+              {selectedFoodRef && (
+                <div className="flex items-center gap-2 p-2 bg-card rounded-lg border border-border">
+                  <StatusBadge status={selectedFoodRef.default_status as FoodStatus} size="sm" />
+                  <span className="text-xs text-muted-foreground">{selectedFoodRef.fodmap_note}</span>
+                </div>
+              )}
             </div>
 
             {/* Portion Size */}
@@ -246,7 +270,7 @@ export default function LogMeal() {
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Any additional details..."
-                className="min-h-[80px] rounded-xl bg-card border-border resize-none"
+                className="min-h-[70px] rounded-xl bg-card border-border resize-none"
               />
             </div>
 
@@ -265,7 +289,7 @@ export default function LogMeal() {
             <div className="animate-slide-up space-y-3">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-foreground">Bloating</label>
-                <span className={cn("font-semibold", getSeverityColor(bloating[0]))}>
+                <span className={cn("font-semibold text-sm", getSeverityColor(bloating[0]))}>
                   {bloating[0]}/10 - {getSeverityLabel(bloating[0])}
                 </span>
               </div>
@@ -282,7 +306,7 @@ export default function LogMeal() {
             <div className="animate-slide-up space-y-3" style={{ animationDelay: '0.05s' }}>
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-foreground">Pain/Cramping</label>
-                <span className={cn("font-semibold", getSeverityColor(pain[0]))}>
+                <span className={cn("font-semibold text-sm", getSeverityColor(pain[0]))}>
                   {pain[0]}/10 - {getSeverityLabel(pain[0])}
                 </span>
               </div>
@@ -302,7 +326,7 @@ export default function LogMeal() {
                   "w-5 h-5",
                   stoolIssue ? "text-destructive" : "text-muted-foreground"
                 )} />
-                <span className="font-medium text-foreground">Stool Issue</span>
+                <span className="font-medium text-foreground text-sm">Stool Issue</span>
               </div>
               <Switch
                 checked={stoolIssue}
@@ -311,7 +335,7 @@ export default function LogMeal() {
             </div>
 
             {/* Buttons */}
-            <div className="space-y-3 pt-4">
+            <div className="space-y-3 pt-2">
               <Button
                 onClick={handleSymptomSubmit}
                 disabled={isSubmitting}
@@ -323,7 +347,7 @@ export default function LogMeal() {
               <Button
                 variant="ghost"
                 onClick={handleSkipSymptoms}
-                className="w-full h-12 text-muted-foreground"
+                className="w-full h-10 text-muted-foreground"
               >
                 Skip symptom logging
               </Button>

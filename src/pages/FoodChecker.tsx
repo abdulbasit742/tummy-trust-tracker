@@ -5,9 +5,9 @@ import { Disclaimer } from '@/components/ui/Disclaimer';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { calculateToleranceScores } from '@/lib/toleranceEngine';
+import { calculateToleranceScores, shouldUsePersonalTolerance } from '@/lib/toleranceEngine';
 import { FoodReference, FoodStatus, ToleranceData } from '@/types';
-import { Search, X, Info } from 'lucide-react';
+import { Search, X, Info, User, Database } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function FoodChecker() {
@@ -42,27 +42,32 @@ export default function FoodChecker() {
     setIsLoading(false);
   };
 
-  const getPersonalStatus = (foodName: string, defaultStatus: FoodStatus): { status: FoodStatus; isPersonal: boolean } => {
+  const getStatusInfo = (foodName: string, defaultStatus: FoodStatus): { status: FoodStatus; isPersonal: boolean; tolerancePercent?: number } => {
     const personal = toleranceData.find(
       t => t.food_name.toLowerCase() === foodName.toLowerCase()
     );
     
-    if (personal && personal.meal_count >= 1) {
-      return { status: personal.status, isPersonal: true };
+    // Priority rule: use personal if >= 2 symptom logs
+    if (shouldUsePersonalTolerance(personal)) {
+      return { 
+        status: personal!.status, 
+        isPersonal: true,
+        tolerancePercent: personal!.tolerance_percent
+      };
     }
     
     return { status: defaultStatus, isPersonal: false };
   };
 
   const filteredFoods = useMemo(() => {
-    if (!searchQuery.trim()) return foods.slice(0, 8);
+    if (!searchQuery.trim()) return foods.slice(0, 10);
     
     return foods.filter(food =>
       food.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [searchQuery, foods]);
 
-  const isCustomFood = searchQuery.trim() && 
+  const isCustomFood = searchQuery.trim().length >= 2 && 
     !foods.some(f => f.name.toLowerCase() === searchQuery.toLowerCase().trim());
 
   const handleFoodSelect = (food: FoodReference) => {
@@ -77,7 +82,7 @@ export default function FoodChecker() {
 
   return (
     <MobileLayout>
-      <div className="px-4 py-6 space-y-6">
+      <div className="px-4 py-6 space-y-5">
         {/* Header */}
         <div className="animate-fade-in">
           <h1 className="font-display text-2xl font-bold text-foreground">
@@ -88,7 +93,7 @@ export default function FoodChecker() {
           </p>
         </div>
 
-        {/* Search */}
+        {/* Search with Autocomplete */}
         <div className="relative animate-slide-up">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <Input
@@ -97,7 +102,7 @@ export default function FoodChecker() {
               setSearchQuery(e.target.value);
               setSelectedFood(null);
             }}
-            placeholder="Search for a food..."
+            placeholder="Search foods (e.g. Rice, Daal)"
             className="pl-12 pr-12 h-14 text-lg rounded-xl bg-card border-border"
           />
           {searchQuery && (
@@ -111,17 +116,22 @@ export default function FoodChecker() {
         </div>
 
         {/* Custom Food Warning */}
-        {isCustomFood && (
+        {isCustomFood && !selectedFood && (
           <div className="animate-scale-in">
             <div className="bg-caution/10 border border-caution/30 rounded-xl p-4">
               <div className="flex items-start gap-3">
                 <Info className="w-5 h-5 text-caution flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-semibold text-foreground">"{searchQuery}" not in database</p>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <p className="font-semibold text-foreground text-sm">"{searchQuery}" not in database</p>
+                  <p className="text-xs text-muted-foreground mt-1">
                     You can still log this food. We'll track your reaction to help determine tolerance.
                   </p>
-                  <StatusBadge status="caution" size="sm" className="mt-3" />
+                  <div className="flex items-center gap-2 mt-2">
+                    <StatusBadge status="caution" size="sm" />
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Database className="w-3 h-3" /> Default
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -132,67 +142,113 @@ export default function FoodChecker() {
         {selectedFood && (
           <div className="animate-scale-in">
             <div className="bg-card rounded-xl p-5 shadow-card border border-border">
-              <div className="flex items-start justify-between gap-3 mb-4">
-                <div>
-                  <h2 className="font-display text-xl font-bold text-foreground">
-                    {selectedFood.name}
-                  </h2>
-                </div>
-                <StatusBadge 
-                  status={getPersonalStatus(selectedFood.name, selectedFood.default_status as FoodStatus).status} 
-                  size="lg" 
-                />
-              </div>
+              {(() => {
+                const { status, isPersonal, tolerancePercent } = getStatusInfo(selectedFood.name, selectedFood.default_status as FoodStatus);
+                return (
+                  <>
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <h2 className="font-display text-xl font-bold text-foreground">
+                        {selectedFood.name}
+                      </h2>
+                      <StatusBadge status={status} size="lg" />
+                    </div>
 
-              <div className={cn(
-                "p-4 rounded-lg mb-4",
-                getPersonalStatus(selectedFood.name, selectedFood.default_status as FoodStatus).status === 'safe' && "bg-success/10",
-                getPersonalStatus(selectedFood.name, selectedFood.default_status as FoodStatus).status === 'caution' && "bg-caution/10",
-                getPersonalStatus(selectedFood.name, selectedFood.default_status as FoodStatus).status === 'avoid' && "bg-destructive/10",
-              )}>
-                <p className="text-foreground text-sm leading-relaxed">
-                  {selectedFood.fodmap_note}
-                </p>
-              </div>
+                    {/* Personalized vs Default label */}
+                    <div className="flex items-center gap-2 mb-3">
+                      {isPersonal ? (
+                        <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full flex items-center gap-1">
+                          <User className="w-3 h-3" /> Personalized ({tolerancePercent}%)
+                        </span>
+                      ) : (
+                        <span className="text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded-full flex items-center gap-1">
+                          <Database className="w-3 h-3" /> Default
+                        </span>
+                      )}
+                    </div>
 
-              {getPersonalStatus(selectedFood.name, selectedFood.default_status as FoodStatus).isPersonal && (
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Info className="w-3 h-3" />
-                  Based on your past reactions
-                </p>
-              )}
+                    <div className={cn(
+                      "p-3 rounded-lg mb-3",
+                      status === 'safe' && "bg-success/10",
+                      status === 'caution' && "bg-caution/10",
+                      status === 'avoid' && "bg-destructive/10",
+                    )}>
+                      <p className="text-foreground text-sm leading-relaxed">
+                        {selectedFood.fodmap_note}
+                      </p>
+                    </div>
+
+                    {isPersonal && (
+                      <p className="text-xs text-muted-foreground">
+                        Based on your logged reactions
+                      </p>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           </div>
         )}
 
-        {/* Food List */}
-        {!selectedFood && !isCustomFood && (
+        {/* Food List / Autocomplete */}
+        {!selectedFood && !isCustomFood && searchQuery.length >= 1 && (
+          <div className="space-y-2 animate-fade-in">
+            {filteredFoods.length > 0 ? (
+              filteredFoods.slice(0, 8).map((food) => {
+                const { status, isPersonal } = getStatusInfo(food.name, food.default_status as FoodStatus);
+                return (
+                  <button
+                    key={food.id}
+                    onClick={() => handleFoodSelect(food)}
+                    className="w-full text-left bg-card rounded-xl p-3 border border-border hover:shadow-soft transition-all active:scale-[0.98]"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <span className="font-medium text-foreground text-sm">{food.name}</span>
+                        <span className="text-xs text-muted-foreground ml-2">
+                          {isPersonal ? '• Personal' : ''}
+                        </span>
+                      </div>
+                      <StatusBadge status={status} size="sm" />
+                    </div>
+                  </button>
+                );
+              })
+            ) : (
+              <p className="text-center text-muted-foreground text-sm py-4">
+                No foods found
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Browse Foods (when empty search) */}
+        {!selectedFood && !searchQuery && (
           <div className="space-y-3">
             <h3 className="font-display font-semibold text-muted-foreground text-xs uppercase tracking-wide">
-              {searchQuery ? 'Search Results' : 'Common Foods'}
+              Browse Foods ({foods.length})
             </h3>
             
             {isLoading ? (
               <div className="space-y-2">
                 {[1,2,3].map(i => (
-                  <div key={i} className="bg-card rounded-xl p-4 border border-border animate-pulse-soft">
+                  <div key={i} className="bg-card rounded-xl p-3 border border-border animate-pulse-soft">
                     <div className="h-4 bg-muted rounded w-1/2"></div>
                   </div>
                 ))}
               </div>
-            ) : filteredFoods.length > 0 ? (
+            ) : (
               <div className="space-y-2">
-                {filteredFoods.map((food) => {
-                  const { status, isPersonal } = getPersonalStatus(food.name, food.default_status as FoodStatus);
+                {foods.slice(0, 10).map((food) => {
+                  const { status, isPersonal } = getStatusInfo(food.name, food.default_status as FoodStatus);
                   return (
                     <button
                       key={food.id}
                       onClick={() => handleFoodSelect(food)}
-                      className="w-full text-left bg-card rounded-xl p-4 border border-border hover:shadow-soft transition-all active:scale-[0.98]"
+                      className="w-full text-left bg-card rounded-xl p-3 border border-border hover:shadow-soft transition-all active:scale-[0.98]"
                     >
-                      <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                          <span className="font-medium text-foreground">{food.name}</span>
+                          <span className="font-medium text-foreground text-sm">{food.name}</span>
                           {isPersonal && (
                             <span className="text-xs text-primary ml-2">• Personal</span>
                           )}
@@ -202,12 +258,6 @@ export default function FoodChecker() {
                     </button>
                   );
                 })}
-              </div>
-            ) : (
-              <div className="bg-card rounded-xl p-6 border border-border text-center">
-                <p className="text-muted-foreground text-sm">
-                  No foods found matching "{searchQuery}"
-                </p>
               </div>
             )}
           </div>

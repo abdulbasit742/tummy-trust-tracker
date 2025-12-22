@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { MealLogWithSymptoms, SymptomLog, ToleranceData, FoodStatus } from '@/types';
+import { SymptomLog, ToleranceData, FoodStatus } from '@/types';
 
 export async function calculateToleranceScores(userId: string): Promise<ToleranceData[]> {
   // Fetch all meal logs with their symptom logs
@@ -22,7 +22,7 @@ export async function calculateToleranceScores(userId: string): Promise<Toleranc
 
   mealLogs.forEach(meal => {
     const mealSymptoms = symptomLogs?.filter(s => s.meal_log_id === meal.id) || [];
-    const foodKey = meal.food_name.toLowerCase();
+    const foodKey = meal.food_name.toLowerCase().trim();
     
     if (!foodSymptoms[foodKey]) {
       foodSymptoms[foodKey] = { symptoms: [], count: 0 };
@@ -37,12 +37,13 @@ export async function calculateToleranceScores(userId: string): Promise<Toleranc
 
   Object.entries(foodSymptoms).forEach(([foodName, data]) => {
     if (data.symptoms.length === 0) {
-      // No symptoms logged yet - default to caution
+      // No symptoms logged yet - can't determine personal tolerance
       toleranceData.push({
         food_name: foodName.charAt(0).toUpperCase() + foodName.slice(1),
         tolerance_percent: 50,
         status: 'caution',
         meal_count: data.count,
+        symptom_log_count: 0,
       });
       return;
     }
@@ -68,10 +69,16 @@ export async function calculateToleranceScores(userId: string): Promise<Toleranc
       tolerance_percent: tolerancePercent,
       status,
       meal_count: data.count,
+      symptom_log_count: data.symptoms.length,
     });
   });
 
   return toleranceData.sort((a, b) => b.tolerance_percent - a.tolerance_percent);
+}
+
+// Check if personal tolerance should override default (>=2 symptom logs)
+export function shouldUsePersonalTolerance(toleranceData: ToleranceData | undefined): boolean {
+  return !!toleranceData && toleranceData.symptom_log_count >= 2;
 }
 
 export function getStatusFromTolerance(percent: number): FoodStatus {
