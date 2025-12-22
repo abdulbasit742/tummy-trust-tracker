@@ -1,44 +1,71 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { MobileLayout } from '@/components/layout/MobileLayout';
-import { FoodCard } from '@/components/cards/FoodCard';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Disclaimer } from '@/components/ui/Disclaimer';
 import { Input } from '@/components/ui/input';
-import { FOODS_DATABASE } from '@/data/mockData';
-import { useUser } from '@/contexts/UserContext';
-import { Food, FoodStatus } from '@/types';
-import { Search, X } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { calculateToleranceScores } from '@/lib/toleranceEngine';
+import { FoodReference, FoodStatus, ToleranceData } from '@/types';
+import { Search, X, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function FoodChecker() {
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFood, setSelectedFood] = useState<Food | null>(null);
-  const { toleranceScores } = useUser();
+  const [foods, setFoods] = useState<FoodReference[]>([]);
+  const [toleranceData, setToleranceData] = useState<ToleranceData[]>([]);
+  const [selectedFood, setSelectedFood] = useState<FoodReference | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const getPersonalStatus = (food: Food): FoodStatus => {
-    const personalScore = toleranceScores.find(
-      s => s.foodName.toLowerCase() === food.name.toLowerCase()
-    );
+  useEffect(() => {
+    loadData();
+  }, [user]);
+
+  const loadData = async () => {
+    setIsLoading(true);
     
-    if (personalScore) {
-      if (personalScore.score >= 70) return 'recommended';
-      if (personalScore.score >= 40) return 'caution';
-      return 'avoid';
+    // Fetch food reference
+    const { data: foodData } = await supabase
+      .from('food_reference')
+      .select('*')
+      .order('name');
+    
+    setFoods((foodData as FoodReference[]) || []);
+
+    // Get personal tolerance data
+    if (user) {
+      const scores = await calculateToleranceScores(user.id);
+      setToleranceData(scores);
     }
     
-    return food.defaultStatus;
+    setIsLoading(false);
+  };
+
+  const getPersonalStatus = (foodName: string, defaultStatus: FoodStatus): { status: FoodStatus; isPersonal: boolean } => {
+    const personal = toleranceData.find(
+      t => t.food_name.toLowerCase() === foodName.toLowerCase()
+    );
+    
+    if (personal && personal.meal_count >= 1) {
+      return { status: personal.status, isPersonal: true };
+    }
+    
+    return { status: defaultStatus, isPersonal: false };
   };
 
   const filteredFoods = useMemo(() => {
-    if (!searchQuery.trim()) return FOODS_DATABASE.slice(0, 6);
+    if (!searchQuery.trim()) return foods.slice(0, 8);
     
-    return FOODS_DATABASE.filter(food =>
-      food.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      food.category.toLowerCase().includes(searchQuery.toLowerCase())
+    return foods.filter(food =>
+      food.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery]);
+  }, [searchQuery, foods]);
 
-  const handleFoodSelect = (food: Food) => {
+  const isCustomFood = searchQuery.trim() && 
+    !foods.some(f => f.name.toLowerCase() === searchQuery.toLowerCase().trim());
+
+  const handleFoodSelect = (food: FoodReference) => {
     setSelectedFood(food);
     setSearchQuery(food.name);
   };
@@ -56,7 +83,7 @@ export default function FoodChecker() {
           <h1 className="font-display text-2xl font-bold text-foreground">
             Food Checker
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground text-sm mt-1">
             Check if a food is safe for your IBS
           </p>
         </div>
@@ -71,7 +98,7 @@ export default function FoodChecker() {
               setSelectedFood(null);
             }}
             placeholder="Search for a food..."
-            className="pl-12 pr-12 h-14 text-lg rounded-2xl bg-card border-border"
+            className="pl-12 pr-12 h-14 text-lg rounded-xl bg-card border-border"
           />
           {searchQuery && (
             <button
@@ -83,80 +110,102 @@ export default function FoodChecker() {
           )}
         </div>
 
+        {/* Custom Food Warning */}
+        {isCustomFood && (
+          <div className="animate-scale-in">
+            <div className="bg-caution/10 border border-caution/30 rounded-xl p-4">
+              <div className="flex items-start gap-3">
+                <Info className="w-5 h-5 text-caution flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-foreground">"{searchQuery}" not in database</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    You can still log this food. We'll track your reaction to help determine tolerance.
+                  </p>
+                  <StatusBadge status="caution" size="sm" className="mt-3" />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Selected Food Detail */}
         {selectedFood && (
           <div className="animate-scale-in">
-            <div className="bg-card rounded-2xl p-5 shadow-elevated border border-border">
+            <div className="bg-card rounded-xl p-5 shadow-card border border-border">
               <div className="flex items-start justify-between gap-3 mb-4">
                 <div>
                   <h2 className="font-display text-xl font-bold text-foreground">
                     {selectedFood.name}
                   </h2>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedFood.category}
-                  </p>
                 </div>
-                <StatusBadge status={getPersonalStatus(selectedFood)} size="lg" />
+                <StatusBadge 
+                  status={getPersonalStatus(selectedFood.name, selectedFood.default_status as FoodStatus).status} 
+                  size="lg" 
+                />
               </div>
 
               <div className={cn(
-                "p-4 rounded-xl mb-4",
-                getPersonalStatus(selectedFood) === 'recommended' && "bg-success/10",
-                getPersonalStatus(selectedFood) === 'caution' && "bg-caution/10",
-                getPersonalStatus(selectedFood) === 'avoid' && "bg-destructive/10",
+                "p-4 rounded-lg mb-4",
+                getPersonalStatus(selectedFood.name, selectedFood.default_status as FoodStatus).status === 'safe' && "bg-success/10",
+                getPersonalStatus(selectedFood.name, selectedFood.default_status as FoodStatus).status === 'caution' && "bg-caution/10",
+                getPersonalStatus(selectedFood.name, selectedFood.default_status as FoodStatus).status === 'avoid' && "bg-destructive/10",
               )}>
-                <p className="text-foreground leading-relaxed">
-                  {selectedFood.notes}
+                <p className="text-foreground text-sm leading-relaxed">
+                  {selectedFood.fodmap_note}
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
-                <span className={cn(
-                  "text-sm font-medium px-3 py-1 rounded-full",
-                  selectedFood.fodmapLevel === 'low' && "bg-success/15 text-success",
-                  selectedFood.fodmapLevel === 'moderate' && "bg-caution/15 text-caution",
-                  selectedFood.fodmapLevel === 'high' && "bg-destructive/15 text-destructive",
-                )}>
-                  {selectedFood.fodmapLevel.toUpperCase()} FODMAP
-                </span>
-              </div>
-
-              {toleranceScores.find(s => s.foodName.toLowerCase() === selectedFood.name.toLowerCase()) && (
-                <div className="mt-4 pt-4 border-t border-border">
-                  <p className="text-sm text-muted-foreground">
-                    📊 Based on your personal reaction history
-                  </p>
-                </div>
+              {getPersonalStatus(selectedFood.name, selectedFood.default_status as FoodStatus).isPersonal && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Info className="w-3 h-3" />
+                  Based on your past reactions
+                </p>
               )}
             </div>
           </div>
         )}
 
         {/* Food List */}
-        {!selectedFood && (
+        {!selectedFood && !isCustomFood && (
           <div className="space-y-3">
-            <h3 className="font-display font-semibold text-muted-foreground text-sm uppercase tracking-wide">
-              {searchQuery ? 'Search Results' : 'Popular Foods'}
+            <h3 className="font-display font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+              {searchQuery ? 'Search Results' : 'Common Foods'}
             </h3>
             
-            {filteredFoods.length > 0 ? (
-              <div className="space-y-3">
-                {filteredFoods.map((food, index) => (
-                  <div 
-                    key={food.id} 
-                    style={{ animationDelay: `${index * 0.05}s` }}
-                    className="animate-fade-in"
-                  >
-                    <FoodCard
-                      food={{ ...food, defaultStatus: getPersonalStatus(food) }}
-                      onClick={() => handleFoodSelect(food)}
-                    />
+            {isLoading ? (
+              <div className="space-y-2">
+                {[1,2,3].map(i => (
+                  <div key={i} className="bg-card rounded-xl p-4 border border-border animate-pulse-soft">
+                    <div className="h-4 bg-muted rounded w-1/2"></div>
                   </div>
                 ))}
               </div>
+            ) : filteredFoods.length > 0 ? (
+              <div className="space-y-2">
+                {filteredFoods.map((food) => {
+                  const { status, isPersonal } = getPersonalStatus(food.name, food.default_status as FoodStatus);
+                  return (
+                    <button
+                      key={food.id}
+                      onClick={() => handleFoodSelect(food)}
+                      className="w-full text-left bg-card rounded-xl p-4 border border-border hover:shadow-soft transition-all active:scale-[0.98]"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <span className="font-medium text-foreground">{food.name}</span>
+                          {isPersonal && (
+                            <span className="text-xs text-primary ml-2">• Personal</span>
+                          )}
+                        </div>
+                        <StatusBadge status={status} size="sm" />
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             ) : (
-              <div className="bg-card rounded-2xl p-6 shadow-card border border-border text-center">
-                <p className="text-muted-foreground">
+              <div className="bg-card rounded-xl p-6 border border-border text-center">
+                <p className="text-muted-foreground text-sm">
                   No foods found matching "{searchQuery}"
                 </p>
               </div>
@@ -165,7 +214,7 @@ export default function FoodChecker() {
         )}
 
         {/* Disclaimer */}
-        <Disclaimer compact />
+        <Disclaimer />
       </div>
     </MobileLayout>
   );

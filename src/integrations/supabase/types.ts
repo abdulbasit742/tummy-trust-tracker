@@ -14,7 +14,128 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      food_reference: {
+        Row: {
+          created_at: string
+          default_status: string
+          fodmap_note: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          default_status: string
+          fodmap_note?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          default_status?: string
+          fodmap_note?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      meal_logs: {
+        Row: {
+          created_at: string
+          eaten_at: string
+          food_name: string
+          id: string
+          notes: string | null
+          portion: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          eaten_at?: string
+          food_name: string
+          id?: string
+          notes?: string | null
+          portion: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          eaten_at?: string
+          food_name?: string
+          id?: string
+          notes?: string | null
+          portion?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          ibs_type: string
+          id: string
+          severity: string
+          symptoms: string[] | null
+          trigger_sensitivities: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          ibs_type: string
+          id?: string
+          severity: string
+          symptoms?: string[] | null
+          trigger_sensitivities?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          ibs_type?: string
+          id?: string
+          severity?: string
+          symptoms?: string[] | null
+          trigger_sensitivities?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      symptom_logs: {
+        Row: {
+          bloating_0_10: number
+          id: string
+          meal_log_id: string
+          pain_0_10: number
+          recorded_at: string
+          stool_issue: boolean
+        }
+        Insert: {
+          bloating_0_10: number
+          id?: string
+          meal_log_id: string
+          pain_0_10: number
+          recorded_at?: string
+          stool_issue?: boolean
+        }
+        Update: {
+          bloating_0_10?: number
+          id?: string
+          meal_log_id?: string
+          pain_0_10?: number
+          recorded_at?: string
+          stool_issue?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "symptom_logs_meal_log_id_fkey"
+            columns: ["meal_log_id"]
+            isOneToOne: false
+            referencedRelation: "meal_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
