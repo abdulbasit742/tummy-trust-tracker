@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import FoodChecker from "./pages/FoodChecker";
 import LogMeal from "./pages/LogMeal";
+import Insights from "./pages/Insights";
 import Profile from "./pages/Profile";
 import Suggestions from "./pages/Suggestions";
 import NotFound from "./pages/NotFound";
@@ -49,6 +50,11 @@ function AppRoutes() {
       <Route path="/log-meal" element={
         <ProtectedRoute>
           <LogMeal />
+        </ProtectedRoute>
+      } />
+      <Route path="/insights" element={
+        <ProtectedRoute>
+          <Insights />
         </ProtectedRoute>
       } />
       <Route path="/profile" element={

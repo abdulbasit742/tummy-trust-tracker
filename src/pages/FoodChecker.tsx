@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { calculateToleranceScores, shouldUsePersonalTolerance } from '@/lib/toleranceEngine';
+import { normalizeFoodName } from '@/lib/utils/foodUtils';
 import { FoodReference, FoodStatus, ToleranceData } from '@/types';
 import { Search, X, Info, User, Database } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -43,8 +44,9 @@ export default function FoodChecker() {
   };
 
   const getStatusInfo = (foodName: string, defaultStatus: FoodStatus): { status: FoodStatus; isPersonal: boolean; tolerancePercent?: number } => {
+    const normalizedName = normalizeFoodName(foodName);
     const personal = toleranceData.find(
-      t => t.food_name.toLowerCase() === foodName.toLowerCase()
+      t => normalizeFoodName(t.food_name) === normalizedName
     );
     
     // Priority rule: use personal if >= 2 symptom logs
@@ -59,16 +61,17 @@ export default function FoodChecker() {
     return { status: defaultStatus, isPersonal: false };
   };
 
+  const normalizedSearch = normalizeFoodName(searchQuery);
   const filteredFoods = useMemo(() => {
     if (!searchQuery.trim()) return foods.slice(0, 10);
     
     return foods.filter(food =>
-      food.name.toLowerCase().includes(searchQuery.toLowerCase())
+      normalizeFoodName(food.name).includes(normalizedSearch)
     );
-  }, [searchQuery, foods]);
+  }, [searchQuery, foods, normalizedSearch]);
 
   const isCustomFood = searchQuery.trim().length >= 2 && 
-    !foods.some(f => f.name.toLowerCase() === searchQuery.toLowerCase().trim());
+    !foods.some(f => normalizeFoodName(f.name) === normalizedSearch);
 
   const handleFoodSelect = (food: FoodReference) => {
     setSelectedFood(food);

@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { PORTION_SIZES } from '@/data/constants';
 import { FoodReference, PortionSize, FoodStatus } from '@/types';
+import { normalizeFoodName } from '@/lib/utils/foodUtils';
 import { useToast } from '@/hooks/use-toast';
 import { Utensils, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -51,11 +52,12 @@ export default function LogMeal() {
     setFoods((data as FoodReference[]) || []);
   };
 
+  const normalizedInput = normalizeFoodName(foodName);
   const suggestions = foods
-    .filter(f => f.name.toLowerCase().includes(foodName.toLowerCase()))
+    .filter(f => normalizeFoodName(f.name).includes(normalizedInput))
     .slice(0, 6);
 
-  const selectedFoodRef = foods.find(f => f.name.toLowerCase() === foodName.toLowerCase());
+  const selectedFoodRef = foods.find(f => normalizeFoodName(f.name) === normalizedInput);
   const isCustomFood = foodName.trim().length >= 2 && !selectedFoodRef;
 
   const handleMealSubmit = async () => {
@@ -184,7 +186,7 @@ export default function LogMeal() {
             <div className="animate-slide-up space-y-2">
               <label className="flex items-center gap-2 text-sm font-medium text-foreground">
                 <Utensils className="w-4 h-4 text-primary" />
-                Food Name
+                Food Name *
               </label>
               <div className="relative">
                 <Input
@@ -241,7 +243,7 @@ export default function LogMeal() {
             {/* Portion Size */}
             <div className="animate-slide-up space-y-2" style={{ animationDelay: '0.05s' }}>
               <label className="text-sm font-medium text-foreground">
-                Portion Size
+                Portion Size *
               </label>
               <div className="grid grid-cols-3 gap-2">
                 {PORTION_SIZES.map((size) => (
