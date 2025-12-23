@@ -16,9 +16,9 @@ export function ToleranceBar({ score, showLabel = true, size = 'md', className }
   };
 
   const getBackgroundColor = (score: number) => {
-    if (score >= 70) return 'bg-success/15';
-    if (score >= 40) return 'bg-caution/15';
-    return 'bg-destructive/15';
+    if (score >= 70) return 'bg-success/12';
+    if (score >= 40) return 'bg-caution/12';
+    return 'bg-destructive/12';
   };
 
   const getLabel = (score: number) => {
@@ -36,7 +36,7 @@ export function ToleranceBar({ score, showLabel = true, size = 'md', className }
   return (
     <div className={cn("w-full", className)}>
       {showLabel && (
-        <div className="flex items-center justify-between mb-1.5">
+        <div className="flex items-center justify-between mb-2">
           <span className={cn("text-xs font-semibold", getTextColor(score))}>
             {getLabel(score)}
           </span>
@@ -48,14 +48,14 @@ export function ToleranceBar({ score, showLabel = true, size = 'md', className }
       <div className={cn(
         "w-full rounded-full overflow-hidden",
         getBackgroundColor(score),
-        size === 'sm' ? 'h-2' : 'h-3'
+        size === 'sm' ? 'h-2' : 'h-2.5'
       )}>
         <div
           className={cn(
             "h-full rounded-full transition-all duration-500 ease-out",
             getColor(score)
           )}
-          style={{ width: `${Math.max(score, 2)}%` }}
+          style={{ width: `${Math.max(score, 3)}%` }}
         />
       </div>
     </div>

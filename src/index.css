@@ -7,129 +7,129 @@
 @layer base {
   :root {
     /* ========================================
-       CALM PREMIUM PALETTE
-       A cohesive, accessible health-app palette
+       PREMIUM CALM HEALTH PALETTE
+       Unified, accessible, consistent
        ======================================== */
     
-    /* Backgrounds */
-    --background: 40 30% 97%;
-    --foreground: 220 20% 16%;
+    /* Backgrounds - soft warm off-white */
+    --background: 40 28% 97%;
+    --foreground: 220 25% 14%;
 
-    /* Cards & Surfaces */
+    /* Cards & Surfaces - pure/warm white */
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 16%;
+    --card-foreground: 220 25% 14%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 16%;
+    --popover-foreground: 220 25% 14%;
 
     /* Primary: Calm Teal - main brand color */
-    --primary: 168 45% 40%;
+    --primary: 170 42% 42%;
     --primary-foreground: 0 0% 100%;
 
     /* Secondary: Soft neutral for backgrounds */
-    --secondary: 40 25% 93%;
-    --secondary-foreground: 220 15% 30%;
+    --secondary: 40 22% 93%;
+    --secondary-foreground: 220 18% 32%;
 
     /* Muted: Subdued elements */
-    --muted: 40 20% 94%;
-    --muted-foreground: 220 10% 50%;
+    --muted: 40 18% 94%;
+    --muted-foreground: 220 12% 48%;
 
     /* Accent: Light teal tint */
-    --accent: 168 30% 94%;
-    --accent-foreground: 168 45% 30%;
+    --accent: 170 28% 94%;
+    --accent-foreground: 170 42% 32%;
 
     /* Destructive: Soft red for errors/avoid */
-    --destructive: 4 75% 55%;
+    --destructive: 4 68% 52%;
     --destructive-foreground: 0 0% 100%;
 
     /* Caution: Warm amber for warnings */
-    --caution: 40 95% 48%;
-    --caution-foreground: 30 100% 12%;
+    --caution: 38 92% 50%;
+    --caution-foreground: 32 100% 10%;
 
     /* Success: Green for safe/positive */
-    --success: 158 60% 40%;
+    --success: 160 55% 42%;
     --success-foreground: 0 0% 100%;
 
-    /* Borders & Inputs */
-    --border: 40 15% 88%;
-    --input: 40 15% 88%;
-    --ring: 168 45% 40%;
+    /* Borders & Inputs - very light gray */
+    --border: 40 12% 88%;
+    --input: 40 12% 88%;
+    --ring: 170 42% 42%;
 
-    /* Radius */
-    --radius: 1rem;
+    /* Radius - consistent rounded corners */
+    --radius: 0.875rem;
 
-    /* Sidebar (not used but kept for compatibility) */
+    /* Sidebar (compatibility) */
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 220 10% 30%;
-    --sidebar-primary: 168 45% 40%;
+    --sidebar-foreground: 220 12% 32%;
+    --sidebar-primary: 170 42% 42%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 40 20% 96%;
-    --sidebar-accent-foreground: 220 10% 30%;
-    --sidebar-border: 40 15% 90%;
-    --sidebar-ring: 168 45% 40%;
+    --sidebar-accent: 40 18% 96%;
+    --sidebar-accent-foreground: 220 12% 32%;
+    --sidebar-border: 40 12% 90%;
+    --sidebar-ring: 170 42% 42%;
 
     /* ========================================
        PREMIUM GRADIENTS
        ======================================== */
-    --gradient-calm: linear-gradient(135deg, hsl(168 45% 40%) 0%, hsl(168 50% 46%) 100%);
-    --gradient-warm: linear-gradient(180deg, hsl(40 30% 97%) 0%, hsl(40 25% 95%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(40 20% 99%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(168 45% 40% / 0.06) 0%, hsl(168 50% 50% / 0.02) 100%);
-    --gradient-success: linear-gradient(135deg, hsl(158 60% 40%) 0%, hsl(158 65% 45%) 100%);
+    --gradient-calm: linear-gradient(135deg, hsl(170 42% 42%) 0%, hsl(170 48% 48%) 100%);
+    --gradient-warm: linear-gradient(180deg, hsl(40 28% 97%) 0%, hsl(40 22% 94%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(40 18% 99%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(170 42% 42% / 0.05) 0%, hsl(170 48% 48% / 0.02) 100%);
+    --gradient-success: linear-gradient(135deg, hsl(160 55% 42%) 0%, hsl(160 60% 48%) 100%);
 
     /* ========================================
-       PREMIUM SHADOWS
+       PREMIUM SHADOWS - Softer, more refined
        ======================================== */
-    --shadow-xs: 0 1px 2px 0 hsl(220 20% 16% / 0.04);
-    --shadow-soft: 0 2px 8px -2px hsl(220 20% 16% / 0.06);
-    --shadow-card: 0 4px 16px -4px hsl(220 20% 16% / 0.08), 0 1px 3px -1px hsl(220 20% 16% / 0.04);
-    --shadow-elevated: 0 12px 28px -8px hsl(220 20% 16% / 0.12), 0 4px 8px -4px hsl(220 20% 16% / 0.05);
-    --shadow-glow: 0 0 24px hsl(168 45% 40% / 0.18);
+    --shadow-xs: 0 1px 2px 0 hsl(220 25% 14% / 0.03);
+    --shadow-soft: 0 2px 8px -2px hsl(220 25% 14% / 0.05), 0 1px 2px -1px hsl(220 25% 14% / 0.03);
+    --shadow-card: 0 4px 12px -4px hsl(220 25% 14% / 0.07), 0 1px 3px -1px hsl(220 25% 14% / 0.03);
+    --shadow-elevated: 0 10px 24px -6px hsl(220 25% 14% / 0.10), 0 4px 8px -4px hsl(220 25% 14% / 0.04);
+    --shadow-glow: 0 0 20px hsl(170 42% 42% / 0.15);
   }
 
   .dark {
-    --background: 220 20% 8%;
-    --foreground: 40 20% 96%;
+    --background: 220 22% 7%;
+    --foreground: 40 18% 96%;
 
-    --card: 220 18% 11%;
-    --card-foreground: 40 20% 96%;
+    --card: 220 20% 10%;
+    --card-foreground: 40 18% 96%;
 
-    --popover: 220 18% 11%;
-    --popover-foreground: 40 20% 96%;
+    --popover: 220 20% 10%;
+    --popover-foreground: 40 18% 96%;
 
-    --primary: 168 50% 48%;
-    --primary-foreground: 220 20% 8%;
+    --primary: 170 48% 50%;
+    --primary-foreground: 220 22% 7%;
 
-    --secondary: 220 15% 16%;
-    --secondary-foreground: 40 20% 90%;
+    --secondary: 220 16% 15%;
+    --secondary-foreground: 40 18% 88%;
 
-    --muted: 220 15% 14%;
-    --muted-foreground: 40 12% 60%;
+    --muted: 220 16% 13%;
+    --muted-foreground: 40 10% 58%;
 
-    --accent: 168 25% 16%;
-    --accent-foreground: 168 50% 65%;
+    --accent: 170 22% 15%;
+    --accent-foreground: 170 48% 62%;
 
-    --destructive: 4 70% 55%;
+    --destructive: 4 65% 52%;
     --destructive-foreground: 0 0% 100%;
 
-    --caution: 40 90% 50%;
-    --caution-foreground: 40 95% 95%;
+    --caution: 38 88% 52%;
+    --caution-foreground: 38 92% 94%;
 
-    --success: 158 55% 48%;
-    --success-foreground: 220 20% 8%;
+    --success: 160 52% 50%;
+    --success-foreground: 220 22% 7%;
 
-    --border: 220 15% 18%;
-    --input: 220 15% 18%;
-    --ring: 168 50% 48%;
+    --border: 220 16% 17%;
+    --input: 220 16% 17%;
+    --ring: 170 48% 50%;
 
-    --sidebar-background: 220 18% 10%;
-    --sidebar-foreground: 40 15% 90%;
-    --sidebar-primary: 168 50% 48%;
+    --sidebar-background: 220 20% 9%;
+    --sidebar-foreground: 40 14% 88%;
+    --sidebar-primary: 170 48% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 15% 15%;
-    --sidebar-accent-foreground: 40 15% 90%;
-    --sidebar-border: 220 15% 16%;
-    --sidebar-ring: 168 50% 48%;
+    --sidebar-accent: 220 16% 14%;
+    --sidebar-accent-foreground: 40 14% 88%;
+    --sidebar-border: 220 16% 15%;
+    --sidebar-ring: 170 48% 50%;
   }
 }
 
@@ -150,16 +150,21 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
+    line-height: 1.6;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Quicksand', system-ui, sans-serif;
-    @apply tracking-tight;
+    @apply tracking-tight leading-tight;
   }
+
+  h1 { @apply text-2xl font-bold; }
+  h2 { @apply text-xl font-semibold; }
+  h3 { @apply text-lg font-semibold; }
 
   /* Improved focus styles */
   :focus-visible {
-    @apply outline-none ring-2 ring-ring/70 ring-offset-2 ring-offset-background;
+    @apply outline-none ring-2 ring-ring/60 ring-offset-2 ring-offset-background;
   }
 
   /* Prevent horizontal overflow */
@@ -231,9 +236,9 @@
     text-wrap: balance;
   }
 
-  /* Glass effect */
+  /* Glass effect - refined */
   .glass {
-    @apply bg-card/85 backdrop-blur-lg border-border/50;
+    @apply bg-card/90 backdrop-blur-xl border-border/40;
   }
 
   /* Hide scrollbar */
@@ -244,10 +249,18 @@
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
+  /* Touch-friendly minimum size */
+  .touch-target {
+    min-height: 48px;
+    min-width: 48px;
+  }
 }
 
 @layer components {
-  /* Status badge classes */
+  /* ========================================
+     STATUS BADGES - Unified styling
+     ======================================== */
   .status-safe {
     @apply bg-success/10 text-success border-success/20;
   }
@@ -260,38 +273,46 @@
     @apply bg-destructive/10 text-destructive border-destructive/20;
   }
 
-  /* Premium card */
+  /* ========================================
+     CARDS - Consistent styling
+     ======================================== */
   .card-premium {
     @apply bg-card rounded-2xl border border-border shadow-card;
   }
 
-  /* Interactive card */
   .card-interactive {
     @apply bg-card rounded-2xl border border-border shadow-soft;
     @apply transition-all duration-200 ease-out;
-    @apply hover:shadow-card hover:border-primary/15;
+    @apply hover:shadow-card hover:border-primary/20;
     @apply active:scale-[0.98] active:shadow-soft;
   }
 
-  /* Section header */
+  .card-elevated {
+    @apply bg-card rounded-2xl border border-border shadow-elevated;
+  }
+
+  /* ========================================
+     SECTION HEADERS
+     ======================================== */
   .section-header {
     @apply flex items-center gap-2.5 mb-3;
   }
 
   .section-header-icon {
-    @apply w-5 h-5 text-primary;
+    @apply w-4 h-4 text-primary;
   }
 
   .section-header-title {
     @apply font-display text-sm font-semibold text-foreground tracking-tight;
   }
 
-  /* Page container */
+  /* ========================================
+     PAGE LAYOUT
+     ======================================== */
   .page-container {
-    @apply px-4 py-6 space-y-5 max-w-lg mx-auto;
+    @apply px-5 py-6 space-y-5 max-w-lg mx-auto;
   }
 
-  /* Page header */
   .page-header {
     @apply animate-fade-in;
   }
@@ -301,30 +322,75 @@
   }
 
   .page-subtitle {
-    @apply text-muted-foreground text-sm mt-1;
+    @apply text-muted-foreground text-sm mt-1 leading-relaxed;
   }
 
-  /* Form field */
+  /* ========================================
+     FORM ELEMENTS
+     ======================================== */
   .form-label {
     @apply text-sm font-medium text-foreground mb-2 block;
   }
 
   .form-hint {
-    @apply text-xs text-muted-foreground mt-1.5;
+    @apply text-xs text-muted-foreground mt-1.5 leading-relaxed;
   }
 
-  /* Pill button group */
+  /* ========================================
+     PILL BUTTONS
+     ======================================== */
   .pill-group {
     @apply flex gap-2;
   }
 
   .pill-button {
-    @apply flex-1 py-3 px-4 rounded-xl border-2 text-sm font-semibold transition-all duration-200;
+    @apply flex-1 py-3.5 px-4 rounded-xl border-2 text-sm font-semibold transition-all duration-200;
     @apply border-border bg-card text-foreground;
     @apply hover:border-primary/40 active:scale-[0.97];
+    min-height: 48px;
   }
 
   .pill-button-active {
     @apply border-primary bg-primary/5 text-primary;
+  }
+
+  /* ========================================
+     QUICK ACTIONS - Touch-friendly
+     ======================================== */
+  .quick-action-card {
+    @apply h-auto py-5 flex flex-col items-center gap-2.5 rounded-2xl border-0;
+    @apply transition-all duration-200 active:scale-[0.97];
+    min-height: 88px;
+  }
+
+  /* ========================================
+     LIST ITEMS - Touch-friendly rows
+     ======================================== */
+  .list-item {
+    @apply flex items-center justify-between p-4;
+    min-height: 56px;
+  }
+
+  .list-item-touch {
+    @apply list-item cursor-pointer transition-colors hover:bg-muted/50 active:bg-muted;
+  }
+
+  /* ========================================
+     EMPTY STATES
+     ======================================== */
+  .empty-state {
+    @apply bg-card rounded-2xl p-6 border border-border text-center;
+  }
+
+  .empty-state-icon {
+    @apply w-12 h-12 mx-auto mb-4 text-muted-foreground/50;
+  }
+
+  .empty-state-title {
+    @apply font-display font-semibold text-foreground mb-2;
+  }
+
+  .empty-state-text {
+    @apply text-muted-foreground text-sm leading-relaxed;
   }
 }

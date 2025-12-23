@@ -199,13 +199,13 @@ export default function Insights() {
 
   return (
     <MobileLayout>
-      <div className="px-4 py-6 space-y-5">
+      <div className="px-5 py-6 space-y-5">
         {/* Header */}
         <div className="animate-fade-in">
           <h1 className="font-display text-2xl font-bold text-foreground">
             Insights
           </h1>
-          <p className="text-muted-foreground text-sm mt-1">
+          <p className="text-muted-foreground text-sm mt-1 leading-relaxed">
             Understand your IBS patterns
           </p>
         </div>
@@ -219,10 +219,10 @@ export default function Insights() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-sm font-medium transition-all",
+                  "flex-1 flex items-center justify-center gap-1.5 py-3 px-3 rounded-xl text-sm font-semibold transition-all min-h-[48px]",
                   activeTab === tab.id
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-card border border-border text-muted-foreground hover:text-foreground"
+                    ? "bg-primary text-primary-foreground shadow-soft"
+                    : "bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/20"
                 )}
               >
                 <Icon className="w-4 h-4" />
