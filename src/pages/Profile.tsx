@@ -249,7 +249,7 @@ export default function Profile() {
 
   return (
     <MobileLayout>
-      <div className="px-4 py-6 space-y-6">
+      <div className="px-5 py-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between animate-fade-in">
           <div>
@@ -266,7 +266,7 @@ export default function Profile() {
               variant="outline"
               size="sm"
               onClick={handleSignOut}
-              className="rounded-xl"
+              className="rounded-xl h-10"
             >
               <LogOut className="w-4 h-4 mr-2" />
               Sign Out

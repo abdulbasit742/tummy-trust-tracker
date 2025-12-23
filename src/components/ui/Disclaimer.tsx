@@ -13,13 +13,13 @@ export function Disclaimer({ className, variant = 'default' }: DisclaimerProps) 
     <div className={cn(
       "flex items-start gap-3 rounded-2xl border transition-colors",
       variant === 'default' 
-        ? "p-4 bg-muted/50 border-border" 
-        : "p-3 bg-muted/30 border-border/50",
+        ? "p-4 bg-muted/40 border-border/60" 
+        : "p-3 bg-muted/30 border-border/40",
       className
     )}>
       <div className={cn(
-        "rounded-full flex items-center justify-center flex-shrink-0",
-        variant === 'default' ? "w-8 h-8 bg-muted" : "w-6 h-6 bg-muted/50"
+        "rounded-xl flex items-center justify-center flex-shrink-0",
+        variant === 'default' ? "w-9 h-9 bg-muted/80" : "w-7 h-7 bg-muted/60"
       )}>
         <Info className={cn(
           "text-muted-foreground",

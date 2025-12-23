@@ -29,14 +29,14 @@ export function MobileLayout({ children, showNav = true }: MobileLayoutProps) {
     <div className="min-h-screen bg-background flex flex-col max-w-[100vw] overflow-x-hidden">
       <main className={cn(
         "flex-1 overflow-x-hidden",
-        showNav && "pb-24"
+        showNav && "pb-28" // Extra padding to prevent content overlap with nav
       )}>
         {children}
       </main>
       
       {showNav && (
-        <nav className="fixed bottom-0 left-0 right-0 glass border-t border-border/50 safe-bottom z-50">
-          <div className="flex items-end justify-around px-2 pt-2 pb-1.5 max-w-md mx-auto">
+        <nav className="fixed bottom-0 left-0 right-0 glass border-t border-border/40 safe-bottom z-50">
+          <div className="flex items-end justify-around px-3 pt-2.5 pb-2 max-w-md mx-auto">
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
               const Icon = item.icon;
@@ -47,7 +47,7 @@ export function MobileLayout({ children, showNav = true }: MobileLayoutProps) {
                     key={item.path}
                     onClick={() => navigate(item.path)}
                     className={cn(
-                      "flex flex-col items-center justify-center -mt-4 transition-all duration-200"
+                      "flex flex-col items-center justify-center -mt-5 transition-all duration-200"
                     )}
                   >
                     <div className={cn(
@@ -59,7 +59,7 @@ export function MobileLayout({ children, showNav = true }: MobileLayoutProps) {
                       <Icon className="w-6 h-6 text-primary-foreground" />
                     </div>
                     <span className={cn(
-                      "text-[10px] font-semibold mt-1 transition-colors",
+                      "text-[10px] font-semibold mt-1.5 transition-colors",
                       isActive ? "text-primary" : "text-muted-foreground"
                     )}>
                       {item.label}
@@ -73,14 +73,15 @@ export function MobileLayout({ children, showNav = true }: MobileLayoutProps) {
                   key={item.path}
                   onClick={() => navigate(item.path)}
                   className={cn(
-                    "flex flex-col items-center justify-center px-3 py-2 rounded-xl transition-all duration-200 min-w-[56px]",
+                    "flex flex-col items-center justify-center px-3 py-2.5 rounded-xl transition-all duration-200",
+                    "min-w-[60px] min-h-[52px]", // Touch-friendly size
                     isActive 
                       ? "text-primary" 
-                      : "text-muted-foreground hover:text-foreground"
+                      : "text-muted-foreground hover:text-foreground active:text-primary"
                   )}
                 >
                   <div className={cn(
-                    "p-2 rounded-xl transition-all duration-200",
+                    "p-2.5 rounded-xl transition-all duration-200",
                     isActive && "bg-primary/10"
                   )}>
                     <Icon className={cn(
