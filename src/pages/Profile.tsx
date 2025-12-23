@@ -276,14 +276,14 @@ export default function Profile() {
 
         {/* Profile Summary - View Mode */}
         {profile && !isEditing && (
-          <div className="bg-card rounded-xl p-4 border border-border animate-slide-up">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 gradient-calm rounded-xl flex items-center justify-center">
-                  <User className="w-6 h-6 text-primary-foreground" />
+          <div className="bg-card rounded-2xl p-5 border border-border shadow-soft animate-slide-up">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 gradient-calm rounded-2xl flex items-center justify-center shadow-glow">
+                  <User className="w-7 h-7 text-primary-foreground" />
                 </div>
                 <div>
-                  <p className="font-display font-semibold text-foreground">{profile.ibs_type}</p>
+                  <p className="font-display font-bold text-foreground text-lg">{profile.ibs_type}</p>
                   <p className="text-sm text-muted-foreground capitalize">{profile.severity} severity</p>
                 </div>
               </div>
@@ -291,24 +291,24 @@ export default function Profile() {
                 variant="ghost"
                 size="sm"
                 onClick={startEditing}
-                className="rounded-xl"
+                className="rounded-xl h-10 w-10 p-0"
               >
                 <Edit2 className="w-4 h-4" />
               </Button>
             </div>
             
             {profile.symptoms.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-3">
+              <div className="flex flex-wrap gap-2">
                 {profile.symptoms.slice(0, 4).map((symptom) => (
                   <span 
                     key={symptom}
-                    className="text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded-full capitalize"
+                    className="text-xs bg-secondary text-secondary-foreground px-3 py-1.5 rounded-full capitalize font-medium"
                   >
                     {symptom}
                   </span>
                 ))}
                 {profile.symptoms.length > 4 && (
-                  <span className="text-xs text-muted-foreground px-2 py-1">
+                  <span className="text-xs text-muted-foreground px-3 py-1.5">
                     +{profile.symptoms.length - 4} more
                   </span>
                 )}
@@ -319,26 +319,26 @@ export default function Profile() {
 
         {/* Profile Edit Mode */}
         {profile && isEditing && (
-          <div className="bg-card rounded-xl p-4 border border-border animate-slide-up space-y-4">
+          <div className="bg-card rounded-2xl p-5 border border-border shadow-soft animate-slide-up space-y-5">
             <div className="flex items-center justify-between">
-              <h3 className="font-display font-semibold text-foreground">Edit Profile</h3>
-              <Button variant="ghost" size="sm" onClick={cancelEditing}>
+              <h3 className="font-display font-bold text-foreground text-lg">Edit Profile</h3>
+              <Button variant="ghost" size="sm" onClick={cancelEditing} className="rounded-xl h-10 w-10 p-0">
                 <X className="w-4 h-4" />
               </Button>
             </div>
 
             <div>
-              <label className="text-sm font-medium text-foreground mb-2 block">IBS Type</label>
+              <label className="text-sm font-semibold text-foreground mb-3 block">IBS Type</label>
               <div className="space-y-2">
                 {IBS_TYPES.map((type) => (
                   <button
                     key={type.value}
                     onClick={() => setEditIbsType(type.value as IBSType)}
                     className={cn(
-                      "w-full text-left p-3 rounded-xl border-2 transition-all text-sm",
+                      "w-full text-left p-4 rounded-xl border-2 transition-all text-sm font-medium min-h-[52px]",
                       editIbsType === type.value
-                        ? "border-primary bg-primary/5"
-                        : "border-border bg-background hover:border-primary/50"
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border bg-background text-foreground hover:border-primary/40"
                     )}
                   >
                     {type.label}
@@ -348,17 +348,15 @@ export default function Profile() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-foreground mb-2 block">Severity</label>
-              <div className="grid grid-cols-3 gap-2">
+              <label className="text-sm font-semibold text-foreground mb-3 block">Severity</label>
+              <div className="grid grid-cols-3 gap-3">
                 {SEVERITY_LEVELS.map((level) => (
                   <button
                     key={level.value}
                     onClick={() => setEditSeverity(level.value as SeverityLevel)}
                     className={cn(
-                      "p-2 rounded-xl border-2 transition-all text-sm font-medium",
-                      editSeverity === level.value
-                        ? "border-primary bg-primary/5 text-primary"
-                        : "border-border bg-background text-foreground hover:border-primary/50"
+                      "pill-button text-center",
+                      editSeverity === level.value && "pill-button-active"
                     )}
                   >
                     {level.label}
@@ -368,17 +366,17 @@ export default function Profile() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-foreground mb-2 block">Symptoms</label>
+              <label className="text-sm font-semibold text-foreground mb-3 block">Symptoms</label>
               <div className="flex flex-wrap gap-2">
                 {SYMPTOMS.map((symptom) => (
                   <button
                     key={symptom.id}
                     onClick={() => toggleEditSymptom(symptom.id)}
                     className={cn(
-                      "px-3 py-1.5 rounded-full border-2 transition-all text-xs font-medium",
+                      "px-4 py-2 rounded-full border-2 transition-all text-xs font-semibold min-h-[40px]",
                       editSymptoms.includes(symptom.id)
                         ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border bg-background text-foreground hover:border-primary/50"
+                        : "border-border bg-background text-foreground hover:border-primary/40"
                     )}
                   >
                     {symptom.label}
@@ -390,9 +388,9 @@ export default function Profile() {
             <Button
               onClick={handleSaveProfile}
               disabled={isSaving || !editIbsType || !editSeverity}
-              className="w-full h-11 rounded-xl gradient-calm text-primary-foreground border-0"
+              className="w-full h-14 rounded-xl gradient-calm text-primary-foreground border-0 shadow-soft font-semibold text-base"
             >
-              <Save className="w-4 h-4 mr-2" />
+              <Save className="w-5 h-5 mr-2" />
               {isSaving ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
@@ -402,7 +400,7 @@ export default function Profile() {
         <EarlyUserStatus />
 
         {/* Share Section */}
-        <div className="bg-card rounded-xl p-4 border border-border">
+        <div className="bg-card rounded-2xl p-5 border border-border shadow-soft">
           <ShareButton variant="full" />
         </div>
 
@@ -411,15 +409,15 @@ export default function Profile() {
 
         {/* Personal Tolerance */}
         <div className="animate-slide-up">
-          <h2 className="font-display text-lg font-semibold text-foreground mb-3">
+          <h2 className="font-display text-lg font-bold text-foreground mb-4">
             Personal Tolerance
           </h2>
 
           {toleranceData.length > 0 ? (
-            <div className="bg-card rounded-xl border border-border divide-y divide-border">
+            <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden shadow-soft">
               {toleranceData.slice(0, 8).map((food) => (
-                <div key={food.food_name} className="p-3">
-                  <div className="flex items-center justify-between mb-1.5">
+                <div key={food.food_name} className="p-4">
+                  <div className="flex items-center justify-between mb-2">
                     <span className="font-medium text-foreground text-sm">{food.food_name}</span>
                     <span className="text-xs text-muted-foreground">
                       {food.meal_count} {food.meal_count === 1 ? 'log' : 'logs'}
@@ -430,8 +428,8 @@ export default function Profile() {
               ))}
             </div>
           ) : (
-            <div className="bg-card rounded-xl p-4 border border-border text-center">
-              <p className="text-muted-foreground text-sm">
+            <div className="empty-state">
+              <p className="text-muted-foreground text-sm leading-relaxed">
                 Log meals with symptoms to build your tolerance profile
               </p>
             </div>
@@ -440,39 +438,39 @@ export default function Profile() {
 
         {/* Meal History */}
         <div className="animate-slide-up">
-          <h2 className="font-display text-lg font-semibold text-foreground mb-3">
+          <h2 className="font-display text-lg font-bold text-foreground mb-4">
             Meal History
           </h2>
 
           {isLoading ? (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {[1,2,3].map(i => (
-                <div key={i} className="bg-card rounded-xl p-4 border border-border animate-pulse-soft">
+                <div key={i} className="bg-card rounded-2xl p-4 border border-border animate-pulse-soft">
                   <div className="h-4 bg-muted rounded w-1/2"></div>
                 </div>
               ))}
             </div>
           ) : mealLogs.length > 0 ? (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {displayedLogs.map((meal) => (
                 <div 
                   key={meal.id}
-                  className="bg-card rounded-xl p-3 border border-border"
+                  className="bg-card rounded-2xl p-4 border border-border shadow-soft"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="font-medium text-foreground text-sm truncate">{meal.food_name}</span>
-                        <span className="text-xs text-muted-foreground">({meal.portion})</span>
+                        <span className="text-xs text-muted-foreground font-medium">({meal.portion})</span>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-0.5">
+                      <p className="text-xs text-muted-foreground mt-1">
                         {format(new Date(meal.eaten_at), 'MMM d, h:mm a')}
                       </p>
                     </div>
                     
                     <button
                       onClick={() => handleDeleteMeal(meal.id)}
-                      className="p-1.5 text-muted-foreground hover:text-destructive transition-colors"
+                      className="p-2 text-muted-foreground hover:text-destructive transition-colors rounded-lg hover:bg-destructive/10"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -480,16 +478,16 @@ export default function Profile() {
 
                   {/* Symptom Logs for this meal */}
                   {meal.symptom_logs && meal.symptom_logs.length > 0 && (
-                    <div className="mt-2 pt-2 border-t border-border">
+                    <div className="mt-3 pt-3 border-t border-border">
                       {meal.symptom_logs.map((symptomLog) => (
                         <div key={symptomLog.id}>
                           {editingSymptomLog?.id === symptomLog.id ? (
                             // Editing mode
-                            <div className="space-y-3 p-2 bg-muted/50 rounded-lg">
+                            <div className="space-y-4 p-3 bg-muted/40 rounded-xl">
                               <div className="flex items-center justify-between">
-                                <span className="text-xs font-medium text-foreground">Edit Symptoms</span>
-                                <Button variant="ghost" size="sm" onClick={cancelEditingSymptom} className="h-6 w-6 p-0">
-                                  <X className="w-3 h-3" />
+                                <span className="text-sm font-semibold text-foreground">Edit Symptoms</span>
+                                <Button variant="ghost" size="sm" onClick={cancelEditingSymptom} className="h-8 w-8 p-0 rounded-lg">
+                                  <X className="w-4 h-4" />
                                 </Button>
                               </div>
                               
@@ -537,14 +535,14 @@ export default function Profile() {
                                 onClick={handleSaveSymptom}
                                 disabled={isSaving}
                                 size="sm"
-                                className="w-full h-8 text-xs rounded-lg"
+                                className="w-full h-10 text-sm rounded-xl font-semibold"
                               >
                                 {isSaving ? 'Saving...' : 'Save Changes'}
                               </Button>
                             </div>
                           ) : (
                             // View mode
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between py-1">
                               <span className={cn(
                                 "text-xs font-medium px-2 py-0.5 rounded-full",
                                 symptomLog.bloating_0_10 + symptomLog.pain_0_10 <= 4 
@@ -578,7 +576,7 @@ export default function Profile() {
 
                   {/* No symptoms logged indicator */}
                   {(!meal.symptom_logs || meal.symptom_logs.length === 0) && (
-                    <div className="mt-2 pt-2 border-t border-border">
+                    <div className="mt-3 pt-3 border-t border-border">
                       <span className="text-xs text-muted-foreground italic">
                         No symptoms logged
                       </span>
@@ -591,18 +589,18 @@ export default function Profile() {
                 <Button
                   variant="ghost"
                   onClick={() => setShowAllLogs(!showAllLogs)}
-                  className="w-full text-muted-foreground"
+                  className="w-full text-muted-foreground h-12 font-medium"
                 >
                   {showAllLogs ? 'Show less' : `Show all ${mealLogs.length} logs`}
                   <ChevronRight className={cn(
-                    "w-4 h-4 ml-1 transition-transform",
+                    "w-4 h-4 ml-1.5 transition-transform",
                     showAllLogs && "rotate-90"
                   )} />
                 </Button>
               )}
             </div>
           ) : (
-            <div className="bg-card rounded-xl p-4 border border-border text-center">
+            <div className="empty-state">
               <p className="text-muted-foreground text-sm">No meal logs yet</p>
             </div>
           )}
