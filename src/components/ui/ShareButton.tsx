@@ -1,10 +1,7 @@
-import React from 'react';
+import React, { forwardRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Share2, Copy, MessageCircle, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useState } from 'react';
-
-const APP_URL = window.location.origin;
 
 const SHARE_TEXT = `IBS Diet Companion helps track meals, symptoms, and personal triggers.
 
@@ -17,7 +14,8 @@ interface ShareButtonProps {
   className?: string;
 }
 
-export function ShareButton({ variant = 'icon', className = '' }: ShareButtonProps) {
+export const ShareButton = forwardRef<HTMLDivElement, ShareButtonProps>(
+  function ShareButton({ variant = 'icon', className = '' }, ref) {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
 
@@ -46,20 +44,22 @@ export function ShareButton({ variant = 'icon', className = '' }: ShareButtonPro
 
   if (variant === 'icon') {
     return (
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={handleCopy}
-        className={`rounded-xl ${className}`}
-        title="Share app"
-      >
-        {copied ? <Check className="w-4 h-4 text-success" /> : <Share2 className="w-4 h-4" />}
-      </Button>
+      <div ref={ref}>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleCopy}
+          className={`rounded-xl ${className}`}
+          title="Share app"
+        >
+          {copied ? <Check className="w-4 h-4 text-success" /> : <Share2 className="w-4 h-4" />}
+        </Button>
+      </div>
     );
   }
 
   return (
-    <div className={`space-y-3 ${className}`}>
+    <div ref={ref} className={`space-y-3 ${className}`}>
       <h3 className="font-display font-semibold text-foreground text-sm">Share with Others</h3>
       <p className="text-muted-foreground text-xs">
         Know someone with IBS? Share this free tool with them.
@@ -84,4 +84,4 @@ export function ShareButton({ variant = 'icon', className = '' }: ShareButtonPro
       </div>
     </div>
   );
-}
+});
