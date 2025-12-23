@@ -8,10 +8,12 @@ import { Disclaimer } from '@/components/ui/Disclaimer';
 import { EarlyUserStatus, WhyThisApp } from '@/components/ui/FreeAccessBanner';
 import { ShareButton } from '@/components/ui/ShareButton';
 import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
 import { calculateToleranceScores } from '@/lib/toleranceEngine';
 import { MealLog, SymptomLog, ToleranceData, IBSType, SeverityLevel } from '@/types';
 import { IBS_TYPES, SYMPTOMS, SEVERITY_LEVELS } from '@/data/constants';
-import { User, LogOut, Trash2, Edit2, ChevronRight, Save, X } from 'lucide-react';
+import { User, LogOut, Trash2, Edit2, ChevronRight, Save, X, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -30,12 +32,18 @@ export default function Profile() {
   const [isLoading, setIsLoading] = useState(true);
   const [showAllLogs, setShowAllLogs] = useState(false);
   
-  // Edit mode state
+  // Edit profile mode state
   const [isEditing, setIsEditing] = useState(false);
   const [editIbsType, setEditIbsType] = useState<IBSType | null>(null);
   const [editSeverity, setEditSeverity] = useState<SeverityLevel | null>(null);
   const [editSymptoms, setEditSymptoms] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Symptom editing state
+  const [editingSymptomLog, setEditingSymptomLog] = useState<SymptomLog | null>(null);
+  const [editBloating, setEditBloating] = useState([0]);
+  const [editPain, setEditPain] = useState([0]);
+  const [editStoolIssue, setEditStoolIssue] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -97,6 +105,73 @@ export default function Profile() {
     loadData();
   };
 
+  const handleDeleteSymptom = async (symptomLogId: string) => {
+    const { error } = await supabase
+      .from('symptom_logs')
+      .delete()
+      .eq('id', symptomLogId);
+
+    if (error) {
+      toast({
+        title: "Error deleting",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Deleted",
+      description: "Symptom log removed.",
+    });
+    
+    loadData();
+  };
+
+  const startEditingSymptom = (symptomLog: SymptomLog) => {
+    setEditingSymptomLog(symptomLog);
+    setEditBloating([symptomLog.bloating_0_10]);
+    setEditPain([symptomLog.pain_0_10]);
+    setEditStoolIssue(symptomLog.stool_issue);
+  };
+
+  const cancelEditingSymptom = () => {
+    setEditingSymptomLog(null);
+  };
+
+  const handleSaveSymptom = async () => {
+    if (!editingSymptomLog) return;
+    
+    setIsSaving(true);
+    
+    const { error } = await supabase
+      .from('symptom_logs')
+      .update({
+        bloating_0_10: editBloating[0],
+        pain_0_10: editPain[0],
+        stool_issue: editStoolIssue,
+      })
+      .eq('id', editingSymptomLog.id);
+
+    if (error) {
+      toast({
+        title: "Error saving",
+        description: error.message,
+        variant: "destructive",
+      });
+      setIsSaving(false);
+      return;
+    }
+
+    toast({
+      title: "Updated",
+      description: "Symptom log updated.",
+    });
+    setEditingSymptomLog(null);
+    setIsSaving(false);
+    loadData();
+  };
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/auth');
@@ -154,6 +229,20 @@ export default function Profile() {
     });
     setIsEditing(false);
     setIsSaving(false);
+  };
+
+  const getSeverityLabel = (value: number) => {
+    if (value === 0) return 'None';
+    if (value <= 3) return 'Mild';
+    if (value <= 6) return 'Moderate';
+    if (value <= 8) return 'Severe';
+    return 'Very severe';
+  };
+
+  const getSeverityColor = (value: number) => {
+    if (value <= 3) return 'text-success';
+    if (value <= 6) return 'text-caution';
+    return 'text-destructive';
   };
 
   const displayedLogs = showAllLogs ? mealLogs : mealLogs.slice(0, 5);
@@ -381,27 +470,120 @@ export default function Profile() {
                       </p>
                     </div>
                     
-                    <div className="flex items-center gap-2">
-                      {meal.symptom_logs && meal.symptom_logs.length > 0 && (
-                        <span className={cn(
-                          "text-xs font-medium px-2 py-0.5 rounded-full",
-                          meal.symptom_logs[0].bloating_0_10 + meal.symptom_logs[0].pain_0_10 <= 4 
-                            ? "bg-success/15 text-success" 
-                            : meal.symptom_logs[0].bloating_0_10 + meal.symptom_logs[0].pain_0_10 <= 10
-                            ? "bg-caution/15 text-caution"
-                            : "bg-destructive/15 text-destructive"
-                        )}>
-                          B:{meal.symptom_logs[0].bloating_0_10} P:{meal.symptom_logs[0].pain_0_10}
-                        </span>
-                      )}
-                      <button
-                        onClick={() => handleDeleteMeal(meal.id)}
-                        className="p-1.5 text-muted-foreground hover:text-destructive transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => handleDeleteMeal(meal.id)}
+                      className="p-1.5 text-muted-foreground hover:text-destructive transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
+
+                  {/* Symptom Logs for this meal */}
+                  {meal.symptom_logs && meal.symptom_logs.length > 0 && (
+                    <div className="mt-2 pt-2 border-t border-border">
+                      {meal.symptom_logs.map((symptomLog) => (
+                        <div key={symptomLog.id}>
+                          {editingSymptomLog?.id === symptomLog.id ? (
+                            // Editing mode
+                            <div className="space-y-3 p-2 bg-muted/50 rounded-lg">
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs font-medium text-foreground">Edit Symptoms</span>
+                                <Button variant="ghost" size="sm" onClick={cancelEditingSymptom} className="h-6 w-6 p-0">
+                                  <X className="w-3 h-3" />
+                                </Button>
+                              </div>
+                              
+                              <div>
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="text-xs text-muted-foreground">Bloating</span>
+                                  <span className={cn("text-xs font-medium", getSeverityColor(editBloating[0]))}>
+                                    {editBloating[0]}/10
+                                  </span>
+                                </div>
+                                <Slider
+                                  value={editBloating}
+                                  onValueChange={setEditBloating}
+                                  max={10}
+                                  step={1}
+                                  className="w-full"
+                                />
+                              </div>
+                              
+                              <div>
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="text-xs text-muted-foreground">Pain</span>
+                                  <span className={cn("text-xs font-medium", getSeverityColor(editPain[0]))}>
+                                    {editPain[0]}/10
+                                  </span>
+                                </div>
+                                <Slider
+                                  value={editPain}
+                                  onValueChange={setEditPain}
+                                  max={10}
+                                  step={1}
+                                  className="w-full"
+                                />
+                              </div>
+                              
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs text-muted-foreground">Stool Issue</span>
+                                <Switch
+                                  checked={editStoolIssue}
+                                  onCheckedChange={setEditStoolIssue}
+                                />
+                              </div>
+                              
+                              <Button
+                                onClick={handleSaveSymptom}
+                                disabled={isSaving}
+                                size="sm"
+                                className="w-full h-8 text-xs rounded-lg"
+                              >
+                                {isSaving ? 'Saving...' : 'Save Changes'}
+                              </Button>
+                            </div>
+                          ) : (
+                            // View mode
+                            <div className="flex items-center justify-between">
+                              <span className={cn(
+                                "text-xs font-medium px-2 py-0.5 rounded-full",
+                                symptomLog.bloating_0_10 + symptomLog.pain_0_10 <= 4 
+                                  ? "bg-success/15 text-success" 
+                                  : symptomLog.bloating_0_10 + symptomLog.pain_0_10 <= 10
+                                  ? "bg-caution/15 text-caution"
+                                  : "bg-destructive/15 text-destructive"
+                              )}>
+                                B:{symptomLog.bloating_0_10} P:{symptomLog.pain_0_10} {symptomLog.stool_issue && '💩'}
+                              </span>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={() => startEditingSymptom(symptomLog)}
+                                  className="p-1 text-muted-foreground hover:text-primary transition-colors"
+                                >
+                                  <Edit2 className="w-3 h-3" />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteSymptom(symptomLog.id)}
+                                  className="p-1 text-muted-foreground hover:text-destructive transition-colors"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* No symptoms logged indicator */}
+                  {(!meal.symptom_logs || meal.symptom_logs.length === 0) && (
+                    <div className="mt-2 pt-2 border-t border-border">
+                      <span className="text-xs text-muted-foreground italic">
+                        No symptoms logged
+                      </span>
+                    </div>
+                  )}
                 </div>
               ))}
               
