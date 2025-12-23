@@ -73,6 +73,7 @@ export type Database = {
           created_at: string
           ibs_type: string
           id: string
+          plan: string
           severity: string
           symptoms: string[] | null
           trigger_sensitivities: string[] | null
@@ -83,6 +84,7 @@ export type Database = {
           created_at?: string
           ibs_type: string
           id?: string
+          plan?: string
           severity: string
           symptoms?: string[] | null
           trigger_sensitivities?: string[] | null
@@ -93,6 +95,7 @@ export type Database = {
           created_at?: string
           ibs_type?: string
           id?: string
+          plan?: string
           severity?: string
           symptoms?: string[] | null
           trigger_sensitivities?: string[] | null
