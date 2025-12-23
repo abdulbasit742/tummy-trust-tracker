@@ -8,8 +8,9 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Disclaimer } from '@/components/ui/Disclaimer';
 import { Button } from '@/components/ui/button';
 import { calculateToleranceScores } from '@/lib/toleranceEngine';
-import { MealLog, SymptomLog, ToleranceData } from '@/types';
-import { User, LogOut, Trash2, Edit2, ChevronRight } from 'lucide-react';
+import { MealLog, SymptomLog, ToleranceData, IBSType, SeverityLevel } from '@/types';
+import { IBS_TYPES, SYMPTOMS, SEVERITY_LEVELS } from '@/data/constants';
+import { User, LogOut, Trash2, Edit2, ChevronRight, Save, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -20,13 +21,20 @@ interface MealWithSymptoms extends MealLog {
 
 export default function Profile() {
   const navigate = useNavigate();
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, refreshProfile } = useAuth();
   const { toast } = useToast();
   
   const [mealLogs, setMealLogs] = useState<MealWithSymptoms[]>([]);
   const [toleranceData, setToleranceData] = useState<ToleranceData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAllLogs, setShowAllLogs] = useState(false);
+  
+  // Edit mode state
+  const [isEditing, setIsEditing] = useState(false);
+  const [editIbsType, setEditIbsType] = useState<IBSType | null>(null);
+  const [editSeverity, setEditSeverity] = useState<SeverityLevel | null>(null);
+  const [editSymptoms, setEditSymptoms] = useState<string[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -95,6 +103,63 @@ export default function Profile() {
     navigate('/auth');
   };
 
+  const startEditing = () => {
+    if (profile) {
+      setEditIbsType(profile.ibs_type);
+      setEditSeverity(profile.severity);
+      setEditSymptoms(profile.symptoms || []);
+      setIsEditing(true);
+    }
+  };
+
+  const cancelEditing = () => {
+    setIsEditing(false);
+    setEditIbsType(null);
+    setEditSeverity(null);
+    setEditSymptoms([]);
+  };
+
+  const toggleEditSymptom = (symptomId: string) => {
+    setEditSymptoms(prev => 
+      prev.includes(symptomId) 
+        ? prev.filter(s => s !== symptomId)
+        : [...prev, symptomId]
+    );
+  };
+
+  const handleSaveProfile = async () => {
+    if (!profile || !editIbsType || !editSeverity) return;
+    
+    setIsSaving(true);
+    
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        ibs_type: editIbsType,
+        severity: editSeverity,
+        symptoms: editSymptoms,
+      })
+      .eq('id', profile.id);
+
+    if (error) {
+      toast({
+        title: "Error saving",
+        description: error.message,
+        variant: "destructive",
+      });
+      setIsSaving(false);
+      return;
+    }
+
+    await refreshProfile();
+    toast({
+      title: "Profile updated",
+      description: "Your changes have been saved.",
+    });
+    setIsEditing(false);
+    setIsSaving(false);
+  };
+
   const displayedLogs = showAllLogs ? mealLogs : mealLogs.slice(0, 5);
 
   return (
@@ -121,17 +186,27 @@ export default function Profile() {
           </Button>
         </div>
 
-        {/* Profile Summary */}
-        {profile && (
+        {/* Profile Summary - View Mode */}
+        {profile && !isEditing && (
           <div className="bg-card rounded-xl p-4 border border-border animate-slide-up">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 gradient-calm rounded-xl flex items-center justify-center">
-                <User className="w-6 h-6 text-primary-foreground" />
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 gradient-calm rounded-xl flex items-center justify-center">
+                  <User className="w-6 h-6 text-primary-foreground" />
+                </div>
+                <div>
+                  <p className="font-display font-semibold text-foreground">{profile.ibs_type}</p>
+                  <p className="text-sm text-muted-foreground capitalize">{profile.severity} severity</p>
+                </div>
               </div>
-              <div>
-                <p className="font-display font-semibold text-foreground">{profile.ibs_type}</p>
-                <p className="text-sm text-muted-foreground capitalize">{profile.severity} severity</p>
-              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={startEditing}
+                className="rounded-xl"
+              >
+                <Edit2 className="w-4 h-4" />
+              </Button>
             </div>
             
             {profile.symptoms.length > 0 && (
@@ -151,6 +226,91 @@ export default function Profile() {
                 )}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Profile Edit Mode */}
+        {profile && isEditing && (
+          <div className="bg-card rounded-xl p-4 border border-border animate-slide-up space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-display font-semibold text-foreground">Edit Profile</h3>
+              <Button variant="ghost" size="sm" onClick={cancelEditing}>
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+
+            {/* IBS Type */}
+            <div>
+              <label className="text-sm font-medium text-foreground mb-2 block">IBS Type</label>
+              <div className="space-y-2">
+                {IBS_TYPES.map((type) => (
+                  <button
+                    key={type.value}
+                    onClick={() => setEditIbsType(type.value as IBSType)}
+                    className={cn(
+                      "w-full text-left p-3 rounded-xl border-2 transition-all text-sm",
+                      editIbsType === type.value
+                        ? "border-primary bg-primary/5"
+                        : "border-border bg-background hover:border-primary/50"
+                    )}
+                  >
+                    {type.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Severity */}
+            <div>
+              <label className="text-sm font-medium text-foreground mb-2 block">Severity</label>
+              <div className="grid grid-cols-3 gap-2">
+                {SEVERITY_LEVELS.map((level) => (
+                  <button
+                    key={level.value}
+                    onClick={() => setEditSeverity(level.value as SeverityLevel)}
+                    className={cn(
+                      "p-2 rounded-xl border-2 transition-all text-sm font-medium",
+                      editSeverity === level.value
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border bg-background text-foreground hover:border-primary/50"
+                    )}
+                  >
+                    {level.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Symptoms */}
+            <div>
+              <label className="text-sm font-medium text-foreground mb-2 block">Symptoms</label>
+              <div className="flex flex-wrap gap-2">
+                {SYMPTOMS.map((symptom) => (
+                  <button
+                    key={symptom.id}
+                    onClick={() => toggleEditSymptom(symptom.id)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-full border-2 transition-all text-xs font-medium",
+                      editSymptoms.includes(symptom.id)
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-background text-foreground hover:border-primary/50"
+                    )}
+                  >
+                    {symptom.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Save Button */}
+            <Button
+              onClick={handleSaveProfile}
+              disabled={isSaving || !editIbsType || !editSeverity}
+              className="w-full h-11 rounded-xl gradient-calm text-primary-foreground border-0"
+            >
+              <Save className="w-4 h-4 mr-2" />
+              {isSaving ? 'Saving...' : 'Save Changes'}
+            </Button>
           </div>
         )}
 

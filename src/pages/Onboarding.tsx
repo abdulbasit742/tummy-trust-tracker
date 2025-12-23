@@ -5,9 +5,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { IBS_TYPES, SYMPTOMS, SEVERITY_LEVELS, COMMON_TRIGGERS, DISCLAIMER_TEXT } from '@/data/constants';
 import { IBSType, SeverityLevel } from '@/types';
 import { Button } from '@/components/ui/button';
-import { Disclaimer } from '@/components/ui/Disclaimer';
 import { ArrowRight, ArrowLeft, Heart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 
 type Step = 'welcome' | 'ibs-type' | 'symptoms' | 'severity' | 'triggers';
@@ -22,6 +22,7 @@ export default function Onboarding() {
   const [symptoms, setSymptoms] = useState<string[]>([]);
   const [severity, setSeverity] = useState<SeverityLevel | null>(null);
   const [triggers, setTriggers] = useState<string[]>([]);
+  const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const steps: Step[] = ['welcome', 'ibs-type', 'symptoms', 'severity', 'triggers'];
@@ -30,7 +31,7 @@ export default function Onboarding() {
 
   const canContinue = () => {
     switch (step) {
-      case 'welcome': return true;
+      case 'welcome': return disclaimerAccepted;
       case 'ibs-type': return ibsType !== null;
       case 'symptoms': return symptoms.length > 0;
       case 'severity': return severity !== null;
@@ -134,7 +135,25 @@ export default function Onboarding() {
               </p>
             </div>
 
-            <Disclaimer className="mb-8" />
+            <div className="bg-card rounded-xl p-4 border border-border mb-4">
+              <p className="text-sm text-muted-foreground mb-4">
+                {DISCLAIMER_TEXT}
+              </p>
+              <div className="flex items-start gap-3">
+                <Checkbox
+                  id="disclaimer"
+                  checked={disclaimerAccepted}
+                  onCheckedChange={(checked) => setDisclaimerAccepted(checked === true)}
+                  className="mt-0.5"
+                />
+                <label 
+                  htmlFor="disclaimer" 
+                  className="text-sm font-medium text-foreground cursor-pointer leading-tight"
+                >
+                  I understand and accept
+                </label>
+              </div>
+            </div>
           </div>
         )}
 
