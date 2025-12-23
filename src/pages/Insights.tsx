@@ -235,8 +235,8 @@ export default function Insights() {
         {isLoading ? (
           <div className="space-y-3">
             {[1, 2, 3].map(i => (
-              <div key={i} className="bg-card rounded-xl p-4 border border-border animate-pulse-soft">
-                <div className="h-4 bg-muted rounded w-1/2 mb-2"></div>
+              <div key={i} className="bg-card rounded-2xl p-5 border border-border animate-pulse-soft shadow-soft">
+                <div className="h-4 bg-muted rounded w-1/2 mb-3"></div>
                 <div className="h-6 bg-muted rounded w-1/3"></div>
               </div>
             ))}
@@ -247,15 +247,15 @@ export default function Insights() {
             {activeTab === 'progress' && progressData && (
               <div className="space-y-4 animate-fade-in">
                 {/* Week Trend */}
-                <div className="bg-card rounded-xl p-4 border border-border">
+                <div className="bg-card rounded-2xl p-5 border border-border shadow-soft">
                   <div className="flex items-center gap-3 mb-2">
                     {getTrendIcon()}
-                    <span className={cn("font-display font-semibold", getTrendColor())}>
+                    <span className={cn("font-display font-semibold text-base", getTrendColor())}>
                       {getTrendLabel()}
                     </span>
                   </div>
                   {progressData.trend === 'insufficient' && (
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm text-muted-foreground leading-relaxed">
                       Log more meals with symptoms to see trends
                     </p>
                   )}
@@ -263,44 +263,44 @@ export default function Insights() {
 
                 {/* Averages */}
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-card rounded-xl p-4 border border-border">
-                    <p className="text-xs text-muted-foreground mb-1">Last 7 Days Avg</p>
-                    <p className="font-display text-2xl font-bold text-foreground">
+                  <div className="bg-card rounded-2xl p-5 border border-border shadow-soft">
+                    <p className="text-xs text-muted-foreground mb-2">Last 7 Days Avg</p>
+                    <p className="font-display text-3xl font-bold text-foreground">
                       {progressData.last7DaysAvg !== null ? `${progressData.last7DaysAvg}` : '—'}
                     </p>
-                    <p className="text-xs text-muted-foreground">/12 max</p>
+                    <p className="text-xs text-muted-foreground mt-1">/12 max</p>
                   </div>
-                  <div className="bg-card rounded-xl p-4 border border-border">
-                    <p className="text-xs text-muted-foreground mb-1">Previous 7 Days</p>
-                    <p className="font-display text-2xl font-bold text-foreground">
+                  <div className="bg-card rounded-2xl p-5 border border-border shadow-soft">
+                    <p className="text-xs text-muted-foreground mb-2">Previous 7 Days</p>
+                    <p className="font-display text-3xl font-bold text-foreground">
                       {progressData.prev7DaysAvg !== null ? `${progressData.prev7DaysAvg}` : '—'}
                     </p>
-                    <p className="text-xs text-muted-foreground">/12 max</p>
+                    <p className="text-xs text-muted-foreground mt-1">/12 max</p>
                   </div>
                 </div>
 
                 {/* Tracking Consistency */}
-                <div className="bg-card rounded-xl p-4 border border-border">
-                  <div className="flex items-center gap-2 mb-3">
+                <div className="bg-card rounded-2xl p-5 border border-border shadow-soft">
+                  <div className="flex items-center gap-2.5 mb-4">
                     <ClipboardList className="w-4 h-4 text-primary" />
                     <span className="font-display font-semibold text-foreground text-sm">
                       Tracking This Week
                     </span>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-3 mb-3">
-                    <div className="flex items-center gap-2">
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="flex items-center gap-2.5">
                       <Calendar className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm text-foreground">{progressData.mealsLast7Days} meals</span>
+                      <span className="text-sm font-medium text-foreground">{progressData.mealsLast7Days} meals</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2.5">
                       <Activity className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm text-foreground">{progressData.symptomsLast7Days} symptoms</span>
+                      <span className="text-sm font-medium text-foreground">{progressData.symptomsLast7Days} symptoms</span>
                     </div>
                   </div>
 
                   <div className={cn(
-                    "flex items-center gap-2 p-2 rounded-lg text-sm",
+                    "flex items-center gap-2.5 p-3 rounded-xl text-sm font-medium",
                     progressData.completionRatio >= 0.6 
                       ? "bg-success/10 text-success" 
                       : "bg-caution/10 text-caution"
@@ -317,17 +317,17 @@ export default function Insights() {
 
             {/* Triggers Tab */}
             {activeTab === 'triggers' && (
-              <div className="space-y-4 animate-fade-in">
+              <div className="space-y-5 animate-fade-in">
                 {validTolerance.length === 0 ? (
-                  <div className="bg-card rounded-xl p-6 border border-border text-center">
-                    <Target className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                    <h3 className="font-display font-semibold text-foreground mb-2">
+                  <div className="empty-state">
+                    <Target className="empty-state-icon" />
+                    <h3 className="empty-state-title">
                       Not enough data yet
                     </h3>
-                    <p className="text-muted-foreground text-sm">
+                    <p className="empty-state-text">
                       Log meals + symptoms at least twice per food to see triggers.
                     </p>
-                    <p className="text-primary/70 text-xs mt-2">
+                    <p className="text-primary/80 text-xs mt-3">
                       The more you log, the clearer your triggers become.
                     </p>
                   </div>
@@ -335,17 +335,17 @@ export default function Insights() {
                   <>
                     {/* Safe Foods */}
                     <div>
-                      <h3 className="font-display font-semibold text-foreground text-sm mb-2 flex items-center gap-2">
+                      <h3 className="font-display font-semibold text-foreground text-sm mb-3 flex items-center gap-2.5">
                         <CheckCircle className="w-4 h-4 text-success" />
                         Top Safe Foods
                       </h3>
                       {safeFoods.length > 0 ? (
-                        <div className="bg-card rounded-xl border border-border divide-y divide-border">
+                        <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden shadow-soft">
                         {safeFoods.map((food) => (
-                            <div key={food.food_name} className="p-3">
-                              <div className="flex items-center justify-between mb-1.5">
+                            <div key={food.food_name} className="p-4">
+                              <div className="flex items-center justify-between mb-2">
                                 <span className="font-medium text-foreground text-sm" dir="auto">{getDisplayNameWithUrdu(food.food_name, foods)}</span>
-                                <span className="text-xs text-success font-medium">
+                                <span className="text-xs text-success font-semibold">
                                   {getToleranceLabel(food.tolerance_percent)}
                                 </span>
                               </div>
@@ -354,7 +354,7 @@ export default function Insights() {
                           ))}
                         </div>
                       ) : (
-                        <div className="bg-card rounded-xl p-4 border border-border text-center">
+                        <div className="empty-state">
                           <p className="text-muted-foreground text-sm">No safe foods identified yet</p>
                         </div>
                       )}
@@ -362,18 +362,18 @@ export default function Insights() {
 
                     {/* Trigger Foods */}
                     <div>
-                      <h3 className="font-display font-semibold text-foreground text-sm mb-2 flex items-center gap-2">
+                      <h3 className="font-display font-semibold text-foreground text-sm mb-3 flex items-center gap-2.5">
                         <AlertTriangle className="w-4 h-4 text-destructive" />
                         Top Trigger Foods
                       </h3>
                       {triggerFoods.length > 0 ? (
-                        <div className="bg-card rounded-xl border border-border divide-y divide-border">
+                        <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden shadow-soft">
                         {triggerFoods.map((food) => (
-                            <div key={food.food_name} className="p-3">
-                              <div className="flex items-center justify-between mb-1.5">
+                            <div key={food.food_name} className="p-4">
+                              <div className="flex items-center justify-between mb-2">
                                 <span className="font-medium text-foreground text-sm" dir="auto">{getDisplayNameWithUrdu(food.food_name, foods)}</span>
                                 <span className={cn(
-                                  "text-xs font-medium",
+                                  "text-xs font-semibold",
                                   food.tolerance_percent < 40 ? "text-destructive" : "text-caution"
                                 )}>
                                   {getToleranceLabel(food.tolerance_percent)}
@@ -384,7 +384,7 @@ export default function Insights() {
                           ))}
                         </div>
                       ) : (
-                        <div className="bg-card rounded-xl p-4 border border-border text-center">
+                        <div className="empty-state">
                           <p className="text-muted-foreground text-sm">No triggers identified yet</p>
                         </div>
                       )}
@@ -401,41 +401,41 @@ export default function Insights() {
             {/* Doctor Summary Tab */}
             {activeTab === 'doctor' && (
               <div className="space-y-4 animate-fade-in">
-                <div className="bg-card rounded-xl p-4 border border-border">
-                  <h3 className="font-display font-semibold text-foreground mb-3 flex items-center gap-2">
+                <div className="bg-card rounded-2xl p-5 border border-border shadow-soft">
+                  <h3 className="font-display font-semibold text-foreground mb-4 flex items-center gap-2.5">
                     <FileText className="w-4 h-4 text-primary" />
                     Summary for Medical Discussion
                   </h3>
                   
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between">
+                  <div className="space-y-3.5 text-sm">
+                    <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">IBS Type:</span>
-                      <span className="font-medium text-foreground">{profile?.ibs_type || '—'}</span>
+                      <span className="font-semibold text-foreground">{profile?.ibs_type || '—'}</span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">Severity:</span>
-                      <span className="font-medium text-foreground capitalize">{profile?.severity || '—'}</span>
+                      <span className="font-semibold text-foreground capitalize">{profile?.severity || '—'}</span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">Main Symptoms:</span>
-                      <span className="font-medium text-foreground text-right max-w-[60%]">
+                      <span className="font-semibold text-foreground text-right max-w-[60%]">
                         {profile?.symptoms.length ? profile.symptoms.slice(0, 3).join(', ') : '—'}
                       </span>
                     </div>
                     {progressData?.last7DaysAvg !== null && (
-                      <div className="flex justify-between">
+                      <div className="flex justify-between items-center">
                         <span className="text-muted-foreground">Recent Avg Score:</span>
-                        <span className="font-medium text-foreground">{progressData.last7DaysAvg}/12</span>
+                        <span className="font-semibold text-foreground">{progressData.last7DaysAvg}/12</span>
                       </div>
                     )}
                   </div>
 
                   {triggerFoods.length > 0 && (
-                    <div className="mt-4 pt-3 border-t border-border">
-                      <p className="text-xs text-muted-foreground mb-2">Likely Triggers:</p>
-                      <div className="flex flex-wrap gap-1">
+                    <div className="mt-5 pt-4 border-t border-border">
+                      <p className="text-xs text-muted-foreground mb-2.5 font-medium">Likely Triggers:</p>
+                      <div className="flex flex-wrap gap-1.5">
                         {triggerFoods.slice(0, 5).map(f => (
-                          <span key={f.food_name} className="px-2 py-1 bg-destructive/10 text-destructive text-xs rounded-full" dir="auto">
+                          <span key={f.food_name} className="px-2.5 py-1 bg-destructive/10 text-destructive text-xs font-medium rounded-full" dir="auto">
                             {getDisplayNameWithUrdu(f.food_name, foods)}
                           </span>
                         ))}
@@ -444,11 +444,11 @@ export default function Insights() {
                   )}
 
                   {safeFoods.length > 0 && (
-                    <div className="mt-3">
-                      <p className="text-xs text-muted-foreground mb-2">Generally Tolerated:</p>
-                      <div className="flex flex-wrap gap-1">
+                    <div className="mt-4">
+                      <p className="text-xs text-muted-foreground mb-2.5 font-medium">Generally Tolerated:</p>
+                      <div className="flex flex-wrap gap-1.5">
                         {safeFoods.slice(0, 5).map(f => (
-                          <span key={f.food_name} className="px-2 py-1 bg-success/10 text-success text-xs rounded-full" dir="auto">
+                          <span key={f.food_name} className="px-2.5 py-1 bg-success/10 text-success text-xs font-medium rounded-full" dir="auto">
                             {getDisplayNameWithUrdu(f.food_name, foods)}
                           </span>
                         ))}
@@ -459,13 +459,13 @@ export default function Insights() {
 
                 <Button
                   onClick={handleCopySummary}
-                  className="w-full h-12 rounded-xl gradient-calm text-primary-foreground border-0"
+                  className="w-full h-14 rounded-xl gradient-calm text-primary-foreground border-0 shadow-soft font-semibold text-base"
                 >
-                  <Copy className="w-4 h-4 mr-2" />
+                  <Copy className="w-5 h-5 mr-2" />
                   Copy Summary
                 </Button>
 
-                <p className="text-xs text-muted-foreground text-center">
+                <p className="text-xs text-muted-foreground text-center leading-relaxed">
                   Bring this summary to discuss with your doctor
                 </p>
               </div>
@@ -482,19 +482,19 @@ export default function Insights() {
                     variant="outline"
                     size="icon"
                     onClick={() => setRefreshKey(k => k + 1)}
-                    className="rounded-xl h-8 w-8"
+                    className="rounded-xl h-10 w-10"
                   >
                     <RefreshCw className="w-4 h-4" />
                   </Button>
                 </div>
 
                 {safeFoodsForSuggestions.length === 0 ? (
-                  <div className="bg-card rounded-xl p-6 border border-border text-center">
-                    <Utensils className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                    <h3 className="font-display font-semibold text-foreground mb-2">
+                  <div className="empty-state">
+                    <Utensils className="empty-state-icon" />
+                    <h3 className="empty-state-title">
                       No safe foods yet
                     </h3>
-                    <p className="text-muted-foreground text-sm">
+                    <p className="empty-state-text">
                       Log meals with symptoms to discover your safe foods.
                     </p>
                   </div>
@@ -503,14 +503,14 @@ export default function Insights() {
                     {suggestions.map((suggestion, index) => (
                       <div 
                         key={suggestion.mealType}
-                        className="bg-card rounded-xl p-4 border border-border animate-slide-up"
+                        className="bg-card rounded-2xl p-5 border border-border shadow-soft animate-slide-up"
                         style={{ animationDelay: `${index * 0.1}s` }}
                       >
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${getMealColor(suggestion.mealType)}`}>
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center", getMealColor(suggestion.mealType))}>
                             {getMealIcon(suggestion.mealType)}
                           </div>
-                          <h3 className="font-display text-lg font-semibold text-foreground capitalize">
+                          <h3 className="font-display text-lg font-bold text-foreground capitalize">
                             {suggestion.mealType}
                           </h3>
                         </div>
@@ -519,7 +519,7 @@ export default function Insights() {
                           {suggestion.foods.filter(f => f).map((food, i) => (
                             <span 
                               key={i}
-                              className="px-3 py-1.5 bg-success/10 text-success text-sm font-medium rounded-full"
+                              className="px-3.5 py-1.5 bg-success/10 text-success text-sm font-semibold rounded-full"
                             >
                               {food}
                             </span>
@@ -528,10 +528,10 @@ export default function Insights() {
                       </div>
                     ))}
 
-                    <p className="text-xs text-muted-foreground text-center">
+                    <p className="text-xs text-muted-foreground text-center leading-relaxed">
                       {hasPersonalSuggestionData 
-                        ? `✨ Based on your ${toleranceData.filter(t => t.tolerance_percent >= 70).length} personal safe foods`
-                        : `📚 Using ${defaultSafeFoods.length} default safe foods`
+                        ? `Based on your ${toleranceData.filter(t => t.tolerance_percent >= 70).length} personal safe foods`
+                        : `Using ${defaultSafeFoods.length} default safe foods`
                       }
                     </p>
                   </>

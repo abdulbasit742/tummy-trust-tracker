@@ -135,8 +135,8 @@ export default function Onboarding() {
               </p>
             </div>
 
-            <div className="bg-card rounded-xl p-4 border border-border mb-4">
-              <p className="text-sm text-muted-foreground mb-4">
+            <div className="bg-card rounded-2xl p-5 border border-border shadow-soft mb-4">
+              <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
                 {DISCLAIMER_TEXT}
               </p>
               <div className="flex items-start gap-3">
@@ -148,7 +148,7 @@ export default function Onboarding() {
                 />
                 <label 
                   htmlFor="disclaimer" 
-                  className="text-sm font-medium text-foreground cursor-pointer leading-tight"
+                  className="text-sm font-semibold text-foreground cursor-pointer leading-tight"
                 >
                   I understand and accept
                 </label>
@@ -291,7 +291,7 @@ export default function Onboarding() {
             <Button
               variant="outline"
               onClick={handleBack}
-              className="flex-1 h-12 rounded-xl"
+              className="flex-1 h-14 rounded-xl font-semibold"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
@@ -301,7 +301,7 @@ export default function Onboarding() {
             onClick={handleNext}
             disabled={!canContinue() || isSubmitting}
             className={cn(
-              "flex-1 h-12 rounded-xl gradient-calm text-primary-foreground border-0",
+              "flex-1 h-14 rounded-xl gradient-calm text-primary-foreground border-0 font-semibold text-base shadow-soft",
               currentIndex === 0 && "w-full"
             )}
           >
