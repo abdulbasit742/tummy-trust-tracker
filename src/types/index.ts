@@ -12,6 +12,7 @@ export interface Profile {
   symptoms: string[];
   trigger_sensitivities: string[];
   plan: PlanType;
+  free_access_expiry: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -4,14 +4,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { ToleranceBar } from '@/components/ui/ToleranceBar';
-import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Disclaimer } from '@/components/ui/Disclaimer';
-import { PlusBadge } from '@/components/ui/UpgradeCard';
+import { FreeAccessBanner, PlanStatusSection } from '@/components/ui/FreeAccessBanner';
 import { Button } from '@/components/ui/button';
 import { calculateToleranceScores } from '@/lib/toleranceEngine';
 import { MealLog, SymptomLog, ToleranceData, IBSType, SeverityLevel } from '@/types';
 import { IBS_TYPES, SYMPTOMS, SEVERITY_LEVELS } from '@/data/constants';
-import { User, LogOut, Trash2, Edit2, ChevronRight, Save, X, Sparkles } from 'lucide-react';
+import { User, LogOut, Trash2, Edit2, ChevronRight, Save, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -166,6 +165,9 @@ export default function Profile() {
   return (
     <MobileLayout>
       <div className="px-4 py-6 space-y-6">
+        {/* Free Access Banner */}
+        <FreeAccessBanner storageKey="profile-free-access-dismissed" />
+
         {/* Header */}
         <div className="flex items-center justify-between animate-fade-in">
           <div>
@@ -315,47 +317,8 @@ export default function Profile() {
           </div>
         )}
 
-        {/* Plan Section */}
-        {profile && (
-          <div className="bg-card rounded-xl p-4 border border-border animate-slide-up" style={{ animationDelay: '0.05s' }}>
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-display font-semibold text-foreground text-sm mb-1">Current Plan</h3>
-                {profile.plan === 'plus' ? (
-                  <div className="flex items-center gap-2">
-                    <PlusBadge />
-                    <span className="text-xs text-muted-foreground">All features unlocked</span>
-                  </div>
-                ) : (
-                  <span className="text-sm text-muted-foreground">Free</span>
-                )}
-              </div>
-              {profile.plan !== 'plus' && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={async () => {
-                    const { error } = await supabase
-                      .from('profiles')
-                      .update({ plan: 'plus' })
-                      .eq('id', profile.id);
-                    if (!error) {
-                      await refreshProfile();
-                      toast({
-                        title: "Plus features unlocked!",
-                        description: "You now have access to all insights and suggestions.",
-                      });
-                    }
-                  }}
-                  className="rounded-xl"
-                >
-                  <Sparkles className="w-4 h-4 mr-1" />
-                  Upgrade
-                </Button>
-              )}
-            </div>
-          </div>
-        )}
+        {/* Plan Status Section */}
+        <PlanStatusSection />
 
         {/* Personal Tolerance */}
         <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
