@@ -1,0 +1,46 @@
+-- Add urdu_name column to food_reference table
+ALTER TABLE public.food_reference ADD COLUMN urdu_name text DEFAULT NULL;
+
+-- Update common Pakistani foods with Urdu names
+UPDATE public.food_reference SET urdu_name = 'چاول' WHERE LOWER(name) = 'rice';
+UPDATE public.food_reference SET urdu_name = 'روٹی' WHERE LOWER(name) IN ('roti', 'wheat bread', 'chapati');
+UPDATE public.food_reference SET urdu_name = 'دودھ' WHERE LOWER(name) = 'milk';
+UPDATE public.food_reference SET urdu_name = 'دہی' WHERE LOWER(name) = 'yogurt';
+UPDATE public.food_reference SET urdu_name = 'گوبھی' WHERE LOWER(name) = 'cauliflower';
+UPDATE public.food_reference SET urdu_name = 'بند گوبھی' WHERE LOWER(name) = 'cabbage';
+UPDATE public.food_reference SET urdu_name = 'آلو' WHERE LOWER(name) = 'potato';
+UPDATE public.food_reference SET urdu_name = 'پیاز' WHERE LOWER(name) = 'onion';
+UPDATE public.food_reference SET urdu_name = 'ٹماٹر' WHERE LOWER(name) = 'tomato';
+UPDATE public.food_reference SET urdu_name = 'پالک' WHERE LOWER(name) = 'spinach';
+UPDATE public.food_reference SET urdu_name = 'دال' WHERE LOWER(name) IN ('lentils', 'daal', 'dal');
+UPDATE public.food_reference SET urdu_name = 'چنے' WHERE LOWER(name) = 'chickpeas';
+UPDATE public.food_reference SET urdu_name = 'راجما' WHERE LOWER(name) = 'kidney beans';
+UPDATE public.food_reference SET urdu_name = 'کیلا' WHERE LOWER(name) = 'banana';
+UPDATE public.food_reference SET urdu_name = 'سیب' WHERE LOWER(name) = 'apple';
+UPDATE public.food_reference SET urdu_name = 'آم' WHERE LOWER(name) = 'mango';
+UPDATE public.food_reference SET urdu_name = 'چکن' WHERE LOWER(name) = 'chicken';
+UPDATE public.food_reference SET urdu_name = 'انڈا' WHERE LOWER(name) = 'egg';
+UPDATE public.food_reference SET urdu_name = 'چائے' WHERE LOWER(name) = 'tea';
+UPDATE public.food_reference SET urdu_name = 'کافی' WHERE LOWER(name) = 'coffee';
+UPDATE public.food_reference SET urdu_name = 'گاجر' WHERE LOWER(name) = 'carrot';
+UPDATE public.food_reference SET urdu_name = 'کھیرا' WHERE LOWER(name) = 'cucumber';
+UPDATE public.food_reference SET urdu_name = 'مٹر' WHERE LOWER(name) = 'peas';
+UPDATE public.food_reference SET urdu_name = 'بینگن' WHERE LOWER(name) = 'eggplant';
+UPDATE public.food_reference SET urdu_name = 'لہسن' WHERE LOWER(name) = 'garlic';
+UPDATE public.food_reference SET urdu_name = 'ادرک' WHERE LOWER(name) = 'ginger';
+UPDATE public.food_reference SET urdu_name = 'مچھلی' WHERE LOWER(name) = 'fish';
+UPDATE public.food_reference SET urdu_name = 'گوشت' WHERE LOWER(name) IN ('beef', 'mutton', 'meat');
+UPDATE public.food_reference SET urdu_name = 'پنیر' WHERE LOWER(name) = 'cheese';
+UPDATE public.food_reference SET urdu_name = 'مکھن' WHERE LOWER(name) = 'butter';
+UPDATE public.food_reference SET urdu_name = 'انگور' WHERE LOWER(name) = 'grapes';
+UPDATE public.food_reference SET urdu_name = 'سنگترہ' WHERE LOWER(name) = 'orange';
+UPDATE public.food_reference SET urdu_name = 'تربوز' WHERE LOWER(name) = 'watermelon';
+UPDATE public.food_reference SET urdu_name = 'خربوزہ' WHERE LOWER(name) = 'melon';
+UPDATE public.food_reference SET urdu_name = 'پپیتا' WHERE LOWER(name) = 'papaya';
+UPDATE public.food_reference SET urdu_name = 'کدو' WHERE LOWER(name) = 'pumpkin';
+UPDATE public.food_reference SET urdu_name = 'بھنڈی' WHERE LOWER(name) = 'okra';
+UPDATE public.food_reference SET urdu_name = 'ٹنڈے' WHERE LOWER(name) = 'tinda';
+UPDATE public.food_reference SET urdu_name = 'توری' WHERE LOWER(name) = 'zucchini';
+UPDATE public.food_reference SET urdu_name = 'شکرقندی' WHERE LOWER(name) = 'sweet potato';
+UPDATE public.food_reference SET urdu_name = 'جو' WHERE LOWER(name) = 'barley';
+UPDATE public.food_reference SET urdu_name = 'جئی' WHERE LOWER(name) = 'oats';

@@ -7,7 +7,8 @@ import { ToleranceBar } from '@/components/ui/ToleranceBar';
 import { Button } from '@/components/ui/button';
 import { calculateToleranceScores, getToleranceLabel } from '@/lib/toleranceEngine';
 import { calculateProgressData, ProgressData } from '@/lib/progressEngine';
-import { ToleranceData } from '@/types';
+import { getDisplayNameWithUrdu } from '@/lib/utils/foodUtils';
+import { ToleranceData, FoodReference } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { 
   TrendingUp, TrendingDown, Minus, Activity, 
@@ -26,6 +27,7 @@ export default function Insights() {
   const [progressData, setProgressData] = useState<ProgressData | null>(null);
   const [toleranceData, setToleranceData] = useState<ToleranceData[]>([]);
   const [defaultSafeFoods, setDefaultSafeFoods] = useState<string[]>([]);
+  const [foods, setFoods] = useState<FoodReference[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -39,15 +41,17 @@ export default function Insights() {
     if (!user) return;
     setIsLoading(true);
     
-    const [progress, tolerance, foods] = await Promise.all([
+    const [progress, tolerance, foodsData, allFoods] = await Promise.all([
       calculateProgressData(user.id),
       calculateToleranceScores(user.id),
       supabase.from('food_reference').select('name').eq('default_status', 'safe'),
+      supabase.from('food_reference').select('*').order('name'),
     ]);
     
     setProgressData(progress);
     setToleranceData(tolerance);
-    setDefaultSafeFoods(foods.data?.map(f => f.name) || []);
+    setDefaultSafeFoods(foodsData.data?.map(f => f.name) || []);
+    setFoods((allFoods.data as FoodReference[]) || []);
     setIsLoading(false);
   };
 
@@ -337,10 +341,10 @@ export default function Insights() {
                       </h3>
                       {safeFoods.length > 0 ? (
                         <div className="bg-card rounded-xl border border-border divide-y divide-border">
-                          {safeFoods.map((food) => (
+                        {safeFoods.map((food) => (
                             <div key={food.food_name} className="p-3">
                               <div className="flex items-center justify-between mb-1.5">
-                                <span className="font-medium text-foreground text-sm">{food.food_name}</span>
+                                <span className="font-medium text-foreground text-sm" dir="auto">{getDisplayNameWithUrdu(food.food_name, foods)}</span>
                                 <span className="text-xs text-success font-medium">
                                   {getToleranceLabel(food.tolerance_percent)}
                                 </span>
@@ -364,10 +368,10 @@ export default function Insights() {
                       </h3>
                       {triggerFoods.length > 0 ? (
                         <div className="bg-card rounded-xl border border-border divide-y divide-border">
-                          {triggerFoods.map((food) => (
+                        {triggerFoods.map((food) => (
                             <div key={food.food_name} className="p-3">
                               <div className="flex items-center justify-between mb-1.5">
-                                <span className="font-medium text-foreground text-sm">{food.food_name}</span>
+                                <span className="font-medium text-foreground text-sm" dir="auto">{getDisplayNameWithUrdu(food.food_name, foods)}</span>
                                 <span className={cn(
                                   "text-xs font-medium",
                                   food.tolerance_percent < 40 ? "text-destructive" : "text-caution"
@@ -431,8 +435,8 @@ export default function Insights() {
                       <p className="text-xs text-muted-foreground mb-2">Likely Triggers:</p>
                       <div className="flex flex-wrap gap-1">
                         {triggerFoods.slice(0, 5).map(f => (
-                          <span key={f.food_name} className="px-2 py-1 bg-destructive/10 text-destructive text-xs rounded-full">
-                            {f.food_name}
+                          <span key={f.food_name} className="px-2 py-1 bg-destructive/10 text-destructive text-xs rounded-full" dir="auto">
+                            {getDisplayNameWithUrdu(f.food_name, foods)}
                           </span>
                         ))}
                       </div>
@@ -444,8 +448,8 @@ export default function Insights() {
                       <p className="text-xs text-muted-foreground mb-2">Generally Tolerated:</p>
                       <div className="flex flex-wrap gap-1">
                         {safeFoods.slice(0, 5).map(f => (
-                          <span key={f.food_name} className="px-2 py-1 bg-success/10 text-success text-xs rounded-full">
-                            {f.food_name}
+                          <span key={f.food_name} className="px-2 py-1 bg-success/10 text-success text-xs rounded-full" dir="auto">
+                            {getDisplayNameWithUrdu(f.food_name, foods)}
                           </span>
                         ))}
                       </div>

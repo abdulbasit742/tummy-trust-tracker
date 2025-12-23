@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { calculateToleranceScores, shouldUsePersonalTolerance } from '@/lib/toleranceEngine';
-import { normalizeFoodName } from '@/lib/utils/foodUtils';
+import { normalizeFoodName, getFoodDisplayName, searchFoods, getDisplayNameWithUrdu } from '@/lib/utils/foodUtils';
 import { FoodReference, FoodStatus, ToleranceData } from '@/types';
 import { Search, X, Info, User, Database } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -61,15 +61,13 @@ export default function FoodChecker() {
     return { status: defaultStatus, isPersonal: false };
   };
 
-  const normalizedSearch = normalizeFoodName(searchQuery);
+  // Use bilingual search
   const filteredFoods = useMemo(() => {
     if (!searchQuery.trim()) return foods.slice(0, 10);
-    
-    return foods.filter(food =>
-      normalizeFoodName(food.name).includes(normalizedSearch)
-    );
-  }, [searchQuery, foods, normalizedSearch]);
+    return searchFoods(searchQuery, foods);
+  }, [searchQuery, foods]);
 
+  const normalizedSearch = normalizeFoodName(searchQuery);
   const isCustomFood = searchQuery.trim().length >= 2 && 
     !foods.some(f => normalizeFoodName(f.name) === normalizedSearch);
 
@@ -99,7 +97,7 @@ export default function FoodChecker() {
           </p>
         </div>
 
-        {/* Search with Autocomplete */}
+        {/* Search with Autocomplete - supports English, Urdu, and Roman Urdu */}
         <div className="relative animate-slide-up">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <Input
@@ -108,8 +106,9 @@ export default function FoodChecker() {
               setSearchQuery(e.target.value);
               setSelectedFood(null);
             }}
-            placeholder="Search foods (e.g. Rice, Daal)"
+            placeholder="Search: Rice, چاول, chawal"
             className="pl-12 pr-12 h-14 text-lg rounded-xl bg-card border-border"
+            dir="auto"
           />
           {searchQuery && (
             <button
@@ -153,8 +152,8 @@ export default function FoodChecker() {
                 return (
                   <>
                     <div className="flex items-start justify-between gap-3 mb-3">
-                      <h2 className="font-display text-xl font-bold text-foreground">
-                        {selectedFood.name}
+                      <h2 className="font-display text-xl font-bold text-foreground" dir="auto">
+                        {getFoodDisplayName(selectedFood)}
                       </h2>
                       <StatusBadge status={status} size="lg" />
                     </div>
@@ -209,7 +208,9 @@ export default function FoodChecker() {
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex-1 min-w-0">
-                        <span className="font-medium text-foreground text-sm">{food.name}</span>
+                        <span className="font-medium text-foreground text-sm" dir="auto">
+                          {getFoodDisplayName(food)}
+                        </span>
                         <span className="text-xs text-muted-foreground ml-2">
                           {isPersonal ? '• Personal' : ''}
                         </span>
@@ -254,7 +255,9 @@ export default function FoodChecker() {
                     >
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                          <span className="font-medium text-foreground text-sm">{food.name}</span>
+                          <span className="font-medium text-foreground text-sm" dir="auto">
+                            {getFoodDisplayName(food)}
+                          </span>
                           {isPersonal && (
                             <span className="text-xs text-primary ml-2">• Personal</span>
                           )}

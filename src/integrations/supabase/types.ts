@@ -21,6 +21,7 @@ export type Database = {
           fodmap_note: string
           id: string
           name: string
+          urdu_name: string | null
         }
         Insert: {
           created_at?: string
@@ -28,6 +29,7 @@ export type Database = {
           fodmap_note?: string
           id?: string
           name: string
+          urdu_name?: string | null
         }
         Update: {
           created_at?: string
@@ -35,6 +37,7 @@ export type Database = {
           fodmap_note?: string
           id?: string
           name?: string
+          urdu_name?: string | null
         }
         Relationships: []
       }

@@ -20,6 +20,7 @@ export interface Profile {
 export interface FoodReference {
   id: string;
   name: string;
+  urdu_name: string | null;
   default_status: FoodStatus;
   fodmap_note: string;
   created_at: string;
