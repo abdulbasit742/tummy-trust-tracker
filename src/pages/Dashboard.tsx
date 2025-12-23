@@ -78,8 +78,10 @@ export default function Dashboard() {
     return { status: defaultStatus, isPersonal: false };
   };
 
-  const safeFoods = toleranceData.filter(t => t.tolerance_percent >= 70).slice(0, 5);
-  const triggerFoods = toleranceData.filter(t => t.tolerance_percent < 40).slice(0, 5);
+  // Only show foods with >= 2 symptom logs (enough data for reliable insight)
+  const validTolerance = toleranceData.filter(t => t.symptom_log_count >= 2);
+  const safeFoods = validTolerance.filter(t => t.tolerance_percent >= 70).slice(0, 5);
+  const triggerFoods = validTolerance.filter(t => t.tolerance_percent < 40).slice(0, 5);
 
   const filteredFoods = foodSearch.trim()
     ? foods.filter(f => f.name.toLowerCase().includes(foodSearch.toLowerCase())).slice(0, 6)

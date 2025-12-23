@@ -32,4 +32,4 @@ export const PORTION_SIZES = [
   { value: 'L', label: 'Large' },
 ] as const;
 
-export const DISCLAIMER_TEXT = "This tool is for educational tracking only and does not replace medical advice. Consult a qualified doctor.";
+export const DISCLAIMER_TEXT = "This tool is for educational tracking only and does not replace medical advice. Always consult a qualified doctor.";
