@@ -274,6 +274,9 @@ export default function Insights() {
                     <p className="text-muted-foreground text-sm">
                       Log meals + symptoms at least twice per food to see triggers.
                     </p>
+                    <p className="text-primary/70 text-xs mt-2">
+                      The more you log, the clearer your triggers become.
+                    </p>
                   </div>
                 ) : (
                   <>

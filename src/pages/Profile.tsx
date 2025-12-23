@@ -5,7 +5,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { ToleranceBar } from '@/components/ui/ToleranceBar';
 import { Disclaimer } from '@/components/ui/Disclaimer';
-import { FreeAccessBanner, PlanStatusSection } from '@/components/ui/FreeAccessBanner';
+import { EarlyUserStatus, WhyThisApp } from '@/components/ui/FreeAccessBanner';
+import { ShareButton } from '@/components/ui/ShareButton';
 import { Button } from '@/components/ui/button';
 import { calculateToleranceScores } from '@/lib/toleranceEngine';
 import { MealLog, SymptomLog, ToleranceData, IBSType, SeverityLevel } from '@/types';
@@ -47,7 +48,6 @@ export default function Profile() {
     
     setIsLoading(true);
 
-    // Fetch meal logs with symptoms
     const { data: meals } = await supabase
       .from('meal_logs')
       .select('*')
@@ -68,7 +68,6 @@ export default function Profile() {
       setMealLogs(mealsWithSymptoms as MealWithSymptoms[]);
     }
 
-    // Get tolerance data
     const scores = await calculateToleranceScores(user.id);
     setToleranceData(scores);
 
@@ -114,9 +113,6 @@ export default function Profile() {
 
   const cancelEditing = () => {
     setIsEditing(false);
-    setEditIbsType(null);
-    setEditSeverity(null);
-    setEditSymptoms([]);
   };
 
   const toggleEditSymptom = (symptomId: string) => {
@@ -165,9 +161,6 @@ export default function Profile() {
   return (
     <MobileLayout>
       <div className="px-4 py-6 space-y-6">
-        {/* Free Access Banner */}
-        <FreeAccessBanner storageKey="profile-free-access-dismissed" />
-
         {/* Header */}
         <div className="flex items-center justify-between animate-fade-in">
           <div>
@@ -178,15 +171,18 @@ export default function Profile() {
               {user?.email}
             </p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleSignOut}
-            className="rounded-xl"
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            Sign Out
-          </Button>
+          <div className="flex items-center gap-2">
+            <ShareButton variant="icon" />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSignOut}
+              className="rounded-xl"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
         </div>
 
         {/* Profile Summary - View Mode */}
@@ -242,7 +238,6 @@ export default function Profile() {
               </Button>
             </div>
 
-            {/* IBS Type */}
             <div>
               <label className="text-sm font-medium text-foreground mb-2 block">IBS Type</label>
               <div className="space-y-2">
@@ -263,7 +258,6 @@ export default function Profile() {
               </div>
             </div>
 
-            {/* Severity */}
             <div>
               <label className="text-sm font-medium text-foreground mb-2 block">Severity</label>
               <div className="grid grid-cols-3 gap-2">
@@ -284,7 +278,6 @@ export default function Profile() {
               </div>
             </div>
 
-            {/* Symptoms */}
             <div>
               <label className="text-sm font-medium text-foreground mb-2 block">Symptoms</label>
               <div className="flex flex-wrap gap-2">
@@ -305,7 +298,6 @@ export default function Profile() {
               </div>
             </div>
 
-            {/* Save Button */}
             <Button
               onClick={handleSaveProfile}
               disabled={isSaving || !editIbsType || !editSeverity}
@@ -317,11 +309,19 @@ export default function Profile() {
           </div>
         )}
 
-        {/* Plan Status Section */}
-        <PlanStatusSection />
+        {/* Early User Status */}
+        <EarlyUserStatus />
+
+        {/* Share Section */}
+        <div className="bg-card rounded-xl p-4 border border-border">
+          <ShareButton variant="full" />
+        </div>
+
+        {/* Why This App */}
+        <WhyThisApp />
 
         {/* Personal Tolerance */}
-        <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
+        <div className="animate-slide-up">
           <h2 className="font-display text-lg font-semibold text-foreground mb-3">
             Personal Tolerance
           </h2>
@@ -350,7 +350,7 @@ export default function Profile() {
         </div>
 
         {/* Meal History */}
-        <div className="animate-slide-up" style={{ animationDelay: '0.15s' }}>
+        <div className="animate-slide-up">
           <h2 className="font-display text-lg font-semibold text-foreground mb-3">
             Meal History
           </h2>
