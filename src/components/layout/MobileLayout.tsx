@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Search, PlusCircle, BarChart3, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useEffect } from 'react';
 
 interface MobileLayoutProps {
   children: React.ReactNode;
@@ -10,9 +9,9 @@ interface MobileLayoutProps {
 }
 
 const navItems = [
-  { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
-  { path: '/food-checker', icon: Search, label: 'Food Check' },
-  { path: '/log-meal', icon: PlusCircle, label: 'Log Meal' },
+  { path: '/', icon: LayoutDashboard, label: 'Home' },
+  { path: '/food-checker', icon: Search, label: 'Check' },
+  { path: '/log-meal', icon: PlusCircle, label: 'Log', isMain: true },
   { path: '/insights', icon: BarChart3, label: 'Insights' },
   { path: '/profile', icon: User, label: 'Profile' },
 ];
@@ -30,35 +29,67 @@ export function MobileLayout({ children, showNav = true }: MobileLayoutProps) {
     <div className="min-h-screen bg-background flex flex-col max-w-[100vw] overflow-x-hidden">
       <main className={cn(
         "flex-1 overflow-x-hidden",
-        showNav && "pb-20"
+        showNav && "pb-24"
       )}>
         {children}
       </main>
       
       {showNav && (
-        <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-elevated safe-bottom z-50">
-          <div className="flex items-center justify-around px-1 py-1.5">
+        <nav className="fixed bottom-0 left-0 right-0 glass border-t border-border/50 safe-bottom z-50">
+          <div className="flex items-end justify-around px-2 pt-2 pb-1.5 max-w-md mx-auto">
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
               const Icon = item.icon;
+              
+              if (item.isMain) {
+                return (
+                  <button
+                    key={item.path}
+                    onClick={() => navigate(item.path)}
+                    className={cn(
+                      "flex flex-col items-center justify-center -mt-4 transition-all duration-200"
+                    )}
+                  >
+                    <div className={cn(
+                      "w-14 h-14 rounded-2xl flex items-center justify-center shadow-elevated transition-all duration-200",
+                      isActive 
+                        ? "gradient-calm shadow-glow" 
+                        : "bg-primary hover:shadow-glow"
+                    )}>
+                      <Icon className="w-6 h-6 text-primary-foreground" />
+                    </div>
+                    <span className={cn(
+                      "text-[10px] font-semibold mt-1 transition-colors",
+                      isActive ? "text-primary" : "text-muted-foreground"
+                    )}>
+                      {item.label}
+                    </span>
+                  </button>
+                );
+              }
               
               return (
                 <button
                   key={item.path}
                   onClick={() => navigate(item.path)}
                   className={cn(
-                    "flex flex-col items-center justify-center px-1.5 py-1.5 rounded-lg transition-all duration-200 min-w-[48px]",
+                    "flex flex-col items-center justify-center px-3 py-2 rounded-xl transition-all duration-200 min-w-[56px]",
                     isActive 
-                      ? "bg-primary/10 text-primary" 
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      ? "text-primary" 
+                      : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  <Icon className={cn(
-                    "w-5 h-5 mb-0.5 transition-transform",
-                    isActive && "scale-110"
-                  )} />
+                  <div className={cn(
+                    "p-2 rounded-xl transition-all duration-200",
+                    isActive && "bg-primary/10"
+                  )}>
+                    <Icon className={cn(
+                      "w-5 h-5 transition-transform duration-200",
+                      isActive && "scale-110"
+                    )} />
+                  </div>
                   <span className={cn(
-                    "text-[9px] font-medium leading-tight",
+                    "text-[10px] font-medium mt-0.5 transition-all",
                     isActive && "font-semibold"
                   )}>
                     {item.label}

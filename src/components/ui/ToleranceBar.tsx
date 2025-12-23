@@ -15,34 +15,47 @@ export function ToleranceBar({ score, showLabel = true, size = 'md', className }
     return 'bg-destructive';
   };
 
+  const getBackgroundColor = (score: number) => {
+    if (score >= 70) return 'bg-success/15';
+    if (score >= 40) return 'bg-caution/15';
+    return 'bg-destructive/15';
+  };
+
   const getLabel = (score: number) => {
     if (score >= 70) return 'Safe';
     if (score >= 40) return 'Caution';
     return 'Avoid';
   };
 
+  const getTextColor = (score: number) => {
+    if (score >= 70) return 'text-success';
+    if (score >= 40) return 'text-caution';
+    return 'text-destructive';
+  };
+
   return (
     <div className={cn("w-full", className)}>
       {showLabel && (
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-xs font-medium text-muted-foreground">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className={cn("text-xs font-semibold", getTextColor(score))}>
             {getLabel(score)}
           </span>
-          <span className="text-xs font-bold text-foreground">
+          <span className={cn("text-xs font-bold", getTextColor(score))}>
             {score}%
           </span>
         </div>
       )}
       <div className={cn(
-        "w-full bg-muted rounded-full overflow-hidden",
-        size === 'sm' ? 'h-1.5' : 'h-2.5'
+        "w-full rounded-full overflow-hidden",
+        getBackgroundColor(score),
+        size === 'sm' ? 'h-2' : 'h-3'
       )}>
         <div
           className={cn(
             "h-full rounded-full transition-all duration-500 ease-out",
             getColor(score)
           )}
-          style={{ width: `${score}%` }}
+          style={{ width: `${Math.max(score, 2)}%` }}
         />
       </div>
     </div>
