@@ -2,6 +2,7 @@ export type IBSType = 'IBS-C' | 'IBS-D' | 'IBS-M';
 export type SeverityLevel = 'mild' | 'moderate' | 'severe';
 export type FoodStatus = 'safe' | 'caution' | 'avoid';
 export type PortionSize = 'S' | 'M' | 'L';
+export type PlanType = 'free' | 'plus';
 
 export interface Profile {
   id: string;
@@ -10,6 +11,7 @@ export interface Profile {
   severity: SeverityLevel;
   symptoms: string[];
   trigger_sensitivities: string[];
+  plan: PlanType;
   created_at: string;
   updated_at: string;
 }

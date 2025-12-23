@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { Disclaimer } from '@/components/ui/Disclaimer';
 import { ToleranceBar } from '@/components/ui/ToleranceBar';
+import { UpgradeCard } from '@/components/ui/UpgradeCard';
 import { Button } from '@/components/ui/button';
 import { calculateToleranceScores, getToleranceLabel } from '@/lib/toleranceEngine';
 import { calculateProgressData, ProgressData } from '@/lib/progressEngine';
@@ -18,13 +19,16 @@ import { cn } from '@/lib/utils';
 type TabType = 'progress' | 'triggers' | 'doctor';
 
 export default function Insights() {
-  const { user, profile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const { toast } = useToast();
   
   const [activeTab, setActiveTab] = useState<TabType>('progress');
   const [progressData, setProgressData] = useState<ProgressData | null>(null);
   const [toleranceData, setToleranceData] = useState<ToleranceData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Check if user has Plus plan
+  const isPlusPlan = profile?.plan === 'plus';
 
   useEffect(() => {
     if (user) {
@@ -158,39 +162,44 @@ export default function Insights() {
           </p>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-2 animate-slide-up">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  "flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-sm font-medium transition-all",
-                  activeTab === tab.id
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-card border border-border text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <Icon className="w-4 h-4" />
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {isLoading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="bg-card rounded-xl p-4 border border-border animate-pulse-soft">
-                <div className="h-4 bg-muted rounded w-1/2 mb-2"></div>
-                <div className="h-6 bg-muted rounded w-1/3"></div>
-              </div>
-            ))}
-          </div>
+        {/* Show upgrade card if free plan */}
+        {!isPlusPlan ? (
+          <UpgradeCard onUpgraded={refreshProfile} />
         ) : (
           <>
+            {/* Tabs */}
+            <div className="flex gap-2 animate-slide-up">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-sm font-medium transition-all",
+                      activeTab === tab.id
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-card border border-border text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {isLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="bg-card rounded-xl p-4 border border-border animate-pulse-soft">
+                    <div className="h-4 bg-muted rounded w-1/2 mb-2"></div>
+                    <div className="h-6 bg-muted rounded w-1/3"></div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <>
             {/* Progress Tab */}
             {activeTab === 'progress' && progressData && (
               <div className="space-y-4 animate-fade-in">
@@ -415,6 +424,8 @@ export default function Insights() {
                 </p>
               </div>
             )}
+          </>
+        )}
           </>
         )}
 
