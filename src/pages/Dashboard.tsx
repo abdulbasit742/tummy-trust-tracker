@@ -11,9 +11,10 @@ import { ShareButton } from '@/components/ui/ShareButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { calculateToleranceScores, shouldUsePersonalTolerance } from '@/lib/toleranceEngine';
+import { getDisplayNameWithUrdu, searchFoods, getFoodDisplayName } from '@/lib/utils/foodUtils';
 import { MealLog, ToleranceData, FoodReference, FoodStatus } from '@/types';
 import { Search, PlusCircle, TrendingUp, TrendingDown, Calendar, Database, X } from 'lucide-react';
-import { format, isToday } from 'date-fns';
+import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 export default function Dashboard() {
@@ -83,8 +84,9 @@ export default function Dashboard() {
   const safeFoods = validTolerance.filter(t => t.tolerance_percent >= 70).slice(0, 5);
   const triggerFoods = validTolerance.filter(t => t.tolerance_percent < 40).slice(0, 5);
 
+  // Use bilingual search
   const filteredFoods = foodSearch.trim()
-    ? foods.filter(f => f.name.toLowerCase().includes(foodSearch.toLowerCase())).slice(0, 6)
+    ? searchFoods(foodSearch, foods).slice(0, 6)
     : [];
 
   return (
@@ -141,8 +143,9 @@ export default function Dashboard() {
             <Input
               value={foodSearch}
               onChange={(e) => setFoodSearch(e.target.value)}
-              placeholder="Quick search foods..."
+              placeholder="Search: Rice, چاول, chawal"
               className="pl-9 pr-9 h-10 rounded-xl bg-card border-border text-sm"
+              dir="auto"
             />
             {foodSearch && (
               <button
@@ -165,7 +168,9 @@ export default function Dashboard() {
                     className="flex items-center justify-between p-3"
                   >
                     <div className="flex-1 min-w-0">
-                      <span className="font-medium text-foreground text-sm">{food.name}</span>
+                      <span className="font-medium text-foreground text-sm" dir="auto">
+                        {getFoodDisplayName(food)}
+                      </span>
                       {isPersonal && (
                         <span className="text-xs text-primary ml-1">• Personal</span>
                       )}
@@ -199,7 +204,9 @@ export default function Dashboard() {
                   className="flex items-center justify-between p-3"
                 >
                   <div>
-                    <span className="font-medium text-foreground text-sm">{meal.food_name}</span>
+                    <span className="font-medium text-foreground text-sm" dir="auto">
+                      {getDisplayNameWithUrdu(meal.food_name, foods)}
+                    </span>
                     <span className="text-xs text-muted-foreground ml-1">({meal.portion})</span>
                   </div>
                   <span className="text-xs text-muted-foreground">
@@ -239,7 +246,9 @@ export default function Dashboard() {
               {safeFoods.map((food) => (
                 <div key={food.food_name}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-medium text-foreground text-sm">{food.food_name}</span>
+                    <span className="font-medium text-foreground text-sm" dir="auto">
+                      {getDisplayNameWithUrdu(food.food_name, foods)}
+                    </span>
                     <span className="text-xs text-muted-foreground">{food.meal_count} logs</span>
                   </div>
                   <ToleranceBar score={food.tolerance_percent} showLabel={false} size="sm" />
@@ -272,7 +281,9 @@ export default function Dashboard() {
               {triggerFoods.map((food) => (
                 <div key={food.food_name}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-medium text-foreground text-sm">{food.food_name}</span>
+                    <span className="font-medium text-foreground text-sm" dir="auto">
+                      {getDisplayNameWithUrdu(food.food_name, foods)}
+                    </span>
                     <span className="text-xs text-muted-foreground">{food.meal_count} logs</span>
                   </div>
                   <ToleranceBar score={food.tolerance_percent} showLabel={false} size="sm" />

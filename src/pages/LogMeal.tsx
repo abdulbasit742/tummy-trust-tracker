@@ -11,7 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { PORTION_SIZES } from '@/data/constants';
 import { FoodReference, PortionSize, FoodStatus } from '@/types';
-import { normalizeFoodName, displayFoodName } from '@/lib/utils/foodUtils';
+import { normalizeFoodName, displayFoodName, searchFoods, getFoodDisplayName } from '@/lib/utils/foodUtils';
 import { useToast } from '@/hooks/use-toast';
 import { Utensils, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -52,11 +52,10 @@ export default function LogMeal() {
     setFoods((data as FoodReference[]) || []);
   };
 
-  const normalizedInput = normalizeFoodName(foodName);
-  const suggestions = foods
-    .filter(f => normalizeFoodName(f.name).includes(normalizedInput))
-    .slice(0, 6);
+  // Use bilingual search
+  const suggestions = searchFoods(foodName, foods).slice(0, 6);
 
+  const normalizedInput = normalizeFoodName(foodName);
   const selectedFoodRef = foods.find(f => normalizeFoodName(f.name) === normalizedInput);
   const isCustomFood = foodName.trim().length >= 2 && !selectedFoodRef;
 
@@ -128,7 +127,7 @@ export default function LogMeal() {
 
     toast({
       title: "Logged successfully!",
-      description: `${foodName} and symptoms recorded.`,
+      description: `${displayFoodName(foodName)} and symptoms recorded.`,
     });
 
     navigate('/');
@@ -137,7 +136,7 @@ export default function LogMeal() {
   const handleSkipSymptoms = () => {
     toast({
       title: "Meal logged!",
-      description: `${foodName} recorded without symptoms.`,
+      description: `${displayFoodName(foodName)} recorded without symptoms.`,
     });
     navigate('/');
   };
@@ -167,7 +166,7 @@ export default function LogMeal() {
           <p className="text-muted-foreground text-sm mt-1">
             {step === 'meal' 
               ? 'What did you eat?' 
-              : `How do you feel after ${foodName}?`}
+              : `How do you feel after ${displayFoodName(foodName)}?`}
           </p>
         </div>
 
@@ -200,8 +199,9 @@ export default function LogMeal() {
                   }}
                   onFocus={() => setShowSuggestions(true)}
                   onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                  placeholder="Type to search (e.g. Rice, Daal)"
+                  placeholder="Type: Rice, چاول, chawal"
                   className="h-12 rounded-xl bg-card border-border"
+                  dir="auto"
                 />
                 
                 {/* Autocomplete Dropdown */}
@@ -216,7 +216,9 @@ export default function LogMeal() {
                         }}
                         className="w-full text-left px-4 py-3 hover:bg-muted transition-colors flex items-center justify-between"
                       >
-                        <span className="text-sm text-foreground">{food.name}</span>
+                        <span className="text-sm text-foreground" dir="auto">
+                          {getFoodDisplayName(food)}
+                        </span>
                         <StatusBadge status={food.default_status as FoodStatus} size="sm" />
                       </button>
                     ))}
