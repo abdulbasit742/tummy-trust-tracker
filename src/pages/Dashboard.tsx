@@ -6,7 +6,8 @@ import { MobileLayout } from '@/components/layout/MobileLayout';
 import { ToleranceBar } from '@/components/ui/ToleranceBar';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Disclaimer } from '@/components/ui/Disclaimer';
-import { FreeAccessBanner } from '@/components/ui/FreeAccessBanner';
+import { GrowthBanner, WelcomeCard } from '@/components/ui/FreeAccessBanner';
+import { ShareButton } from '@/components/ui/ShareButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { calculateToleranceScores, shouldUsePersonalTolerance } from '@/lib/toleranceEngine';
@@ -87,17 +88,23 @@ export default function Dashboard() {
   return (
     <MobileLayout>
       <div className="px-4 py-6 space-y-5">
-        {/* Free Access Banner */}
-        <FreeAccessBanner />
+        {/* Welcome Card for first-time users */}
+        <WelcomeCard />
+        
+        {/* Growth Banner */}
+        <GrowthBanner />
 
         {/* Header */}
-        <div className="animate-fade-in">
-          <h1 className="font-display text-2xl font-bold text-foreground">
-            Dashboard
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            {profile?.ibs_type && `Managing ${profile.ibs_type}`}
-          </p>
+        <div className="flex items-center justify-between animate-fade-in">
+          <div>
+            <h1 className="font-display text-2xl font-bold text-foreground">
+              Dashboard
+            </h1>
+            <p className="text-muted-foreground text-sm mt-1">
+              {profile?.ibs_type && `Managing ${profile.ibs_type}`}
+            </p>
+          </div>
+          <ShareButton variant="icon" />
         </div>
 
         {/* Quick Actions */}
@@ -202,6 +209,9 @@ export default function Dashboard() {
           ) : (
             <div className="bg-card rounded-xl p-4 border border-border text-center">
               <p className="text-muted-foreground text-sm">No meals logged today</p>
+              <p className="text-muted-foreground text-xs mt-1">
+                Log meals consistently for better insights.
+              </p>
               <Button 
                 variant="link" 
                 className="mt-1 text-primary text-sm p-0 h-auto"
@@ -237,7 +247,10 @@ export default function Dashboard() {
           ) : (
             <div className="bg-card rounded-xl p-4 border border-border text-center">
               <p className="text-muted-foreground text-xs">
-                Log meals with symptoms to discover your safe foods
+                Log meals with symptoms to discover your safe foods.
+              </p>
+              <p className="text-muted-foreground text-xs mt-1 text-primary/70">
+                The more you log, the clearer your triggers become.
               </p>
             </div>
           )}

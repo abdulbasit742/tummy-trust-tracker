@@ -94,6 +94,9 @@ export default function FoodChecker() {
           <p className="text-muted-foreground text-sm mt-1">
             Check if a food is safe for your IBS
           </p>
+          <p className="text-xs text-primary/70 mt-1">
+            Personal results improve after tracking reactions.
+          </p>
         </div>
 
         {/* Search with Autocomplete */}
