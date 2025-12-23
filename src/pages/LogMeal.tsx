@@ -11,7 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { PORTION_SIZES } from '@/data/constants';
 import { FoodReference, PortionSize, FoodStatus } from '@/types';
-import { normalizeFoodName } from '@/lib/utils/foodUtils';
+import { normalizeFoodName, displayFoodName } from '@/lib/utils/foodUtils';
 import { useToast } from '@/hooks/use-toast';
 import { Utensils, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -72,11 +72,14 @@ export default function LogMeal() {
 
     setIsSubmitting(true);
 
+    // Store normalized food name for consistent matching
+    const normalizedFoodName = displayFoodName(foodName);
+    
     const { data, error } = await supabase
       .from('meal_logs')
       .insert({
         user_id: user.id,
-        food_name: foodName.trim(),
+        food_name: normalizedFoodName,
         portion: portion,
         eaten_at: new Date().toISOString(),
         notes: notes.trim(),

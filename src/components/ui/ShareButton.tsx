@@ -6,11 +6,11 @@ import { useState } from 'react';
 
 const APP_URL = window.location.origin;
 
-const SHARE_TEXT = `IBS Diet Companion – a free tool to track food, symptoms, and personal triggers.
+const SHARE_TEXT = `IBS Diet Companion helps track meals, symptoms, and personal triggers.
 
 I'm using it to understand my IBS better.
 
-Free access for early users: ${APP_URL}`;
+Early users get 6 months free access.`;
 
 interface ShareButtonProps {
   variant?: 'icon' | 'full';
