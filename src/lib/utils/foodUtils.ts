@@ -38,55 +38,74 @@ export function getDisplayNameWithUrdu(
   return displayFoodName(foodName);
 }
 
-// Roman Urdu to Urdu script mappings for search
+// Roman Urdu to English mappings for search
 const romanUrduMappings: Record<string, string[]> = {
-  'gobi': ['cauliflower', 'گوبھی'],
-  'gobhi': ['cauliflower', 'گوبھی'],
+  // Grains & Bread
   'chawal': ['rice', 'چاول'],
+  'roti': ['roti', 'روٹی'],
+  'chapati': ['roti', 'روٹی'],
+  'naan': ['naan', 'نان'],
+  'jo': ['barley', 'جو'],
+  'jai': ['oats', 'جئی'],
+  
+  // Dairy
   'doodh': ['milk', 'دودھ'],
   'dahi': ['yogurt', 'دہی'],
+  'paneer': ['cheese', 'پنیر'],
+  'makhan': ['butter', 'مکھن'],
+  
+  // Vegetables
+  'gobi': ['cauliflower', 'گوبھی'],
+  'gobhi': ['cauliflower', 'گوبھی'],
+  'phool gobi': ['cauliflower', 'گوبھی'],
+  'band gobi': ['cabbage', 'بند گوبھی'],
   'aloo': ['potato', 'آلو'],
+  'alu': ['potato', 'آلو'],
   'pyaz': ['onion', 'پیاز'],
   'piyaz': ['onion', 'پیاز'],
+  'pyaaz': ['onion', 'پیاز'],
   'tamatar': ['tomato', 'ٹماٹر'],
   'palak': ['spinach', 'پالک'],
-  'daal': ['lentils', 'دال'],
-  'dal': ['lentils', 'دال'],
-  'chanay': ['chickpeas', 'چنے'],
-  'chane': ['chickpeas', 'چنے'],
-  'kela': ['banana', 'کیلا'],
-  'seb': ['apple', 'سیب'],
-  'aam': ['mango', 'آم'],
-  'murgh': ['chicken', 'چکن'],
-  'chicken': ['chicken', 'چکن'],
-  'anda': ['egg', 'انڈا'],
-  'chai': ['tea', 'چائے'],
-  'coffee': ['coffee', 'کافی'],
   'gajar': ['carrot', 'گاجر'],
   'kheera': ['cucumber', 'کھیرا'],
   'matar': ['peas', 'مٹر'],
   'baingan': ['eggplant', 'بینگن'],
   'lehsun': ['garlic', 'لہسن'],
   'adrak': ['ginger', 'ادرک'],
-  'machli': ['fish', 'مچھلی'],
-  'gosht': ['beef', 'گوشت'],
-  'paneer': ['cheese', 'پنیر'],
-  'makhan': ['butter', 'مکھن'],
+  'kaddu': ['pumpkin', 'کدو'],
+  'bhindi': ['okra', 'بھنڈی'],
+  'tori': ['zucchini', 'توری'],
+  'shakarkandi': ['sweet potato', 'شکرقندی'],
+  
+  // Legumes
+  'daal': ['lentils', 'دال'],
+  'dal': ['lentils', 'دال'],
+  'chanay': ['chickpeas', 'چنے'],
+  'chane': ['chickpeas', 'چنے'],
+  'channay': ['chickpeas', 'چنے'],
+  'rajma': ['kidney beans', 'راجما'],
+  
+  // Fruits
+  'kela': ['banana', 'کیلا'],
+  'seb': ['apple', 'سیب'],
+  'aam': ['mango', 'آم'],
   'angoor': ['grapes', 'انگور'],
   'santra': ['orange', 'سنگترہ'],
   'tarbooz': ['watermelon', 'تربوز'],
   'kharbuza': ['melon', 'خربوزہ'],
   'papita': ['papaya', 'پپیتا'],
-  'kaddu': ['pumpkin', 'کدو'],
-  'bhindi': ['okra', 'بھنڈی'],
-  'shakarkandi': ['sweet potato', 'شکرقندی'],
-  'roti': ['roti', 'روٹی'],
-  'chapati': ['roti', 'روٹی'],
-  'band gobi': ['cabbage', 'بند گوبھی'],
-  'rajma': ['kidney beans', 'راجما'],
-  'tori': ['zucchini', 'توری'],
-  'jo': ['barley', 'جو'],
-  'jai': ['oats', 'جئی'],
+  
+  // Protein
+  'murgh': ['chicken', 'چکن'],
+  'chicken': ['chicken', 'چکن'],
+  'anda': ['egg', 'انڈا'],
+  'machli': ['fish', 'مچھلی'],
+  'gosht': ['beef', 'گوشت'],
+  'mutton': ['mutton', 'گوشت'],
+  
+  // Beverages
+  'chai': ['tea', 'چائے'],
+  'coffee': ['coffee', 'کافی'],
 };
 
 // Search foods by English, Urdu script, or Roman Urdu
