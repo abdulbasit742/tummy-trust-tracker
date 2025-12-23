@@ -71,6 +71,7 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          free_access_expiry: string | null
           ibs_type: string
           id: string
           plan: string
@@ -82,6 +83,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          free_access_expiry?: string | null
           ibs_type: string
           id?: string
           plan?: string
@@ -93,6 +95,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          free_access_expiry?: string | null
           ibs_type?: string
           id?: string
           plan?: string

@@ -3,10 +3,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { Disclaimer } from '@/components/ui/Disclaimer';
-import { UpgradeCard } from '@/components/ui/UpgradeCard';
 import { Button } from '@/components/ui/button';
 import { calculateToleranceScores } from '@/lib/toleranceEngine';
-import { FoodReference, ToleranceData } from '@/types';
+import { ToleranceData } from '@/types';
 import { Utensils, Sunrise, Sun, Moon, RefreshCw } from 'lucide-react';
 
 interface MealSuggestion {
@@ -15,14 +14,11 @@ interface MealSuggestion {
 }
 
 export default function Suggestions() {
-  const { user, profile, refreshProfile } = useAuth();
+  const { user } = useAuth();
   const [toleranceData, setToleranceData] = useState<ToleranceData[]>([]);
   const [defaultSafeFoods, setDefaultSafeFoods] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
-  
-  // Check if user has Plus plan
-  const isPlusPlan = profile?.plan === 'plus';
 
   useEffect(() => {
     loadData();
@@ -106,27 +102,20 @@ export default function Suggestions() {
               Daily Suggestions
             </h1>
             <p className="text-muted-foreground text-sm mt-1">
-              {isPlusPlan 
-                ? (hasPersonalData ? 'Based on your safe foods' : 'Based on default safe foods')
-                : 'Upgrade to see suggestions'}
+              {hasPersonalData ? 'Based on your safe foods' : 'Based on default safe foods'}
             </p>
           </div>
-          {isPlusPlan && (
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setRefreshKey(k => k + 1)}
-              className="rounded-xl"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </Button>
-          )}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setRefreshKey(k => k + 1)}
+            className="rounded-xl"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </Button>
         </div>
 
-        {/* Show upgrade card if free plan */}
-        {!isPlusPlan ? (
-          <UpgradeCard onUpgraded={refreshProfile} />
-        ) : isLoading ? (
+        {isLoading ? (
           <div className="space-y-4">
             {[1,2,3].map(i => (
               <div key={i} className="bg-card rounded-xl p-4 border border-border animate-pulse-soft">

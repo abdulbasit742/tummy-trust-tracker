@@ -6,6 +6,7 @@ import { MobileLayout } from '@/components/layout/MobileLayout';
 import { ToleranceBar } from '@/components/ui/ToleranceBar';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Disclaimer } from '@/components/ui/Disclaimer';
+import { FreeAccessBanner } from '@/components/ui/FreeAccessBanner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { calculateToleranceScores, shouldUsePersonalTolerance } from '@/lib/toleranceEngine';
@@ -86,6 +87,9 @@ export default function Dashboard() {
   return (
     <MobileLayout>
       <div className="px-4 py-6 space-y-5">
+        {/* Free Access Banner */}
+        <FreeAccessBanner />
+
         {/* Header */}
         <div className="animate-fade-in">
           <h1 className="font-display text-2xl font-bold text-foreground">
