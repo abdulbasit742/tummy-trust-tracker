@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Search, PlusCircle, BarChart3, User, Lightbulb } from 'lucide-react';
+import { LayoutDashboard, Search, PlusCircle, BarChart3, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEffect } from 'react';
 
@@ -10,11 +10,10 @@ interface MobileLayoutProps {
 }
 
 const navItems = [
-  { path: '/', icon: LayoutDashboard, label: 'Home' },
-  { path: '/food-checker', icon: Search, label: 'Check' },
-  { path: '/log-meal', icon: PlusCircle, label: 'Log' },
+  { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
+  { path: '/food-checker', icon: Search, label: 'Food Check' },
+  { path: '/log-meal', icon: PlusCircle, label: 'Log Meal' },
   { path: '/insights', icon: BarChart3, label: 'Insights' },
-  { path: '/suggestions', icon: Lightbulb, label: 'Tips' },
   { path: '/profile', icon: User, label: 'Profile' },
 ];
 

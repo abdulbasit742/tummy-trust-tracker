@@ -10,7 +10,6 @@ import FoodChecker from "./pages/FoodChecker";
 import LogMeal from "./pages/LogMeal";
 import Insights from "./pages/Insights";
 import Profile from "./pages/Profile";
-import Suggestions from "./pages/Suggestions";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -62,11 +61,7 @@ function AppRoutes() {
           <Profile />
         </ProtectedRoute>
       } />
-      <Route path="/suggestions" element={
-        <ProtectedRoute>
-          <Suggestions />
-        </ProtectedRoute>
-      } />
+      <Route path="/suggestions" element={<Navigate to="/insights" replace />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

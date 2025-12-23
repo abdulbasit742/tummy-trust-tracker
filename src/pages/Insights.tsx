@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { Disclaimer } from '@/components/ui/Disclaimer';
 import { ToleranceBar } from '@/components/ui/ToleranceBar';
@@ -11,11 +12,11 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   TrendingUp, TrendingDown, Minus, Activity, 
   Target, FileText, Copy, CheckCircle, AlertTriangle,
-  Calendar, ClipboardList
+  Calendar, ClipboardList, Utensils, Sunrise, Sun, Moon, RefreshCw
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-type TabType = 'progress' | 'triggers' | 'doctor';
+type TabType = 'progress' | 'triggers' | 'doctor' | 'suggestions';
 
 export default function Insights() {
   const { user, profile } = useAuth();
@@ -24,7 +25,9 @@ export default function Insights() {
   const [activeTab, setActiveTab] = useState<TabType>('progress');
   const [progressData, setProgressData] = useState<ProgressData | null>(null);
   const [toleranceData, setToleranceData] = useState<ToleranceData[]>([]);
+  const [defaultSafeFoods, setDefaultSafeFoods] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     if (user) {
@@ -36,13 +39,15 @@ export default function Insights() {
     if (!user) return;
     setIsLoading(true);
     
-    const [progress, tolerance] = await Promise.all([
+    const [progress, tolerance, foods] = await Promise.all([
       calculateProgressData(user.id),
       calculateToleranceScores(user.id),
+      supabase.from('food_reference').select('name').eq('default_status', 'safe'),
     ]);
     
     setProgressData(progress);
     setToleranceData(tolerance);
+    setDefaultSafeFoods(foods.data?.map(f => f.name) || []);
     setIsLoading(false);
   };
 
@@ -138,10 +143,54 @@ export default function Insights() {
     }
   };
 
+  // Daily Suggestions logic
+  const safeFoodsForSuggestions = useMemo(() => {
+    const personalSafe = toleranceData
+      .filter(t => t.tolerance_percent >= 70 && t.symptom_log_count >= 2)
+      .map(t => t.food_name);
+    
+    if (personalSafe.length >= 3) return personalSafe;
+    return defaultSafeFoods;
+  }, [toleranceData, defaultSafeFoods]);
+
+  const suggestions = useMemo(() => {
+    if (safeFoodsForSuggestions.length === 0) return [];
+
+    const shuffle = (arr: string[]) => [...arr].sort(() => Math.random() - 0.5);
+    const shuffled = shuffle(safeFoodsForSuggestions);
+
+    return [
+      { mealType: 'breakfast' as const, foods: shuffled.slice(0, 2) },
+      { mealType: 'lunch' as const, foods: shuffled.slice(2, 5).length >= 2 ? shuffled.slice(2, 5) : shuffled.slice(0, 3) },
+      { mealType: 'dinner' as const, foods: shuffled.length > 5 ? shuffled.slice(5, 8) : shuffled.slice(0, 3) },
+    ];
+  }, [safeFoodsForSuggestions, refreshKey]);
+
+  const hasPersonalSuggestionData = toleranceData.filter(t => t.tolerance_percent >= 70 && t.symptom_log_count >= 2).length >= 3;
+
+  const getMealIcon = (type: string) => {
+    switch (type) {
+      case 'breakfast': return <Sunrise className="w-5 h-5" />;
+      case 'lunch': return <Sun className="w-5 h-5" />;
+      case 'dinner': return <Moon className="w-5 h-5" />;
+      default: return null;
+    }
+  };
+
+  const getMealColor = (type: string) => {
+    switch (type) {
+      case 'breakfast': return 'text-caution bg-caution/10';
+      case 'lunch': return 'text-primary bg-primary/10';
+      case 'dinner': return 'text-accent-foreground bg-accent';
+      default: return '';
+    }
+  };
+
   const tabs = [
     { id: 'progress' as TabType, label: 'Progress', icon: Activity },
     { id: 'triggers' as TabType, label: 'Triggers', icon: Target },
     { id: 'doctor' as TabType, label: 'Doctor', icon: FileText },
+    { id: 'suggestions' as TabType, label: 'Suggest', icon: Utensils },
   ];
 
   return (
@@ -415,6 +464,74 @@ export default function Insights() {
                 <p className="text-xs text-muted-foreground text-center">
                   Bring this summary to discuss with your doctor
                 </p>
+              </div>
+            )}
+
+            {/* Suggestions Tab */}
+            {activeTab === 'suggestions' && (
+              <div className="space-y-4 animate-fade-in">
+                <div className="flex items-center justify-between">
+                  <p className="text-muted-foreground text-sm">
+                    {hasPersonalSuggestionData ? 'Based on your safe foods' : 'Based on default safe foods'}
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setRefreshKey(k => k + 1)}
+                    className="rounded-xl h-8 w-8"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </Button>
+                </div>
+
+                {safeFoodsForSuggestions.length === 0 ? (
+                  <div className="bg-card rounded-xl p-6 border border-border text-center">
+                    <Utensils className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                    <h3 className="font-display font-semibold text-foreground mb-2">
+                      No safe foods yet
+                    </h3>
+                    <p className="text-muted-foreground text-sm">
+                      Log meals with symptoms to discover your safe foods.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    {suggestions.map((suggestion, index) => (
+                      <div 
+                        key={suggestion.mealType}
+                        className="bg-card rounded-xl p-4 border border-border animate-slide-up"
+                        style={{ animationDelay: `${index * 0.1}s` }}
+                      >
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${getMealColor(suggestion.mealType)}`}>
+                            {getMealIcon(suggestion.mealType)}
+                          </div>
+                          <h3 className="font-display text-lg font-semibold text-foreground capitalize">
+                            {suggestion.mealType}
+                          </h3>
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-2">
+                          {suggestion.foods.filter(f => f).map((food, i) => (
+                            <span 
+                              key={i}
+                              className="px-3 py-1.5 bg-success/10 text-success text-sm font-medium rounded-full"
+                            >
+                              {food}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+
+                    <p className="text-xs text-muted-foreground text-center">
+                      {hasPersonalSuggestionData 
+                        ? `✨ Based on your ${toleranceData.filter(t => t.tolerance_percent >= 70).length} personal safe foods`
+                        : `📚 Using ${defaultSafeFoods.length} default safe foods`
+                      }
+                    </p>
+                  </>
+                )}
               </div>
             )}
           </>
