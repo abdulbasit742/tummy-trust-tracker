@@ -20,7 +20,10 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse-soft text-muted-foreground">Loading...</div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-10 w-10 rounded-full border-2 border-primary/30 border-t-primary animate-spin-slow" />
+          <p className="text-muted-foreground text-sm animate-pulse-soft">Loading...</p>
+        </div>
       </div>
     );
   }

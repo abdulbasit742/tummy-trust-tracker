@@ -5,6 +5,7 @@ import { MobileLayout } from '@/components/layout/MobileLayout';
 import { Disclaimer } from '@/components/ui/Disclaimer';
 import { ToleranceBar } from '@/components/ui/ToleranceBar';
 import { Button } from '@/components/ui/button';
+import { InsightsSkeleton } from '@/components/ui/skeletons';
 import { calculateToleranceScores, getToleranceLabel } from '@/lib/toleranceEngine';
 import { calculateProgressData, ProgressData } from '@/lib/progressEngine';
 import { getDisplayNameWithUrdu } from '@/lib/utils/foodUtils';
@@ -233,14 +234,7 @@ export default function Insights() {
         </div>
 
         {isLoading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="bg-card rounded-2xl p-5 border border-border animate-pulse-soft shadow-soft">
-                <div className="h-4 bg-muted rounded w-1/2 mb-3"></div>
-                <div className="h-6 bg-muted rounded w-1/3"></div>
-              </div>
-            ))}
-          </div>
+          <InsightsSkeleton />
         ) : (
           <>
             {/* Progress Tab */}

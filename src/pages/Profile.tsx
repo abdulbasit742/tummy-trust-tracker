@@ -10,6 +10,7 @@ import { ShareButton } from '@/components/ui/ShareButton';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
+import { ProfileSkeleton, MealLogSkeleton } from '@/components/ui/skeletons';
 import { calculateToleranceScores } from '@/lib/toleranceEngine';
 import { MealLog, SymptomLog, ToleranceData, IBSType, SeverityLevel } from '@/types';
 import { IBS_TYPES, SYMPTOMS, SEVERITY_LEVELS } from '@/data/constants';
@@ -443,13 +444,7 @@ export default function Profile() {
           </h2>
 
           {isLoading ? (
-            <div className="space-y-3">
-              {[1,2,3].map(i => (
-                <div key={i} className="bg-card rounded-2xl p-4 border border-border animate-pulse-soft">
-                  <div className="h-4 bg-muted rounded w-1/2"></div>
-                </div>
-              ))}
-            </div>
+            <MealLogSkeleton count={3} />
           ) : mealLogs.length > 0 ? (
             <div className="space-y-3">
               {displayedLogs.map((meal) => (
