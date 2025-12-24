@@ -29,14 +29,14 @@ export function MobileLayout({ children, showNav = true }: MobileLayoutProps) {
     <div className="min-h-screen bg-background flex flex-col max-w-[100vw] overflow-x-hidden">
       <main className={cn(
         "flex-1 overflow-x-hidden",
-        showNav && "pb-28" // Extra padding to prevent content overlap with nav
+        showNav && "pb-32" // Extra padding to prevent content overlap with nav
       )}>
         {children}
       </main>
       
       {showNav && (
-        <nav className="fixed bottom-0 left-0 right-0 glass border-t border-border/40 safe-bottom z-50">
-          <div className="flex items-end justify-around px-3 pt-2.5 pb-2 max-w-md mx-auto">
+        <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-xl border-t border-border/50 safe-bottom z-50 shadow-elevated">
+          <div className="flex items-end justify-around px-2 pt-2 pb-1.5 max-w-md mx-auto">
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
               const Icon = item.icon;
@@ -47,14 +47,14 @@ export function MobileLayout({ children, showNav = true }: MobileLayoutProps) {
                     key={item.path}
                     onClick={() => navigate(item.path)}
                     className={cn(
-                      "flex flex-col items-center justify-center -mt-5 transition-all duration-200"
+                      "flex flex-col items-center justify-center -mt-6 transition-all duration-200"
                     )}
                   >
                     <div className={cn(
-                      "w-14 h-14 rounded-2xl flex items-center justify-center shadow-elevated transition-all duration-200",
+                      "w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-200",
                       isActive 
-                        ? "gradient-calm shadow-glow" 
-                        : "bg-primary hover:shadow-glow"
+                        ? "gradient-calm shadow-glow scale-105" 
+                        : "bg-primary shadow-card hover:shadow-elevated hover:scale-105"
                     )}>
                       <Icon className="w-6 h-6 text-primary-foreground" />
                     </div>
@@ -73,8 +73,8 @@ export function MobileLayout({ children, showNav = true }: MobileLayoutProps) {
                   key={item.path}
                   onClick={() => navigate(item.path)}
                   className={cn(
-                    "flex flex-col items-center justify-center px-3 py-2.5 rounded-xl transition-all duration-200",
-                    "min-w-[60px] min-h-[52px]", // Touch-friendly size
+                    "flex flex-col items-center justify-center px-3 py-2 rounded-xl transition-all duration-200",
+                    "min-w-[64px] min-h-[56px]", // Touch-friendly size
                     isActive 
                       ? "text-primary" 
                       : "text-muted-foreground hover:text-foreground active:text-primary"

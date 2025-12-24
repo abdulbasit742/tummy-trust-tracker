@@ -7,129 +7,129 @@
 @layer base {
   :root {
     /* ========================================
-       PREMIUM CALM HEALTH PALETTE
-       Unified, accessible, consistent
+       WORLD-CLASS PREMIUM HEALTH PALETTE
+       Refined, calm, trustworthy
        ======================================== */
     
-    /* Backgrounds - soft warm off-white */
-    --background: 40 28% 97%;
-    --foreground: 220 25% 14%;
+    /* Backgrounds - refined warm off-white */
+    --background: 42 32% 97%;
+    --foreground: 220 22% 12%;
 
-    /* Cards & Surfaces - pure/warm white */
-    --card: 0 0% 100%;
-    --card-foreground: 220 25% 14%;
+    /* Cards & Surfaces - pure warm white */
+    --card: 40 40% 99%;
+    --card-foreground: 220 22% 12%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 14%;
+    --popover: 40 40% 99%;
+    --popover-foreground: 220 22% 12%;
 
-    /* Primary: Calm Teal - main brand color */
-    --primary: 170 42% 42%;
+    /* Primary: Sophisticated Teal - main brand color */
+    --primary: 172 45% 40%;
     --primary-foreground: 0 0% 100%;
 
     /* Secondary: Soft neutral for backgrounds */
-    --secondary: 40 22% 93%;
-    --secondary-foreground: 220 18% 32%;
+    --secondary: 42 22% 93%;
+    --secondary-foreground: 220 16% 36%;
 
     /* Muted: Subdued elements */
-    --muted: 40 18% 94%;
-    --muted-foreground: 220 12% 48%;
+    --muted: 42 18% 94%;
+    --muted-foreground: 220 10% 50%;
 
     /* Accent: Light teal tint */
-    --accent: 170 28% 94%;
-    --accent-foreground: 170 42% 32%;
+    --accent: 172 32% 95%;
+    --accent-foreground: 172 45% 30%;
 
     /* Destructive: Soft red for errors/avoid */
-    --destructive: 4 68% 52%;
+    --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
 
     /* Caution: Warm amber for warnings */
-    --caution: 38 92% 50%;
-    --caution-foreground: 32 100% 10%;
+    --caution: 40 96% 50%;
+    --caution-foreground: 35 100% 12%;
 
-    /* Success: Green for safe/positive */
-    --success: 160 55% 42%;
+    /* Success: Balanced green for safe/positive */
+    --success: 162 55% 40%;
     --success-foreground: 0 0% 100%;
 
-    /* Borders & Inputs - very light gray */
-    --border: 40 12% 88%;
-    --input: 40 12% 88%;
-    --ring: 170 42% 42%;
+    /* Borders & Inputs - refined subtle gray */
+    --border: 42 14% 88%;
+    --input: 42 14% 90%;
+    --ring: 172 45% 40%;
 
-    /* Radius - consistent rounded corners */
+    /* Radius - modern rounded corners */
     --radius: 0.875rem;
 
     /* Sidebar (compatibility) */
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 220 12% 32%;
-    --sidebar-primary: 170 42% 42%;
+    --sidebar-background: 40 20% 98%;
+    --sidebar-foreground: 220 12% 30%;
+    --sidebar-primary: 172 45% 40%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 40 18% 96%;
-    --sidebar-accent-foreground: 220 12% 32%;
-    --sidebar-border: 40 12% 90%;
-    --sidebar-ring: 170 42% 42%;
+    --sidebar-accent: 42 18% 96%;
+    --sidebar-accent-foreground: 220 12% 30%;
+    --sidebar-border: 42 14% 90%;
+    --sidebar-ring: 172 45% 40%;
 
     /* ========================================
        PREMIUM GRADIENTS
        ======================================== */
-    --gradient-calm: linear-gradient(135deg, hsl(170 42% 42%) 0%, hsl(170 48% 48%) 100%);
-    --gradient-warm: linear-gradient(180deg, hsl(40 28% 97%) 0%, hsl(40 22% 94%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(40 18% 99%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(170 42% 42% / 0.05) 0%, hsl(170 48% 48% / 0.02) 100%);
-    --gradient-success: linear-gradient(135deg, hsl(160 55% 42%) 0%, hsl(160 60% 48%) 100%);
+    --gradient-calm: linear-gradient(135deg, hsl(172 45% 40%) 0%, hsl(172 50% 46%) 100%);
+    --gradient-warm: linear-gradient(180deg, hsl(42 32% 97%) 0%, hsl(42 22% 94%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(40 40% 99%) 0%, hsl(42 18% 98%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(172 45% 40% / 0.04) 0%, hsl(172 50% 46% / 0.02) 100%);
+    --gradient-success: linear-gradient(135deg, hsl(162 55% 40%) 0%, hsl(162 60% 46%) 100%);
 
     /* ========================================
-       PREMIUM SHADOWS - Softer, more refined
+       PREMIUM SHADOWS - Refined & Elegant
        ======================================== */
-    --shadow-xs: 0 1px 2px 0 hsl(220 25% 14% / 0.03);
-    --shadow-soft: 0 2px 8px -2px hsl(220 25% 14% / 0.05), 0 1px 2px -1px hsl(220 25% 14% / 0.03);
-    --shadow-card: 0 4px 12px -4px hsl(220 25% 14% / 0.07), 0 1px 3px -1px hsl(220 25% 14% / 0.03);
-    --shadow-elevated: 0 10px 24px -6px hsl(220 25% 14% / 0.10), 0 4px 8px -4px hsl(220 25% 14% / 0.04);
-    --shadow-glow: 0 0 20px hsl(170 42% 42% / 0.15);
+    --shadow-xs: 0 1px 2px 0 hsl(220 22% 12% / 0.02);
+    --shadow-soft: 0 2px 8px -2px hsl(220 22% 12% / 0.04), 0 1px 2px -1px hsl(220 22% 12% / 0.02);
+    --shadow-card: 0 4px 16px -4px hsl(220 22% 12% / 0.06), 0 2px 4px -2px hsl(220 22% 12% / 0.02);
+    --shadow-elevated: 0 12px 32px -8px hsl(220 22% 12% / 0.12), 0 4px 12px -4px hsl(220 22% 12% / 0.04);
+    --shadow-glow: 0 0 24px hsl(172 45% 40% / 0.18);
   }
 
   .dark {
-    --background: 220 22% 7%;
-    --foreground: 40 18% 96%;
+    --background: 222 24% 6%;
+    --foreground: 42 18% 96%;
 
-    --card: 220 20% 10%;
-    --card-foreground: 40 18% 96%;
+    --card: 222 22% 9%;
+    --card-foreground: 42 18% 96%;
 
-    --popover: 220 20% 10%;
-    --popover-foreground: 40 18% 96%;
+    --popover: 222 22% 9%;
+    --popover-foreground: 42 18% 96%;
 
-    --primary: 170 48% 50%;
-    --primary-foreground: 220 22% 7%;
+    --primary: 172 52% 52%;
+    --primary-foreground: 222 24% 6%;
 
-    --secondary: 220 16% 15%;
-    --secondary-foreground: 40 18% 88%;
+    --secondary: 222 18% 14%;
+    --secondary-foreground: 42 18% 88%;
 
-    --muted: 220 16% 13%;
-    --muted-foreground: 40 10% 58%;
+    --muted: 222 16% 12%;
+    --muted-foreground: 42 10% 58%;
 
-    --accent: 170 22% 15%;
-    --accent-foreground: 170 48% 62%;
+    --accent: 172 24% 14%;
+    --accent-foreground: 172 52% 64%;
 
-    --destructive: 4 65% 52%;
+    --destructive: 0 68% 54%;
     --destructive-foreground: 0 0% 100%;
 
-    --caution: 38 88% 52%;
-    --caution-foreground: 38 92% 94%;
+    --caution: 40 90% 54%;
+    --caution-foreground: 40 92% 94%;
 
-    --success: 160 52% 50%;
-    --success-foreground: 220 22% 7%;
+    --success: 162 50% 52%;
+    --success-foreground: 222 24% 6%;
 
-    --border: 220 16% 17%;
-    --input: 220 16% 17%;
-    --ring: 170 48% 50%;
+    --border: 222 16% 16%;
+    --input: 222 16% 16%;
+    --ring: 172 52% 52%;
 
-    --sidebar-background: 220 20% 9%;
-    --sidebar-foreground: 40 14% 88%;
-    --sidebar-primary: 170 48% 50%;
+    --sidebar-background: 222 22% 8%;
+    --sidebar-foreground: 42 14% 88%;
+    --sidebar-primary: 172 52% 52%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 16% 14%;
-    --sidebar-accent-foreground: 40 14% 88%;
-    --sidebar-border: 220 16% 15%;
-    --sidebar-ring: 170 48% 50%;
+    --sidebar-accent: 222 18% 13%;
+    --sidebar-accent-foreground: 42 14% 88%;
+    --sidebar-border: 222 16% 14%;
+    --sidebar-ring: 172 52% 52%;
   }
 }
 
@@ -274,28 +274,28 @@
   }
 
   /* ========================================
-     CARDS - Consistent styling
+     CARDS - Consistent premium styling
      ======================================== */
   .card-premium {
-    @apply bg-card rounded-2xl border border-border shadow-card;
+    @apply bg-card rounded-2xl border border-border/80 shadow-card;
   }
 
   .card-interactive {
-    @apply bg-card rounded-2xl border border-border shadow-soft;
+    @apply bg-card rounded-2xl border border-border/80 shadow-soft;
     @apply transition-all duration-200 ease-out;
-    @apply hover:shadow-card hover:border-primary/20;
+    @apply hover:shadow-card hover:border-primary/25;
     @apply active:scale-[0.98] active:shadow-soft;
   }
 
   .card-elevated {
-    @apply bg-card rounded-2xl border border-border shadow-elevated;
+    @apply bg-card rounded-2xl border border-border/80 shadow-elevated;
   }
 
   /* ========================================
-     SECTION HEADERS
+     SECTION HEADERS - Refined typography
      ======================================== */
   .section-header {
-    @apply flex items-center gap-2.5 mb-3;
+    @apply flex items-center gap-2.5 mb-4;
   }
 
   .section-header-icon {
@@ -307,10 +307,10 @@
   }
 
   /* ========================================
-     PAGE LAYOUT
+     PAGE LAYOUT - Consistent spacing
      ======================================== */
   .page-container {
-    @apply px-5 py-6 space-y-5 max-w-lg mx-auto;
+    @apply px-5 py-6 space-y-6 max-w-lg mx-auto;
   }
 
   .page-header {
@@ -318,18 +318,18 @@
   }
 
   .page-title {
-    @apply font-display text-2xl font-bold text-foreground tracking-tight;
+    @apply font-display text-2xl font-bold text-foreground tracking-tight leading-none;
   }
 
   .page-subtitle {
-    @apply text-muted-foreground text-sm mt-1 leading-relaxed;
+    @apply text-muted-foreground text-sm mt-1.5 leading-relaxed;
   }
 
   /* ========================================
-     FORM ELEMENTS
+     FORM ELEMENTS - Touch-friendly
      ======================================== */
   .form-label {
-    @apply text-sm font-medium text-foreground mb-2 block;
+    @apply text-sm font-semibold text-foreground mb-2 block;
   }
 
   .form-hint {
@@ -337,30 +337,30 @@
   }
 
   /* ========================================
-     PILL BUTTONS
+     PILL BUTTONS - Premium touch targets
      ======================================== */
   .pill-group {
-    @apply flex gap-2;
+    @apply flex gap-3;
   }
 
   .pill-button {
     @apply flex-1 py-3.5 px-4 rounded-xl border-2 text-sm font-semibold transition-all duration-200;
     @apply border-border bg-card text-foreground;
-    @apply hover:border-primary/40 active:scale-[0.97];
-    min-height: 48px;
+    @apply hover:border-primary/30 active:scale-[0.97];
+    min-height: 52px;
   }
 
   .pill-button-active {
-    @apply border-primary bg-primary/5 text-primary;
+    @apply border-primary bg-primary/5 text-primary shadow-soft;
   }
 
   /* ========================================
-     QUICK ACTIONS - Touch-friendly
+     QUICK ACTIONS - Touch-friendly cards
      ======================================== */
   .quick-action-card {
     @apply h-auto py-5 flex flex-col items-center gap-2.5 rounded-2xl border-0;
     @apply transition-all duration-200 active:scale-[0.97];
-    min-height: 88px;
+    min-height: 92px;
   }
 
   /* ========================================
@@ -368,22 +368,22 @@
      ======================================== */
   .list-item {
     @apply flex items-center justify-between p-4;
-    min-height: 56px;
+    min-height: 60px;
   }
 
   .list-item-touch {
-    @apply list-item cursor-pointer transition-colors hover:bg-muted/50 active:bg-muted;
+    @apply list-item cursor-pointer transition-colors hover:bg-muted/40 active:bg-muted/60;
   }
 
   /* ========================================
-     EMPTY STATES
+     EMPTY STATES - Calm & Helpful
      ======================================== */
   .empty-state {
-    @apply bg-card rounded-2xl p-6 border border-border text-center;
+    @apply bg-card rounded-2xl p-6 border border-border/80 text-center;
   }
 
   .empty-state-icon {
-    @apply w-12 h-12 mx-auto mb-4 text-muted-foreground/50;
+    @apply w-12 h-12 mx-auto mb-4 text-muted-foreground/40;
   }
 
   .empty-state-title {
@@ -392,5 +392,28 @@
 
   .empty-state-text {
     @apply text-muted-foreground text-sm leading-relaxed;
+  }
+
+  /* ========================================
+     PREMIUM BADGE - Info pills
+     ======================================== */
+  .info-pill {
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium;
+    @apply bg-secondary text-secondary-foreground;
+  }
+
+  .info-pill-primary {
+    @apply bg-primary/10 text-primary;
+  }
+
+  .info-pill-success {
+    @apply bg-success/10 text-success;
+  }
+
+  /* ========================================
+     SECTION DIVIDER
+     ======================================== */
+  .section-divider {
+    @apply h-px bg-gradient-to-r from-transparent via-border to-transparent my-6;
   }
 }
