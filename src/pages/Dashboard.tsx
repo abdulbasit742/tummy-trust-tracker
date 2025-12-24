@@ -6,6 +6,7 @@ import { MobileLayout } from '@/components/layout/MobileLayout';
 import { ToleranceBar } from '@/components/ui/ToleranceBar';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Disclaimer } from '@/components/ui/Disclaimer';
+import { InstallPrompt } from '@/components/ui/InstallPrompt';
 import { GrowthBanner, WelcomeCard } from '@/components/ui/FreeAccessBanner';
 import { ShareButton } from '@/components/ui/ShareButton';
 import { Button } from '@/components/ui/button';
@@ -319,6 +320,9 @@ export default function Dashboard() {
 
         {/* Disclaimer */}
         <Disclaimer />
+
+        {/* Install Prompt */}
+        <InstallPrompt />
       </div>
     </MobileLayout>
   );
