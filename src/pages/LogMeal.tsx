@@ -8,6 +8,7 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAnalytics } from '@/hooks/use-analytics';
 import { supabase } from '@/integrations/supabase/client';
 import { PORTION_SIZES } from '@/data/constants';
 import { FoodReference, PortionSize, FoodStatus } from '@/types';
@@ -21,6 +22,7 @@ type Step = 'meal' | 'symptoms';
 export default function LogMeal() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { trackEvent } = useAnalytics();
   const { toast } = useToast();
 
   const [step, setStep] = useState<Step>('meal');
@@ -97,6 +99,10 @@ export default function LogMeal() {
     }
 
     setMealLogId(data.id);
+    trackEvent({ 
+      eventType: 'meal_logged', 
+      metadata: { food_name: normalizedFoodName, portion: portion } 
+    });
     setStep('symptoms');
     setIsSubmitting(false);
   };
@@ -124,6 +130,11 @@ export default function LogMeal() {
       setIsSubmitting(false);
       return;
     }
+
+    trackEvent({ 
+      eventType: 'symptom_logged', 
+      metadata: { bloating: bloating[0], pain: pain[0], stool_issue: stoolIssue } 
+    });
 
     toast({
       title: "Logged successfully!",

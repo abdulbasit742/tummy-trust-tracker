@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { FoodListSkeleton } from '@/components/ui/skeletons';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAnalytics } from '@/hooks/use-analytics';
 import { calculateToleranceScores, shouldUsePersonalTolerance } from '@/lib/toleranceEngine';
 import { normalizeFoodName, getFoodDisplayName, searchFoods } from '@/lib/utils/foodUtils';
 import { FoodReference, FoodStatus, ToleranceData } from '@/types';
@@ -14,6 +15,7 @@ import { cn } from '@/lib/utils';
 
 export default function FoodChecker() {
   const { user } = useAuth();
+  const { trackEvent } = useAnalytics();
   const [searchQuery, setSearchQuery] = useState('');
   const [foods, setFoods] = useState<FoodReference[]>([]);
   const [toleranceData, setToleranceData] = useState<ToleranceData[]>([]);
@@ -75,6 +77,10 @@ export default function FoodChecker() {
   const handleFoodSelect = (food: FoodReference) => {
     setSelectedFood(food);
     setSearchQuery(food.name);
+    trackEvent({ 
+      eventType: 'food_check', 
+      metadata: { food_name: food.name, status: food.default_status } 
+    });
   };
 
   const clearSearch = () => {
