@@ -283,7 +283,7 @@ export default function LogMeal() {
             <Button
               onClick={handleMealSubmit}
               disabled={isSubmitting || !foodName.trim() || !portion}
-              className="w-full h-14 text-base font-semibold rounded-xl gradient-calm text-primary-foreground border-0 shadow-soft"
+              className="w-full h-14 text-base font-semibold rounded-xl gradient-calm text-primary-foreground border-0 shadow-soft active:scale-[0.98] transition-transform"
             >
               {isSubmitting ? 'Saving...' : 'Next: Log Symptoms'}
             </Button>
@@ -349,7 +349,7 @@ export default function LogMeal() {
               <Button
                 onClick={handleSymptomSubmit}
                 disabled={isSubmitting}
-                className="w-full h-14 text-base font-semibold rounded-xl gradient-calm text-primary-foreground border-0 shadow-soft"
+                className="w-full h-14 text-base font-semibold rounded-xl gradient-calm text-primary-foreground border-0 shadow-soft active:scale-[0.98] transition-transform"
               >
                 <CheckCircle className="w-5 h-5 mr-2" />
                 {isSubmitting ? 'Saving...' : 'Save Entry'}
@@ -357,7 +357,7 @@ export default function LogMeal() {
               <Button
                 variant="ghost"
                 onClick={handleSkipSymptoms}
-                className="w-full h-12 text-muted-foreground font-medium"
+                className="w-full h-12 text-muted-foreground font-medium hover:text-foreground"
               >
                 Skip symptom logging
               </Button>

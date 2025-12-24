@@ -453,7 +453,7 @@ export default function Insights() {
 
                 <Button
                   onClick={handleCopySummary}
-                  className="w-full h-14 rounded-xl gradient-calm text-primary-foreground border-0 shadow-soft font-semibold text-base"
+                  className="w-full h-14 rounded-xl gradient-calm text-primary-foreground border-0 shadow-soft font-semibold text-base active:scale-[0.98] transition-transform"
                 >
                   <Copy className="w-5 h-5 mr-2" />
                   Copy Summary
@@ -476,7 +476,7 @@ export default function Insights() {
                     variant="outline"
                     size="icon"
                     onClick={() => setRefreshKey(k => k + 1)}
-                    className="rounded-xl h-10 w-10"
+                    className="rounded-xl h-10 w-10 active:scale-[0.95] transition-transform"
                   >
                     <RefreshCw className="w-4 h-4" />
                   </Button>

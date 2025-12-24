@@ -215,7 +215,7 @@ export default function FoodChecker() {
                           {getFoodDisplayName(food)}
                         </span>
                         {isPersonal && (
-                          <span className="text-xs text-primary ml-2">• Personal</span>
+                          <span className="text-xs text-primary ml-2 font-medium">• Personal</span>
                         )}
                       </div>
                       <StatusBadge status={status} size="sm" />
@@ -256,7 +256,7 @@ export default function FoodChecker() {
                             {getFoodDisplayName(food)}
                           </span>
                           {isPersonal && (
-                            <span className="text-xs text-primary ml-2">• Personal</span>
+                            <span className="text-xs text-primary ml-2 font-medium">• Personal</span>
                           )}
                         </div>
                         <StatusBadge status={status} size="sm" />

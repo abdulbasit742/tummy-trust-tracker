@@ -124,14 +124,14 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 gap-3 animate-slide-up">
           <Button
             onClick={() => navigate('/food-checker')}
-            className="quick-action-card bg-primary/8 text-primary hover:bg-primary/12 shadow-soft"
+            className="quick-action-card bg-primary/8 text-primary hover:bg-primary/12 shadow-soft active:scale-[0.97] transition-transform"
           >
             <Search className="w-6 h-6" />
             <span className="font-semibold text-sm">Food Check</span>
           </Button>
           <Button
             onClick={() => navigate('/log-meal')}
-            className="quick-action-card bg-success/8 text-success hover:bg-success/12 shadow-soft"
+            className="quick-action-card bg-success/8 text-success hover:bg-success/12 shadow-soft active:scale-[0.97] transition-transform"
           >
             <PlusCircle className="w-6 h-6" />
             <span className="font-semibold text-sm">Log Meal</span>
