@@ -24,17 +24,17 @@ export function GrowthBanner({ storageKey = 'growth-banner-dismissed' }: FreeAcc
   if (isDismissed) return null;
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-r from-success/6 via-primary/4 to-success/6 rounded-2xl p-4 border border-success/15 animate-fade-in">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(160_55%_42%/0.06),transparent_50%)]" />
+    <div className="relative overflow-hidden bg-gradient-to-r from-success/5 via-primary/3 to-success/5 rounded-2xl p-4 border border-success/15 animate-fade-in shadow-soft">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(162_55%_40%/0.05),transparent_50%)]" />
       <div className="relative flex items-center gap-4">
         <div className="w-11 h-11 rounded-xl bg-success/10 flex items-center justify-center flex-shrink-0">
           <Sprout className="w-5 h-5 text-success" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-foreground text-sm font-semibold">
+          <p className="text-foreground text-sm font-semibold leading-tight">
             6 Months Free Access
           </p>
-          <p className="text-muted-foreground text-xs mt-0.5 leading-relaxed">
+          <p className="text-muted-foreground text-xs mt-1 leading-relaxed">
             Full features for early users — no payment needed.
           </p>
         </div>
@@ -42,7 +42,7 @@ export function GrowthBanner({ storageKey = 'growth-banner-dismissed' }: FreeAcc
           onClick={handleDismiss}
           variant="ghost"
           size="sm"
-          className="rounded-xl text-xs h-9 px-4 hover:bg-success/10 text-success font-semibold"
+          className="rounded-xl text-xs h-10 px-4 hover:bg-success/10 text-success font-semibold"
         >
           Got it
         </Button>
@@ -73,7 +73,7 @@ export function WelcomeCard({ storageKey = 'welcome-card-dismissed' }: FreeAcces
       <div className="relative">
         <button
           onClick={handleDismiss}
-          className="absolute -top-1 -right-1 p-2 text-muted-foreground hover:text-foreground transition-colors rounded-xl hover:bg-muted"
+          className="absolute -top-1 -right-1 p-2.5 text-muted-foreground hover:text-foreground transition-colors rounded-xl hover:bg-muted"
           aria-label="Dismiss"
         >
           <X className="w-4 h-4" />
@@ -83,8 +83,8 @@ export function WelcomeCard({ storageKey = 'welcome-card-dismissed' }: FreeAcces
           <div className="w-12 h-12 rounded-2xl gradient-calm flex items-center justify-center flex-shrink-0 shadow-glow">
             <Sparkles className="w-6 h-6 text-primary-foreground" />
           </div>
-          <div className="flex-1 min-w-0 pr-6">
-            <h3 className="font-display font-bold text-foreground text-lg mb-1.5">
+          <div className="flex-1 min-w-0 pr-8">
+            <h3 className="font-display font-bold text-foreground text-lg mb-1.5 leading-tight">
               Welcome, Early User!
             </h3>
             <p className="text-muted-foreground text-sm leading-relaxed">
@@ -93,7 +93,7 @@ export function WelcomeCard({ storageKey = 'welcome-card-dismissed' }: FreeAcces
           </div>
         </div>
         
-        <div className="mt-5 pt-4 border-t border-border/50">
+        <div className="mt-5 pt-4 border-t border-border/60">
           <p className="text-foreground text-sm mb-4 leading-relaxed">
             Track meals, understand triggers, and prepare for doctor visits.
           </p>

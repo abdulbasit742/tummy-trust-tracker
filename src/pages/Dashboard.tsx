@@ -100,7 +100,7 @@ export default function Dashboard() {
 
   return (
     <MobileLayout>
-      <div className="px-5 py-6 space-y-5">
+      <div className="px-5 py-6 space-y-6">
         {/* Welcome Card for first-time users */}
         <WelcomeCard />
         
@@ -110,10 +110,10 @@ export default function Dashboard() {
         {/* Header */}
         <div className="flex items-center justify-between animate-fade-in">
           <div>
-            <h1 className="font-display text-2xl font-bold text-foreground">
+            <h1 className="font-display text-2xl font-bold text-foreground leading-none">
               Dashboard
             </h1>
-            <p className="text-muted-foreground text-sm mt-1">
+            <p className="text-muted-foreground text-sm mt-1.5">
               {profile?.ibs_type && `Managing ${profile.ibs_type}`}
             </p>
           </div>
@@ -124,14 +124,14 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 gap-3 animate-slide-up">
           <Button
             onClick={() => navigate('/food-checker')}
-            className="quick-action-card bg-primary/8 text-primary hover:bg-primary/12"
+            className="quick-action-card bg-primary/8 text-primary hover:bg-primary/12 shadow-soft"
           >
             <Search className="w-6 h-6" />
             <span className="font-semibold text-sm">Food Check</span>
           </Button>
           <Button
             onClick={() => navigate('/log-meal')}
-            className="quick-action-card bg-success/8 text-success hover:bg-success/12"
+            className="quick-action-card bg-success/8 text-success hover:bg-success/12 shadow-soft"
           >
             <PlusCircle className="w-6 h-6" />
             <span className="font-semibold text-sm">Log Meal</span>
@@ -140,7 +140,7 @@ export default function Dashboard() {
 
         {/* Starter Foods Search */}
         <div className="animate-slide-up" style={{ animationDelay: '0.05s' }}>
-          <div className="flex items-center gap-2.5 mb-3">
+          <div className="flex items-center gap-2.5 mb-4">
             <Database className="w-4 h-4 text-primary" />
             <h2 className="font-display text-sm font-semibold text-foreground">
               Starter Foods ({foods.length})
@@ -153,13 +153,13 @@ export default function Dashboard() {
               value={foodSearch}
               onChange={(e) => setFoodSearch(e.target.value)}
               placeholder="Search: Rice, چاول, chawal"
-              className="pl-10 pr-10 h-12 rounded-xl bg-card border-border text-sm"
+              className="pl-11 pr-11 h-13"
               dir="auto"
             />
             {foodSearch && (
               <button
                 onClick={() => setFoodSearch('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg hover:bg-muted transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg hover:bg-muted transition-colors"
               >
                 <X className="w-4 h-4 text-muted-foreground" />
               </button>
@@ -168,7 +168,7 @@ export default function Dashboard() {
 
           {/* Search Results */}
           {filteredFoods.length > 0 && (
-            <div className="mt-3 bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden shadow-soft">
+            <div className="mt-3 bg-card rounded-2xl border border-border/80 divide-y divide-border/60 overflow-hidden shadow-soft">
               {filteredFoods.map((food) => {
                 const { status, isPersonal } = getStatusInfo(food.name, food.default_status as FoodStatus);
                 return (
@@ -181,7 +181,7 @@ export default function Dashboard() {
                         {getFoodDisplayName(food)}
                       </span>
                       {isPersonal && (
-                        <span className="text-xs text-primary ml-2">• Personal</span>
+                        <span className="text-xs text-primary ml-2 font-medium">• Personal</span>
                       )}
                     </div>
                     <StatusBadge status={status} size="sm" />
@@ -194,7 +194,7 @@ export default function Dashboard() {
 
         {/* Today's Meals */}
         <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
-          <div className="flex items-center gap-2.5 mb-3">
+          <div className="flex items-center gap-2.5 mb-4">
             <Calendar className="w-4 h-4 text-primary" />
             <h2 className="font-display text-sm font-semibold text-foreground">
               Today's Meals
@@ -204,7 +204,7 @@ export default function Dashboard() {
           {isLoading ? (
             <FoodListSkeleton count={2} />
           ) : todayMeals.length > 0 ? (
-            <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden shadow-soft">
+            <div className="bg-card rounded-2xl border border-border/80 divide-y divide-border/60 overflow-hidden shadow-soft">
               {todayMeals.map((meal) => (
                 <div 
                   key={meal.id}
@@ -214,9 +214,9 @@ export default function Dashboard() {
                     <span className="font-medium text-foreground text-sm" dir="auto">
                       {getDisplayNameWithUrdu(meal.food_name, foods)}
                     </span>
-                    <span className="text-xs text-muted-foreground ml-2">({meal.portion})</span>
+                    <span className="text-xs text-muted-foreground ml-2 font-medium">({meal.portion})</span>
                   </div>
-                  <span className="text-xs text-muted-foreground font-medium">
+                  <span className="text-xs text-muted-foreground font-semibold">
                     {format(new Date(meal.eaten_at), 'h:mm a')}
                   </span>
                 </div>
@@ -225,12 +225,12 @@ export default function Dashboard() {
           ) : (
             <div className="empty-state">
               <p className="text-muted-foreground text-sm">No meals logged today</p>
-              <p className="text-muted-foreground text-xs mt-1.5 leading-relaxed">
+              <p className="text-muted-foreground/70 text-xs mt-2 leading-relaxed">
                 Log meals consistently for better insights.
               </p>
               <Button 
                 variant="link" 
-                className="mt-2 text-primary text-sm p-0 h-auto font-semibold"
+                className="mt-3 text-primary text-sm p-0 h-auto font-semibold"
                 onClick={() => navigate('/log-meal')}
               >
                 Log your first meal
@@ -241,7 +241,7 @@ export default function Dashboard() {
 
         {/* Top Safe Foods */}
         <div className="animate-slide-up" style={{ animationDelay: '0.15s' }}>
-          <div className="flex items-center gap-2.5 mb-3">
+          <div className="flex items-center gap-2.5 mb-4">
             <TrendingUp className="w-4 h-4 text-success" />
             <h2 className="font-display text-sm font-semibold text-foreground">
               Top 5 Safe Foods
@@ -249,14 +249,14 @@ export default function Dashboard() {
           </div>
 
           {safeFoods.length > 0 ? (
-            <div className="bg-card rounded-2xl p-4 border border-border space-y-4 shadow-soft">
+            <div className="bg-card rounded-2xl p-5 border border-border/80 space-y-5 shadow-soft">
               {safeFoods.map((food) => (
                 <div key={food.food_name}>
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-between mb-2.5">
                     <span className="font-medium text-foreground text-sm" dir="auto">
                       {getDisplayNameWithUrdu(food.food_name, foods)}
                     </span>
-                    <span className="text-xs text-muted-foreground">{food.meal_count} logs</span>
+                    <span className="text-xs text-muted-foreground font-medium">{food.meal_count} logs</span>
                   </div>
                   <ToleranceBar score={food.tolerance_percent} showLabel={false} size="sm" />
                 </div>
@@ -267,7 +267,7 @@ export default function Dashboard() {
               <p className="text-muted-foreground text-sm leading-relaxed">
                 Log meals with symptoms to discover your safe foods.
               </p>
-              <p className="text-primary/70 text-xs mt-2">
+              <p className="text-primary/70 text-xs mt-2.5 font-medium">
                 The more you log, the clearer your triggers become.
               </p>
             </div>
@@ -276,7 +276,7 @@ export default function Dashboard() {
 
         {/* Top Trigger Foods */}
         <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
-          <div className="flex items-center gap-2.5 mb-3">
+          <div className="flex items-center gap-2.5 mb-4">
             <TrendingDown className="w-4 h-4 text-destructive" />
             <h2 className="font-display text-sm font-semibold text-foreground">
               Top 5 Triggers
@@ -284,14 +284,14 @@ export default function Dashboard() {
           </div>
 
           {triggerFoods.length > 0 ? (
-            <div className="bg-card rounded-2xl p-4 border border-border space-y-4 shadow-soft">
+            <div className="bg-card rounded-2xl p-5 border border-border/80 space-y-5 shadow-soft">
               {triggerFoods.map((food) => (
                 <div key={food.food_name}>
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-between mb-2.5">
                     <span className="font-medium text-foreground text-sm" dir="auto">
                       {getDisplayNameWithUrdu(food.food_name, foods)}
                     </span>
-                    <span className="text-xs text-muted-foreground">{food.meal_count} logs</span>
+                    <span className="text-xs text-muted-foreground font-medium">{food.meal_count} logs</span>
                   </div>
                   <ToleranceBar score={food.tolerance_percent} showLabel={false} size="sm" />
                 </div>
