@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { MobileLayout } from '@/components/layout/MobileLayout';
@@ -11,6 +11,7 @@ import { calculateProgressData, ProgressData } from '@/lib/progressEngine';
 import { getDisplayNameWithUrdu } from '@/lib/utils/foodUtils';
 import { ToleranceData, FoodReference } from '@/types';
 import { useToast } from '@/hooks/use-toast';
+import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 import { 
   TrendingUp, TrendingDown, Minus, Activity, 
   Target, FileText, Copy, CheckCircle, AlertTriangle,
@@ -38,7 +39,7 @@ export default function Insights() {
     }
   }, [user]);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!user) return;
     setIsLoading(true);
     
@@ -54,7 +55,11 @@ export default function Insights() {
     setDefaultSafeFoods(foodsData.data?.map(f => f.name) || []);
     setFoods((allFoods.data as FoodReference[]) || []);
     setIsLoading(false);
-  };
+  }, [user]);
+
+  const { handlers, PullIndicator } = usePullToRefresh({
+    onRefresh: loadData,
+  });
 
   // Filter foods with >= 2 symptom logs
   const validTolerance = toleranceData.filter(t => t.symptom_log_count >= 2);
@@ -200,7 +205,13 @@ export default function Insights() {
 
   return (
     <MobileLayout>
-      <div className="px-5 py-6 space-y-5">
+      <div 
+        className="px-5 py-6 space-y-5"
+        onTouchStart={handlers.onTouchStart}
+        onTouchMove={handlers.onTouchMove}
+        onTouchEnd={handlers.onTouchEnd}
+      >
+        <PullIndicator />
         {/* Header */}
         <div className="animate-fade-in">
           <h1 className="font-display text-2xl font-bold text-foreground">

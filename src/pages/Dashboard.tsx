@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,6 +17,7 @@ import { MealLog, ToleranceData, FoodReference, FoodStatus } from '@/types';
 import { Search, PlusCircle, TrendingUp, TrendingDown, Calendar, Database, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -36,7 +37,7 @@ export default function Dashboard() {
     }
   }, [user]);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!user) return;
     
     setIsLoading(true);
@@ -66,7 +67,11 @@ export default function Dashboard() {
     setFoods((foodData as FoodReference[]) || []);
 
     setIsLoading(false);
-  };
+  }, [user]);
+
+  const { handlers, PullIndicator } = usePullToRefresh({
+    onRefresh: loadData,
+  });
 
   const getStatusInfo = (foodName: string, defaultStatus: FoodStatus): { status: FoodStatus; isPersonal: boolean } => {
     const personal = toleranceData.find(
@@ -100,7 +105,13 @@ export default function Dashboard() {
 
   return (
     <MobileLayout>
-      <div className="px-5 py-6 space-y-6">
+      <div 
+        className="px-5 py-6 space-y-6"
+        onTouchStart={handlers.onTouchStart}
+        onTouchMove={handlers.onTouchMove}
+        onTouchEnd={handlers.onTouchEnd}
+      >
+        <PullIndicator />
         {/* Welcome Card for first-time users */}
         <WelcomeCard />
         
