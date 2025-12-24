@@ -389,7 +389,7 @@ export default function Profile() {
             <Button
               onClick={handleSaveProfile}
               disabled={isSaving || !editIbsType || !editSeverity}
-              className="w-full h-14 rounded-xl gradient-calm text-primary-foreground border-0 shadow-soft font-semibold text-base"
+              className="w-full h-14 rounded-xl gradient-calm text-primary-foreground border-0 shadow-soft font-semibold text-base active:scale-[0.98] transition-transform"
             >
               <Save className="w-5 h-5 mr-2" />
               {isSaving ? 'Saving...' : 'Save Changes'}

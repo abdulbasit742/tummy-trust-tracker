@@ -291,7 +291,7 @@ export default function Onboarding() {
             <Button
               variant="outline"
               onClick={handleBack}
-              className="flex-1 h-14 rounded-xl font-semibold"
+              className="flex-1 h-14 rounded-xl font-semibold active:scale-[0.98] transition-transform"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
@@ -301,7 +301,7 @@ export default function Onboarding() {
             onClick={handleNext}
             disabled={!canContinue() || isSubmitting}
             className={cn(
-              "flex-1 h-14 rounded-xl gradient-calm text-primary-foreground border-0 font-semibold text-base shadow-soft",
+              "flex-1 h-14 rounded-xl gradient-calm text-primary-foreground border-0 font-semibold text-base shadow-soft active:scale-[0.98] transition-transform",
               currentIndex === 0 && "w-full"
             )}
           >

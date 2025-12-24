@@ -100,13 +100,13 @@ export default function Auth() {
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Email</label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="your@email.com"
-                className="pl-10 h-12 rounded-xl"
+                className="pl-12 h-14 rounded-xl"
                 required
               />
             </div>
@@ -115,19 +115,19 @@ export default function Auth() {
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Password</label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="pl-10 pr-10 h-12 rounded-xl"
+                className="pl-12 pr-12 h-14 rounded-xl"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground transition-colors"
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
@@ -137,7 +137,7 @@ export default function Auth() {
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full h-12 text-base font-semibold rounded-xl gradient-calm text-primary-foreground border-0"
+            className="w-full h-14 text-base font-semibold rounded-xl gradient-calm text-primary-foreground border-0 shadow-soft"
           >
             {isLoading ? 'Please wait...' : isLogin ? 'Sign In' : 'Create Account'}
           </Button>
