@@ -10,6 +10,7 @@ import { GrowthBanner, WelcomeCard } from '@/components/ui/FreeAccessBanner';
 import { ShareButton } from '@/components/ui/ShareButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { DashboardSkeleton, CardSkeleton, FoodListSkeleton } from '@/components/ui/skeletons';
 import { calculateToleranceScores, shouldUsePersonalTolerance } from '@/lib/toleranceEngine';
 import { getDisplayNameWithUrdu, searchFoods, getFoodDisplayName } from '@/lib/utils/foodUtils';
 import { MealLog, ToleranceData, FoodReference, FoodStatus } from '@/types';
@@ -88,6 +89,14 @@ export default function Dashboard() {
   const filteredFoods = foodSearch.trim()
     ? searchFoods(foodSearch, foods).slice(0, 6)
     : [];
+
+  if (isLoading) {
+    return (
+      <MobileLayout>
+        <DashboardSkeleton />
+      </MobileLayout>
+    );
+  }
 
   return (
     <MobileLayout>
@@ -193,9 +202,7 @@ export default function Dashboard() {
           </div>
 
           {isLoading ? (
-            <div className="bg-card rounded-2xl p-5 border border-border animate-pulse-soft">
-              <div className="h-4 bg-muted rounded w-3/4"></div>
-            </div>
+            <FoodListSkeleton count={2} />
           ) : todayMeals.length > 0 ? (
             <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden shadow-soft">
               {todayMeals.map((meal) => (

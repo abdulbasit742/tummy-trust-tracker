@@ -3,6 +3,7 @@ import { MobileLayout } from '@/components/layout/MobileLayout';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Disclaimer } from '@/components/ui/Disclaimer';
 import { Input } from '@/components/ui/input';
+import { FoodListSkeleton } from '@/components/ui/skeletons';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { calculateToleranceScores, shouldUsePersonalTolerance } from '@/lib/toleranceEngine';
@@ -238,13 +239,7 @@ export default function FoodChecker() {
             </h3>
             
             {isLoading ? (
-              <div className="space-y-2">
-                {[1,2,3].map(i => (
-                  <div key={i} className="bg-card rounded-xl p-4 border border-border animate-pulse-soft">
-                    <div className="h-4 bg-muted rounded w-1/2"></div>
-                  </div>
-                ))}
-              </div>
+              <FoodListSkeleton count={5} />
             ) : (
               <div className="space-y-2">
                 {foods.slice(0, 10).map((food) => {
