@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.png", "og-image.png"],
+      includeAssets: ["favicon.png", "og-image.png", "icon-192.png", "icon-512.png", "icon-maskable-512.png"],
       manifest: {
         name: "IBS Diet Companion",
         short_name: "IBS Diet",
@@ -28,17 +28,17 @@ export default defineConfig(({ mode }) => ({
         start_url: "/",
         icons: [
           {
-            src: "favicon.png",
+            src: "icon-192.png",
             sizes: "192x192",
             type: "image/png",
           },
           {
-            src: "favicon.png",
+            src: "icon-512.png",
             sizes: "512x512",
             type: "image/png",
           },
           {
-            src: "favicon.png",
+            src: "icon-maskable-512.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "maskable",
