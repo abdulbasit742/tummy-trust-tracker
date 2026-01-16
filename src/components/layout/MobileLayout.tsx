@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Search, PlusCircle, BarChart3, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { NetworkStatus } from '@/components/ui/NetworkStatus';
 
 interface MobileLayoutProps {
   children: React.ReactNode;
@@ -27,6 +28,7 @@ export function MobileLayout({ children, showNav = true }: MobileLayoutProps) {
 
   return (
     <div className="min-h-screen bg-background flex flex-col max-w-[100vw] overflow-x-hidden">
+      <NetworkStatus />
       <main className={cn(
         "flex-1 overflow-x-hidden",
         showNav && "pb-32" // Extra padding to prevent content overlap with nav
