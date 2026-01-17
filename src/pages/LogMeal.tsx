@@ -217,7 +217,7 @@ export default function LogMeal() {
                 
                 {/* Autocomplete Dropdown */}
                 {showSuggestions && foodName.length >= 1 && suggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-xl shadow-elevated border border-border overflow-hidden z-10 max-h-[240px] overflow-y-auto">
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-xl shadow-elevated border border-border overflow-hidden z-50 max-h-[240px] overflow-y-auto">
                     {suggestions.map((food) => (
                       <button
                         key={food.id}
