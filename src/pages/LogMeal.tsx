@@ -14,7 +14,7 @@ import { PORTION_SIZES } from '@/data/constants';
 import { FoodReference, PortionSize, FoodStatus } from '@/types';
 import { normalizeFoodName, displayFoodName, searchFoods, getFoodDisplayName } from '@/lib/utils/foodUtils';
 import { useToast } from '@/hooks/use-toast';
-import { Utensils, CheckCircle, AlertCircle, Info } from 'lucide-react';
+import { Utensils, CheckCircle, AlertCircle, Info, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type Step = 'meal' | 'symptoms';
@@ -218,27 +218,47 @@ export default function LogMeal() {
                 {/* Autocomplete Dropdown */}
                 {showSuggestions && foodName.length >= 1 && suggestions.length > 0 && (
                   <div 
-                    className="absolute top-full left-0 right-0 mt-2 rounded-xl shadow-elevated border border-border overflow-hidden z-50 max-h-[240px] overflow-y-auto"
+                    className="absolute top-full left-0 right-0 mt-2 rounded-xl shadow-elevated border border-border overflow-hidden z-50 max-h-[280px] flex flex-col"
                     style={{ backgroundColor: 'hsl(40 40% 99%)' }}
                   >
-                    {suggestions.map((food) => (
+                    {/* Close button header */}
+                    <div 
+                      className="flex items-center justify-between px-4 py-2 border-b border-border"
+                      style={{ backgroundColor: 'hsl(42 18% 96%)' }}
+                    >
+                      <span className="text-xs text-muted-foreground font-medium">
+                        {suggestions.length} result{suggestions.length !== 1 ? 's' : ''}
+                      </span>
                       <button
-                        key={food.id}
-                        onClick={() => {
-                          setFoodName(food.name);
-                          setShowSuggestions(false);
-                        }}
-                        className="w-full text-left px-4 py-3.5 transition-colors flex items-center justify-between min-h-[52px]"
-                        style={{ backgroundColor: 'hsl(40 40% 99%)' }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(42 18% 94%)'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'hsl(40 40% 99%)'}
+                        onClick={() => setShowSuggestions(false)}
+                        className="p-1.5 rounded-full hover:bg-muted transition-colors"
+                        aria-label="Close suggestions"
                       >
-                        <span className="text-sm text-foreground font-medium" dir="auto">
-                          {getFoodDisplayName(food)}
-                        </span>
-                        <StatusBadge status={food.default_status as FoodStatus} size="sm" />
+                        <X className="h-4 w-4 text-muted-foreground" />
                       </button>
-                    ))}
+                    </div>
+                    
+                    {/* Suggestions list */}
+                    <div className="overflow-y-auto flex-1">
+                      {suggestions.map((food) => (
+                        <button
+                          key={food.id}
+                          onClick={() => {
+                            setFoodName(food.name);
+                            setShowSuggestions(false);
+                          }}
+                          className="w-full text-left px-4 py-3.5 transition-colors flex items-center justify-between min-h-[52px]"
+                          style={{ backgroundColor: 'hsl(40 40% 99%)' }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(42 18% 94%)'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'hsl(40 40% 99%)'}
+                        >
+                          <span className="text-sm text-foreground font-medium" dir="auto">
+                            {getFoodDisplayName(food)}
+                          </span>
+                          <StatusBadge status={food.default_status as FoodStatus} size="sm" />
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
