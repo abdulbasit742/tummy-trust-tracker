@@ -10,7 +10,8 @@ type EventType =
   | 'meal_logged'
   | 'symptom_logged'
   | 'share_clicked'
-  | 'profile_updated';
+  | 'profile_updated'
+  | 'water_logged';
 
 interface TrackEventOptions {
   eventType: EventType;
