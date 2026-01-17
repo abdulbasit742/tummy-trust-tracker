@@ -64,9 +64,9 @@ export default function FoodChecker() {
     return { status: defaultStatus, isPersonal: false };
   };
 
-  // Use bilingual search
+  // Use bilingual search - show all results
   const filteredFoods = useMemo(() => {
-    if (!searchQuery.trim()) return foods.slice(0, 10);
+    if (!searchQuery.trim()) return foods;
     return searchFoods(searchQuery, foods);
   }, [searchQuery, foods]);
 
@@ -206,8 +206,11 @@ export default function FoodChecker() {
         {/* Food List / Autocomplete */}
         {!selectedFood && !isCustomFood && searchQuery.length >= 1 && (
           <div className="space-y-2 animate-fade-in">
+            <h3 className="font-display font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+              Search Results ({filteredFoods.length})
+            </h3>
             {filteredFoods.length > 0 ? (
-              filteredFoods.slice(0, 8).map((food) => {
+              filteredFoods.map((food) => {
                 const { status, isPersonal } = getStatusInfo(food.name, food.default_status as FoodStatus);
                 return (
                   <button
@@ -248,7 +251,7 @@ export default function FoodChecker() {
               <FoodListSkeleton count={5} />
             ) : (
               <div className="space-y-2">
-                {foods.slice(0, 10).map((food) => {
+                {foods.map((food) => {
                   const { status, isPersonal } = getStatusInfo(food.name, food.default_status as FoodStatus);
                   return (
                     <button
