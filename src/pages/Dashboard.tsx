@@ -125,9 +125,6 @@ export default function Dashboard() {
         {/* 7-Day Motivational Tips */}
         <MotivationalTip />
 
-        {/* Water Tracking */}
-        <WaterTracker />
-
         {/* Water Reminder Popup */}
         <WaterReminder />
 
@@ -161,6 +158,9 @@ export default function Dashboard() {
             <span className="font-semibold text-sm">Log Meal</span>
           </Button>
         </div>
+
+        {/* Water Tracking */}
+        <WaterTracker />
 
         {/* Starter Foods Search */}
         <div className="animate-slide-up" style={{ animationDelay: '0.05s' }}>
