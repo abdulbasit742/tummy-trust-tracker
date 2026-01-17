@@ -135,7 +135,7 @@ export default function Dashboard() {
               Dashboard
             </h1>
             <p className="text-muted-foreground text-sm mt-1.5">
-              {profile?.ibs_type && `Managing ${profile.ibs_type}`}
+              {format(new Date(), 'EEEE, MMMM d, yyyy')}
             </p>
           </div>
           <ShareButton variant="icon" />
