@@ -196,7 +196,7 @@ export default function LogMeal() {
         {step === 'meal' ? (
           <>
             {/* Food Name with Autocomplete */}
-            <div className="animate-slide-up space-y-3">
+            <div className="animate-slide-up space-y-3 relative z-20">
               <label className="flex items-center gap-2.5 text-sm font-semibold text-foreground">
                 <Utensils className="w-4 h-4 text-primary" />
                 Food Name *
@@ -218,8 +218,12 @@ export default function LogMeal() {
                 {/* Autocomplete Dropdown */}
                 {showSuggestions && foodName.length >= 1 && suggestions.length > 0 && (
                   <div 
-                    className="absolute top-full left-0 right-0 mt-2 rounded-xl shadow-elevated border border-border overflow-hidden z-50 max-h-[280px] flex flex-col"
-                    style={{ backgroundColor: 'hsl(40 40% 99%)' }}
+                    className="absolute top-full left-0 right-0 mt-2 rounded-xl shadow-elevated border border-border overflow-hidden max-h-[280px] flex flex-col"
+                    style={{ 
+                      backgroundColor: 'hsl(40 40% 99%)',
+                      zIndex: 9999,
+                      position: 'absolute'
+                    }}
                   >
                     {/* Close button header */}
                     <div 
