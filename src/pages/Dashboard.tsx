@@ -9,6 +9,7 @@ import { Disclaimer } from '@/components/ui/Disclaimer';
 import { InstallPrompt } from '@/components/ui/InstallPrompt';
 import { GrowthBanner, WelcomeCard } from '@/components/ui/FreeAccessBanner';
 import { ShareButton } from '@/components/ui/ShareButton';
+import { MotivationalTip } from '@/components/ui/MotivationalTip';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DashboardSkeleton, CardSkeleton, FoodListSkeleton } from '@/components/ui/skeletons';
@@ -118,6 +119,9 @@ export default function Dashboard() {
         
         {/* Growth Banner */}
         <GrowthBanner />
+        
+        {/* 7-Day Motivational Tips */}
+        <MotivationalTip />
 
         {/* Header */}
         <div className="flex items-center justify-between animate-fade-in">
