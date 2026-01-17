@@ -221,22 +221,33 @@ export default function Dashboard() {
             <FoodListSkeleton count={2} />
           ) : todayMeals.length > 0 ? (
             <div className="bg-card rounded-2xl border border-border/80 divide-y divide-border/60 overflow-hidden shadow-soft">
-              {todayMeals.map((meal) => (
-                <div 
-                  key={meal.id}
-                  className="list-item"
-                >
-                  <div>
-                    <span className="font-medium text-foreground text-sm" dir="auto">
-                      {getDisplayNameWithUrdu(meal.food_name, foods)}
+              {todayMeals.map((meal) => {
+                // Get food status (personal or default)
+                const matchedFood = foods.find(f => 
+                  f.name.toLowerCase() === meal.food_name.toLowerCase()
+                );
+                const { status } = matchedFood 
+                  ? getStatusInfo(matchedFood.name, matchedFood.default_status as FoodStatus)
+                  : { status: 'caution' as FoodStatus };
+                
+                return (
+                  <div 
+                    key={meal.id}
+                    className="list-item"
+                  >
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <span className="font-medium text-foreground text-sm truncate" dir="auto">
+                        {getDisplayNameWithUrdu(meal.food_name, foods)}
+                      </span>
+                      <span className="text-xs text-muted-foreground font-medium flex-shrink-0">({meal.portion})</span>
+                      <StatusBadge status={status} size="sm" showIcon={true} />
+                    </div>
+                    <span className="text-xs text-muted-foreground font-semibold flex-shrink-0">
+                      {format(new Date(meal.eaten_at), 'h:mm a')}
                     </span>
-                    <span className="text-xs text-muted-foreground ml-2 font-medium">({meal.portion})</span>
                   </div>
-                  <span className="text-xs text-muted-foreground font-semibold">
-                    {format(new Date(meal.eaten_at), 'h:mm a')}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="empty-state">
