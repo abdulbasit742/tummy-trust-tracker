@@ -13,6 +13,7 @@ export interface Profile {
   trigger_sensitivities: string[];
   plan: PlanType;
   free_access_expiry: string | null;
+  custom_tips: string[];
   created_at: string;
   updated_at: string;
 }

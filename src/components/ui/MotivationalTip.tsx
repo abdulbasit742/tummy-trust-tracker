@@ -1,41 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { X, Lightbulb } from 'lucide-react';
+import { X, Lightbulb, Sparkles } from 'lucide-react';
 import { Button } from './button';
 
-const TIPS = [
+interface TipContent {
+  message: string;
+  emoji: string;
+  isCustom?: boolean;
+}
+
+const DEFAULT_TIPS: TipContent[] = [
   {
-    day: 1,
     message: "Every journey starts with one step. Track what you eat and you'll soon understand your body better!",
     emoji: "🌟"
   },
   {
-    day: 2,
     message: "With the right preventive measures, you can enjoy many foods with confidence. Don't worry!",
     emoji: "😊"
   },
   {
-    day: 3,
     message: "Consistent logging helps identify patterns. You're doing great - keep it up!",
     emoji: "💪"
   },
   {
-    day: 4,
     message: "Portion control and timing matter too. Small portions of trigger foods are often tolerated.",
     emoji: "🍽️"
   },
   {
-    day: 5,
     message: "Many IBS patients find that their triggers become clearer within weeks of tracking. Good news ahead!",
     emoji: "✨"
   },
   {
-    day: 6,
     message: "IBS is manageable. Your personal data will guide better food choices. Stay positive!",
     emoji: "🌈"
   },
   {
-    day: 7,
     message: "After a week of tracking, check your Insights to see your progress! You've got this!",
     emoji: "🎉"
   }
@@ -48,7 +47,7 @@ const getLocalStorageKey = (date: Date) => {
 export function MotivationalTip() {
   const { profile } = useAuth();
   const [isVisible, setIsVisible] = useState(false);
-  const [currentTip, setCurrentTip] = useState<typeof TIPS[0] | null>(null);
+  const [currentTip, setCurrentTip] = useState<TipContent & { day?: number } | null>(null);
 
   useEffect(() => {
     if (!profile?.created_at) return;
@@ -58,9 +57,6 @@ export function MotivationalTip() {
     const diffTime = now.getTime() - createdAt.getTime();
     const daysSinceJoined = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-    // Only show for first 7 days (day 0-6 maps to tips 1-7)
-    if (daysSinceJoined >= 7) return;
-
     // Check if already dismissed today
     const today = new Date();
     const dismissKey = getLocalStorageKey(today);
@@ -68,11 +64,33 @@ export function MotivationalTip() {
 
     if (isDismissed) return;
 
-    // Get tip for current day (clamp to 0-6)
-    const tipIndex = Math.min(Math.max(daysSinceJoined, 0), 6);
-    setCurrentTip(TIPS[tipIndex]);
-    setIsVisible(true);
-  }, [profile?.created_at]);
+    // Get custom tips from profile
+    const customTips: TipContent[] = (profile.custom_tips || []).map(tip => ({
+      message: tip,
+      emoji: "💫",
+      isCustom: true
+    }));
+
+    // During first 7 days: show default tip for that day, mixed with custom tips randomly
+    if (daysSinceJoined < 7) {
+      const tipIndex = Math.min(Math.max(daysSinceJoined, 0), 6);
+      
+      // 30% chance to show a custom tip if available, otherwise show default
+      if (customTips.length > 0 && Math.random() < 0.3) {
+        const randomCustom = customTips[Math.floor(Math.random() * customTips.length)];
+        setCurrentTip({ ...randomCustom, day: daysSinceJoined + 1 });
+      } else {
+        setCurrentTip({ ...DEFAULT_TIPS[tipIndex], day: daysSinceJoined + 1 });
+      }
+      setIsVisible(true);
+    } 
+    // After 7 days: only show custom tips if available
+    else if (customTips.length > 0) {
+      const randomCustom = customTips[Math.floor(Math.random() * customTips.length)];
+      setCurrentTip(randomCustom);
+      setIsVisible(true);
+    }
+  }, [profile?.created_at, profile?.custom_tips]);
 
   const handleDismiss = () => {
     const today = new Date();
@@ -92,10 +110,14 @@ export function MotivationalTip() {
       <div className="flex items-center justify-between mb-3 relative z-10">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center">
-            <Lightbulb className="w-4 h-4 text-primary" />
+            {currentTip.isCustom ? (
+              <Sparkles className="w-4 h-4 text-primary" />
+            ) : (
+              <Lightbulb className="w-4 h-4 text-primary" />
+            )}
           </div>
           <span className="text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full">
-            Day {currentTip.day} Tip
+            {currentTip.isCustom ? 'Your Tip' : currentTip.day ? `Day ${currentTip.day} Tip` : 'Daily Tip'}
           </span>
         </div>
         <button
@@ -112,7 +134,7 @@ export function MotivationalTip() {
         <p className="text-lg font-semibold text-foreground mb-1">
           {currentTip.emoji} {currentTip.message.split('.')[0]}.
         </p>
-        {currentTip.message.split('.').length > 1 && (
+        {currentTip.message.split('.').length > 1 && currentTip.message.split('.').slice(1).join('.').trim() && (
           <p className="text-sm text-muted-foreground leading-relaxed">
             {currentTip.message.split('.').slice(1).join('.').trim()}
           </p>
