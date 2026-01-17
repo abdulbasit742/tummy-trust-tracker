@@ -101,6 +101,7 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          custom_tips: string[] | null
           free_access_expiry: string | null
           ibs_type: string
           id: string
@@ -113,6 +114,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          custom_tips?: string[] | null
           free_access_expiry?: string | null
           ibs_type: string
           id?: string
@@ -125,6 +127,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          custom_tips?: string[] | null
           free_access_expiry?: string | null
           ibs_type?: string
           id?: string

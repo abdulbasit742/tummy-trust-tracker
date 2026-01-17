@@ -7,6 +7,7 @@ import { ToleranceBar } from '@/components/ui/ToleranceBar';
 import { Disclaimer } from '@/components/ui/Disclaimer';
 import { EarlyUserStatus, WhyThisApp } from '@/components/ui/FreeAccessBanner';
 import { ShareButton } from '@/components/ui/ShareButton';
+import { CustomTipsEditor } from '@/components/ui/CustomTipsEditor';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
@@ -14,7 +15,7 @@ import { ProfileSkeleton, MealLogSkeleton } from '@/components/ui/skeletons';
 import { calculateToleranceScores } from '@/lib/toleranceEngine';
 import { MealLog, SymptomLog, ToleranceData, IBSType, SeverityLevel } from '@/types';
 import { IBS_TYPES, SYMPTOMS, SEVERITY_LEVELS } from '@/data/constants';
-import { User, LogOut, Trash2, Edit2, ChevronRight, Save, X, AlertCircle } from 'lucide-react';
+import { User, LogOut, Trash2, Edit2, ChevronRight, Save, X, AlertCircle, Lightbulb } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -45,6 +46,10 @@ export default function Profile() {
   const [editBloating, setEditBloating] = useState([0]);
   const [editPain, setEditPain] = useState([0]);
   const [editStoolIssue, setEditStoolIssue] = useState(false);
+
+  // Custom tips editing state
+  const [isEditingTips, setIsEditingTips] = useState(false);
+  const [isSavingTips, setIsSavingTips] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -232,6 +237,35 @@ export default function Profile() {
     setIsSaving(false);
   };
 
+  const handleSaveCustomTips = async (tips: string[]) => {
+    if (!profile) return;
+    
+    setIsSavingTips(true);
+    
+    const { error } = await supabase
+      .from('profiles')
+      .update({ custom_tips: tips })
+      .eq('id', profile.id);
+
+    if (error) {
+      toast({
+        title: "Error saving tips",
+        description: error.message,
+        variant: "destructive",
+      });
+      setIsSavingTips(false);
+      return;
+    }
+
+    await refreshProfile();
+    toast({
+      title: "Tips saved",
+      description: "Your custom tips have been saved.",
+    });
+    setIsEditingTips(false);
+    setIsSavingTips(false);
+  };
+
   const getSeverityLabel = (value: number) => {
     if (value === 0) return 'None';
     if (value <= 3) return 'Mild';
@@ -407,6 +441,42 @@ export default function Profile() {
 
         {/* Why This App */}
         <WhyThisApp />
+
+        {/* Custom Tips Section */}
+        {isEditingTips ? (
+          <CustomTipsEditor
+            tips={profile?.custom_tips || []}
+            onSave={handleSaveCustomTips}
+            onCancel={() => setIsEditingTips(false)}
+            isSaving={isSavingTips}
+          />
+        ) : (
+          <div className="bg-card rounded-2xl p-5 border border-border shadow-soft animate-slide-up">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Lightbulb className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-display font-semibold text-foreground">Custom Tips</h3>
+                  <p className="text-xs text-muted-foreground">
+                    {profile?.custom_tips && profile.custom_tips.length > 0 
+                      ? `${profile.custom_tips.length} custom tip${profile.custom_tips.length > 1 ? 's' : ''}`
+                      : 'Add your own motivational messages'}
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsEditingTips(true)}
+                className="rounded-xl h-10 w-10 p-0"
+              >
+                <Edit2 className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Personal Tolerance */}
         <div className="animate-slide-up">
