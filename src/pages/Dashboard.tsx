@@ -159,9 +159,6 @@ export default function Dashboard() {
           </Button>
         </div>
 
-        {/* Water Tracking */}
-        <WaterTracker />
-
         {/* Starter Foods Search */}
         <div className="animate-slide-up" style={{ animationDelay: '0.05s' }}>
           <div className="flex items-center gap-2.5 mb-4">
@@ -273,6 +270,9 @@ export default function Dashboard() {
             </div>
           )}
         </div>
+
+        {/* Water Tracking */}
+        <WaterTracker />
 
         {/* Top Safe Foods */}
         <div className="animate-slide-up" style={{ animationDelay: '0.15s' }}>
