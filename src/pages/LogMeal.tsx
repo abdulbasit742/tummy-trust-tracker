@@ -280,6 +280,24 @@ export default function LogMeal() {
                   <span className="text-xs text-muted-foreground leading-relaxed">{selectedFoodRef.fodmap_note}</span>
                 </div>
               )}
+
+              {/* Caution/Avoid food encouragement */}
+              {selectedFoodRef && (selectedFoodRef.default_status === 'caution' || selectedFoodRef.default_status === 'avoid') && (
+                <div className="bg-caution/8 border border-caution/20 rounded-xl p-4 space-y-3">
+                  <p className="text-sm text-foreground leading-relaxed">
+                    😊 Don't worry! With the right portion size and preventive measures, many people tolerate this well. Track your reaction to learn what works for you!
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-9 border-caution/30 text-caution hover:bg-caution/10"
+                    onClick={() => setNotes(prev => prev + (prev ? '\n' : '') + 'Eating cautious food - monitoring reaction')}
+                  >
+                    📝 Add precaution note
+                  </Button>
+                </div>
+              )}
             </div>
 
             {/* Portion Size */}
