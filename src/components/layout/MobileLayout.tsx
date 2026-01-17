@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Search, PlusCircle, BarChart3, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { NetworkStatus } from '@/components/ui/NetworkStatus';
+import { hapticMedium } from '@/lib/haptics';
 
 interface MobileLayoutProps {
   children: React.ReactNode;
@@ -26,6 +27,11 @@ export function MobileLayout({ children, showNav = true }: MobileLayoutProps) {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [location.pathname]);
 
+  const handleNavClick = useCallback((path: string) => {
+    hapticMedium();
+    navigate(path);
+  }, [navigate]);
+
   return (
     <div className="min-h-screen bg-background flex flex-col max-w-[100vw] overflow-x-hidden">
       <NetworkStatus />
@@ -47,7 +53,7 @@ export function MobileLayout({ children, showNav = true }: MobileLayoutProps) {
                 return (
                   <button
                     key={item.path}
-                    onClick={() => navigate(item.path)}
+                    onClick={() => handleNavClick(item.path)}
                     className={cn(
                       "flex flex-col items-center justify-center -mt-6 transition-all duration-200"
                     )}
@@ -73,7 +79,7 @@ export function MobileLayout({ children, showNav = true }: MobileLayoutProps) {
               return (
                 <button
                   key={item.path}
-                  onClick={() => navigate(item.path)}
+                  onClick={() => handleNavClick(item.path)}
                   className={cn(
                     "flex flex-col items-center justify-center px-3 py-2 rounded-xl transition-all duration-200",
                     "min-w-[64px] min-h-[56px]", // Touch-friendly size
