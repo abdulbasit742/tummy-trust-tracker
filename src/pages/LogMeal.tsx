@@ -217,7 +217,10 @@ export default function LogMeal() {
                 
                 {/* Autocomplete Dropdown */}
                 {showSuggestions && foodName.length >= 1 && suggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-xl shadow-elevated border border-border overflow-hidden z-50 max-h-[240px] overflow-y-auto">
+                  <div 
+                    className="absolute top-full left-0 right-0 mt-2 rounded-xl shadow-elevated border border-border overflow-hidden z-50 max-h-[240px] overflow-y-auto"
+                    style={{ backgroundColor: 'hsl(40 40% 99%)' }}
+                  >
                     {suggestions.map((food) => (
                       <button
                         key={food.id}
@@ -225,7 +228,10 @@ export default function LogMeal() {
                           setFoodName(food.name);
                           setShowSuggestions(false);
                         }}
-                        className="w-full text-left px-4 py-3.5 hover:bg-muted transition-colors flex items-center justify-between min-h-[52px]"
+                        className="w-full text-left px-4 py-3.5 transition-colors flex items-center justify-between min-h-[52px]"
+                        style={{ backgroundColor: 'hsl(40 40% 99%)' }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(42 18% 94%)'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'hsl(40 40% 99%)'}
                       >
                         <span className="text-sm text-foreground font-medium" dir="auto">
                           {getFoodDisplayName(food)}
