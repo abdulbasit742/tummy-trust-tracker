@@ -10,6 +10,8 @@ import { InstallPrompt } from '@/components/ui/InstallPrompt';
 import { GrowthBanner, WelcomeCard } from '@/components/ui/FreeAccessBanner';
 import { ShareButton } from '@/components/ui/ShareButton';
 import { MotivationalTip } from '@/components/ui/MotivationalTip';
+import { WaterTracker } from '@/components/ui/WaterTracker';
+import { WaterReminder } from '@/components/ui/WaterReminder';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DashboardSkeleton, CardSkeleton, FoodListSkeleton } from '@/components/ui/skeletons';
@@ -122,6 +124,12 @@ export default function Dashboard() {
         
         {/* 7-Day Motivational Tips */}
         <MotivationalTip />
+
+        {/* Water Tracking */}
+        <WaterTracker />
+
+        {/* Water Reminder Popup */}
+        <WaterReminder />
 
         {/* Header */}
         <div className="flex items-center justify-between animate-fade-in">
