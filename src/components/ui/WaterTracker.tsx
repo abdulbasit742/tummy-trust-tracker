@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAnalytics } from '@/hooks/use-analytics';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Droplets, Plus, Minus, Target } from 'lucide-react';
@@ -20,6 +21,7 @@ interface WaterLog {
 export function WaterTracker() {
   const { user } = useAuth();
   const { trackEvent } = useAnalytics();
+  const { t } = useLanguage();
   const { toast } = useToast();
   const [todayGlasses, setTodayGlasses] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -67,7 +69,7 @@ export function WaterTracker() {
       if (error) {
         setTodayGlasses(todayGlasses);
         toast({
-          title: "Error",
+          title: t('common.error'),
           description: "Failed to log water",
           variant: "destructive",
         });
@@ -76,8 +78,8 @@ export function WaterTracker() {
         
         if (newTotal >= DAILY_GOAL && todayGlasses < DAILY_GOAL) {
           toast({
-            title: "🎉 Goal Reached!",
-            description: "You've hit your daily water goal!",
+            title: "🎉 " + t('water.goal') + "!",
+            description: t('water.hydrationReminder'),
           });
         }
       }
@@ -127,13 +129,13 @@ export function WaterTracker() {
             <Droplets className={cn("w-5 h-5", isGoalMet ? "text-primary" : "text-blue-500")} />
           </div>
           <div>
-            <h3 className="font-display text-sm font-semibold text-foreground">Water Intake</h3>
-            <p className="text-xs text-muted-foreground">Daily hydration</p>
+            <h3 className="font-display text-sm font-semibold text-foreground">{t('water.title')}</h3>
+            <p className="text-xs text-muted-foreground">{t('water.dailyGoal')}</p>
           </div>
         </div>
         <div className="flex items-center gap-1.5">
           <Target className="w-3.5 h-3.5 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground font-medium">{DAILY_GOAL} glasses</span>
+          <span className="text-xs text-muted-foreground font-medium">{DAILY_GOAL} {t('water.glasses')}</span>
         </div>
       </div>
 
@@ -168,7 +170,7 @@ export function WaterTracker() {
             {todayGlasses}
           </span>
           <span className="text-lg text-muted-foreground font-medium">/{DAILY_GOAL}</span>
-          <p className="text-xs text-muted-foreground mt-1">glasses today</p>
+          <p className="text-xs text-muted-foreground mt-1">{t('water.glasses')} today</p>
         </div>
 
         <Button
@@ -188,13 +190,13 @@ export function WaterTracker() {
       {/* Encouragement message */}
       {todayGlasses > 0 && todayGlasses < DAILY_GOAL && (
         <p className="text-center text-xs text-muted-foreground mt-4">
-          {DAILY_GOAL - todayGlasses} more glass{DAILY_GOAL - todayGlasses > 1 ? 'es' : ''} to reach your goal! 💪
+          {DAILY_GOAL - todayGlasses} more {DAILY_GOAL - todayGlasses > 1 ? t('water.glasses') : t('water.glass')} to reach your goal! 💪
         </p>
       )}
 
       {isGoalMet && (
         <p className="text-center text-xs text-primary font-medium mt-4">
-          🎉 Great job! You've reached your daily goal!
+          🎉 {t('water.hydrationReminder')}
         </p>
       )}
     </div>

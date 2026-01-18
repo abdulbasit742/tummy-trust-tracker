@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { ToleranceBar } from '@/components/ui/ToleranceBar';
@@ -15,7 +16,7 @@ import { ProfileSkeleton, MealLogSkeleton } from '@/components/ui/skeletons';
 import { calculateToleranceScores } from '@/lib/toleranceEngine';
 import { MealLog, SymptomLog, ToleranceData, IBSType, SeverityLevel } from '@/types';
 import { IBS_TYPES, SYMPTOMS, SEVERITY_LEVELS } from '@/data/constants';
-import { User, LogOut, Trash2, Edit2, ChevronRight, Save, X, AlertCircle, Lightbulb } from 'lucide-react';
+import { User, LogOut, Trash2, Edit2, ChevronRight, Save, X, AlertCircle, Lightbulb, Globe } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -27,6 +28,7 @@ interface MealWithSymptoms extends MealLog {
 export default function Profile() {
   const navigate = useNavigate();
   const { user, profile, signOut, refreshProfile } = useAuth();
+  const { t, language, setLanguage, isUrdu } = useLanguage();
   const { toast } = useToast();
   
   const [mealLogs, setMealLogs] = useState<MealWithSymptoms[]>([]);
@@ -289,7 +291,7 @@ export default function Profile() {
         <div className="flex items-center justify-between animate-fade-in">
           <div>
             <h1 className="font-display text-2xl font-bold text-foreground">
-              Profile
+              {t('profile.title')}
             </h1>
             <p className="text-muted-foreground text-sm mt-1">
               {user?.email}
@@ -304,8 +306,33 @@ export default function Profile() {
               className="rounded-xl h-10"
             >
               <LogOut className="w-4 h-4 mr-2" />
-              Sign Out
+              {t('auth.signOut')}
             </Button>
+          </div>
+        </div>
+
+        {/* Language Toggle */}
+        <div className="bg-card rounded-2xl p-5 border border-border shadow-soft animate-slide-up">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Globe className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-display font-semibold text-foreground">Language / زبان</h3>
+                <p className="text-xs text-muted-foreground">
+                  {language === 'en' ? 'English' : 'اردو'}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className={cn("text-sm font-medium", language === 'en' ? "text-primary" : "text-muted-foreground")}>EN</span>
+              <Switch
+                checked={language === 'ur'}
+                onCheckedChange={(checked) => setLanguage(checked ? 'ur' : 'en')}
+              />
+              <span className={cn("text-sm font-medium", language === 'ur' ? "text-primary" : "text-muted-foreground")}>اردو</span>
+            </div>
           </div>
         </div>
 
