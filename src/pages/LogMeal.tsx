@@ -8,9 +8,9 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useAnalytics } from '@/hooks/use-analytics';
 import { supabase } from '@/integrations/supabase/client';
-import { PORTION_SIZES } from '@/data/constants';
 import { FoodReference, PortionSize, FoodStatus } from '@/types';
 import { normalizeFoodName, displayFoodName, searchFoods, getFoodDisplayName } from '@/lib/utils/foodUtils';
 import { useToast } from '@/hooks/use-toast';
@@ -22,6 +22,7 @@ type Step = 'meal' | 'symptoms';
 export default function LogMeal() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t, isUrdu } = useLanguage();
   const { trackEvent } = useAnalytics();
   const { toast } = useToast();
 
@@ -41,6 +42,12 @@ export default function LogMeal() {
   const [stoolIssue, setStoolIssue] = useState(false);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const PORTION_SIZES = [
+    { value: 'S', label: t('logMeal.small') },
+    { value: 'M', label: t('logMeal.medium') },
+    { value: 'L', label: t('logMeal.large') },
+  ];
 
   useEffect(() => {
     loadFoods();
@@ -64,8 +71,8 @@ export default function LogMeal() {
   const handleMealSubmit = async () => {
     if (!user || !foodName.trim() || !portion) {
       toast({
-        title: "Missing information",
-        description: "Please enter food name and portion size.",
+        title: t('logMeal.missingInfo'),
+        description: t('logMeal.enterFoodAndPortion'),
         variant: "destructive",
       });
       return;
@@ -90,7 +97,7 @@ export default function LogMeal() {
 
     if (error) {
       toast({
-        title: "Error logging meal",
+        title: t('logMeal.errorLogging'),
         description: error.message,
         variant: "destructive",
       });
@@ -123,7 +130,7 @@ export default function LogMeal() {
 
     if (error) {
       toast({
-        title: "Error logging symptoms",
+        title: t('logMeal.errorLoggingSymptoms'),
         description: error.message,
         variant: "destructive",
       });
@@ -137,8 +144,8 @@ export default function LogMeal() {
     });
 
     toast({
-      title: "Logged successfully!",
-      description: `${displayFoodName(foodName)} and symptoms recorded.`,
+      title: t('logMeal.loggedSuccessfully'),
+      description: `${displayFoodName(foodName)} ${t('logMeal.andSymptomsRecorded')}`,
     });
 
     navigate('/');
@@ -146,18 +153,18 @@ export default function LogMeal() {
 
   const handleSkipSymptoms = () => {
     toast({
-      title: "Meal logged!",
-      description: `${displayFoodName(foodName)} recorded without symptoms.`,
+      title: t('logMeal.mealLogged'),
+      description: `${displayFoodName(foodName)} ${t('logMeal.recordedWithoutSymptoms')}`,
     });
     navigate('/');
   };
 
   const getSeverityLabel = (value: number) => {
-    if (value === 0) return 'None';
-    if (value <= 3) return 'Mild';
-    if (value <= 6) return 'Moderate';
-    if (value <= 8) return 'Severe';
-    return 'Very severe';
+    if (value === 0) return t('logMeal.none');
+    if (value <= 3) return t('logMeal.mild');
+    if (value <= 6) return t('logMeal.moderate');
+    if (value <= 8) return t('logMeal.severe');
+    return t('logMeal.verySevere');
   };
 
   const getSeverityColor = (value: number) => {
@@ -172,12 +179,12 @@ export default function LogMeal() {
         {/* Header */}
         <div className="animate-fade-in">
           <h1 className="font-display text-2xl font-bold text-foreground">
-            {step === 'meal' ? 'Log Meal' : 'Log Symptoms'}
+            {step === 'meal' ? t('logMeal.title') : t('logMeal.logSymptoms')}
           </h1>
           <p className="text-muted-foreground text-sm mt-1 leading-relaxed">
             {step === 'meal' 
-              ? 'What did you eat?' 
-              : `How do you feel after ${displayFoodName(foodName)}?`}
+              ? t('logMeal.whatDidYouEat') 
+              : `${t('logMeal.howDoYouFeel')} ${displayFoodName(foodName)}?`}
           </p>
         </div>
 
@@ -199,7 +206,7 @@ export default function LogMeal() {
             <div className="animate-slide-up space-y-3 relative z-20">
               <label className="flex items-center gap-2.5 text-sm font-semibold text-foreground">
                 <Utensils className="w-4 h-4 text-primary" />
-                Food Name *
+                {t('logMeal.foodNameRequired')}
               </label>
               <div className="relative">
                 <Input
@@ -210,7 +217,7 @@ export default function LogMeal() {
                   }}
                   onFocus={() => setShowSuggestions(true)}
                   onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                  placeholder="Type: Rice, چاول, chawal"
+                  placeholder={t('logMeal.typeFoodName')}
                   className="h-14 rounded-xl bg-card border-border text-base"
                   dir="auto"
                 />
@@ -231,7 +238,7 @@ export default function LogMeal() {
                       style={{ backgroundColor: 'hsl(42 18% 96%)' }}
                     >
                       <span className="text-xs text-muted-foreground font-medium">
-                        {suggestions.length} result{suggestions.length !== 1 ? 's' : ''}
+                        {suggestions.length} {suggestions.length !== 1 ? t('logMeal.results') : t('logMeal.result')}
                       </span>
                       <button
                         onClick={() => setShowSuggestions(false)}
@@ -272,7 +279,7 @@ export default function LogMeal() {
                 <div className="flex items-start gap-3 p-3 bg-caution/8 rounded-xl border border-caution/20">
                   <Info className="w-4 h-4 text-caution flex-shrink-0 mt-0.5" />
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Custom food - will be tracked as "Caution" until you log reactions.
+                    {t('logMeal.customFoodNotice')}
                   </p>
                 </div>
               )}
@@ -289,16 +296,16 @@ export default function LogMeal() {
               {selectedFoodRef && (selectedFoodRef.default_status === 'caution' || selectedFoodRef.default_status === 'avoid') && (
                 <div className="bg-caution/8 border border-caution/20 rounded-xl p-4 space-y-3">
                   <p className="text-sm text-foreground leading-relaxed">
-                    😊 Don't worry! With the right portion size and preventive measures, many people tolerate this well. Track your reaction to learn what works for you!
+                    {t('logMeal.cautionFoodMessage')}
                   </p>
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     className="text-xs h-9 border-caution/30 text-caution hover:bg-caution/10"
-                    onClick={() => setNotes(prev => prev + (prev ? '\n' : '') + 'Eating cautious food - monitoring reaction')}
+                    onClick={() => setNotes(prev => prev + (prev ? '\n' : '') + t('logMeal.eatingCautiousFood'))}
                   >
-                    📝 Add precaution note
+                    {t('logMeal.addPrecautionNote')}
                   </Button>
                 </div>
               )}
@@ -307,7 +314,7 @@ export default function LogMeal() {
             {/* Portion Size */}
             <div className="animate-slide-up space-y-3" style={{ animationDelay: '0.05s' }}>
               <label className="text-sm font-semibold text-foreground">
-                Portion Size *
+                {t('logMeal.portionSizeRequired')}
               </label>
               <div className="grid grid-cols-3 gap-3">
                 {PORTION_SIZES.map((size) => (
@@ -328,12 +335,12 @@ export default function LogMeal() {
             {/* Notes */}
             <div className="animate-slide-up space-y-3" style={{ animationDelay: '0.1s' }}>
               <label className="text-sm font-semibold text-foreground">
-                Notes (optional)
+                {t('logMeal.notesOptional')}
               </label>
               <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Any additional details..."
+                placeholder={t('logMeal.additionalDetails')}
                 className="min-h-[80px]"
               />
             </div>
@@ -344,7 +351,7 @@ export default function LogMeal() {
               disabled={isSubmitting || !foodName.trim() || !portion}
               className="w-full h-14 text-base font-semibold rounded-xl gradient-calm text-primary-foreground border-0 shadow-soft active:scale-[0.98] transition-transform"
             >
-              {isSubmitting ? 'Saving...' : 'Next: Log Symptoms'}
+              {isSubmitting ? t('logMeal.saving') : t('logMeal.nextLogSymptoms')}
             </Button>
           </>
         ) : (
@@ -352,7 +359,7 @@ export default function LogMeal() {
             {/* Bloating Slider */}
             <div className="animate-slide-up space-y-4 bg-card rounded-2xl p-5 border border-border">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-semibold text-foreground">Bloating</label>
+                <label className="text-sm font-semibold text-foreground">{t('logMeal.bloating')}</label>
                 <span className={cn("font-bold text-sm", getSeverityColor(bloating[0]))}>
                   {bloating[0]}/10 — {getSeverityLabel(bloating[0])}
                 </span>
@@ -369,7 +376,7 @@ export default function LogMeal() {
             {/* Pain Slider */}
             <div className="animate-slide-up space-y-4 bg-card rounded-2xl p-5 border border-border" style={{ animationDelay: '0.05s' }}>
               <div className="flex items-center justify-between">
-                <label className="text-sm font-semibold text-foreground">Pain/Cramping</label>
+                <label className="text-sm font-semibold text-foreground">{t('logMeal.painCramping')}</label>
                 <span className={cn("font-bold text-sm", getSeverityColor(pain[0]))}>
                   {pain[0]}/10 — {getSeverityLabel(pain[0])}
                 </span>
@@ -395,7 +402,7 @@ export default function LogMeal() {
                     stoolIssue ? "text-destructive" : "text-muted-foreground"
                   )} />
                 </div>
-                <span className="font-semibold text-foreground text-sm">Stool Issue</span>
+                <span className="font-semibold text-foreground text-sm">{t('logMeal.stoolIssue')}</span>
               </div>
               <Switch
                 checked={stoolIssue}
@@ -411,14 +418,14 @@ export default function LogMeal() {
                 className="w-full h-14 text-base font-semibold rounded-xl gradient-calm text-primary-foreground border-0 shadow-soft active:scale-[0.98] transition-transform"
               >
                 <CheckCircle className="w-5 h-5 mr-2" />
-                {isSubmitting ? 'Saving...' : 'Save Entry'}
+                {isSubmitting ? t('logMeal.saving') : t('logMeal.saveEntry')}
               </Button>
               <Button
                 variant="ghost"
                 onClick={handleSkipSymptoms}
                 className="w-full h-12 text-muted-foreground font-medium hover:text-foreground"
               >
-                Skip symptom logging
+                {t('logMeal.skipSymptomLogging')}
               </Button>
             </div>
           </>

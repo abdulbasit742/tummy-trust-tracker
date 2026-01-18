@@ -1,7 +1,7 @@
 import React from 'react';
 import { Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { DISCLAIMER_TEXT } from '@/data/constants';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface DisclaimerProps {
   className?: string;
@@ -9,6 +9,8 @@ interface DisclaimerProps {
 }
 
 export function Disclaimer({ className, variant = 'default' }: DisclaimerProps) {
+  const { t } = useLanguage();
+  
   return (
     <div className={cn(
       "flex items-start gap-3 rounded-2xl border transition-colors",
@@ -30,7 +32,7 @@ export function Disclaimer({ className, variant = 'default' }: DisclaimerProps) 
         "text-muted-foreground leading-relaxed",
         variant === 'default' ? "text-xs" : "text-[11px]"
       )}>
-        {DISCLAIMER_TEXT}
+        {t('disclaimer.text')}
       </p>
     </div>
   );

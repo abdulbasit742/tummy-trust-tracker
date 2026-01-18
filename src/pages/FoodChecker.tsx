@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { FoodListSkeleton } from '@/components/ui/skeletons';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useAnalytics } from '@/hooks/use-analytics';
 import { calculateToleranceScores, shouldUsePersonalTolerance } from '@/lib/toleranceEngine';
 import { normalizeFoodName, getFoodDisplayName, searchFoods } from '@/lib/utils/foodUtils';
@@ -15,6 +16,7 @@ import { cn } from '@/lib/utils';
 
 export default function FoodChecker() {
   const { user } = useAuth();
+  const { t, isUrdu } = useLanguage();
   const { trackEvent } = useAnalytics();
   const [searchQuery, setSearchQuery] = useState('');
   const [foods, setFoods] = useState<FoodReference[]>([]);
@@ -94,33 +96,33 @@ export default function FoodChecker() {
         {/* Header */}
         <div className="animate-fade-in">
           <h1 className="font-display text-2xl font-bold text-foreground">
-            Food Checker
+            {t('foodChecker.title')}
           </h1>
           <p className="text-muted-foreground text-sm mt-1 leading-relaxed">
-            Check if a food is safe for your IBS
+            {t('foodChecker.subtitle')}
           </p>
           <p className="text-xs text-primary/80 mt-1.5">
-            Personal results improve after tracking reactions.
+            {t('foodChecker.personalNote')}
           </p>
         </div>
 
         {/* Search with Autocomplete */}
         <div className="relative animate-slide-up">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <Search className={`absolute ${isUrdu ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground`} />
           <Input
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
               setSelectedFood(null);
             }}
-            placeholder="Search: Rice, چاول, chawal"
-            className="pl-12 pr-12 h-14 text-base rounded-xl bg-card border-border shadow-soft"
+            placeholder={t('dashboard.searchPlaceholder')}
+            className={`${isUrdu ? 'pr-12 pl-12' : 'pl-12 pr-12'} h-14 text-base rounded-xl bg-card border-border shadow-soft`}
             dir="auto"
           />
           {searchQuery && (
             <button
               onClick={clearSearch}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-xl bg-muted hover:bg-muted/80 transition-colors"
+              className={`absolute ${isUrdu ? 'left-4' : 'right-4'} top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-xl bg-muted hover:bg-muted/80 transition-colors`}
             >
               <X className="w-4 h-4 text-muted-foreground" />
             </button>
@@ -136,14 +138,14 @@ export default function FoodChecker() {
                   <Info className="w-4 h-4 text-caution" />
                 </div>
                 <div>
-                  <p className="font-semibold text-foreground text-sm">"{searchQuery}" not in database</p>
+                  <p className="font-semibold text-foreground text-sm">"{searchQuery}" {t('foodChecker.notInDatabase')}</p>
                   <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
-                    You can still log this food. We'll track your reaction to help determine tolerance.
+                    {t('foodChecker.canStillLog')}
                   </p>
                   <div className="flex items-center gap-2.5 mt-3">
                     <StatusBadge status="caution" size="sm" />
                     <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-                      <Database className="w-3 h-3" /> Default
+                      <Database className="w-3 h-3" /> {t('foodChecker.default')}
                     </span>
                   </div>
                 </div>
@@ -171,11 +173,11 @@ export default function FoodChecker() {
                     <div className="flex items-center gap-2.5 mb-4">
                       {isPersonal ? (
                         <span className="text-xs bg-primary/10 text-primary px-3 py-1.5 rounded-full flex items-center gap-1.5 font-medium">
-                          <User className="w-3 h-3" /> Personalized ({tolerancePercent}%)
+                          <User className="w-3 h-3" /> {t('foodChecker.personalized')} ({tolerancePercent}%)
                         </span>
                       ) : (
                         <span className="text-xs bg-secondary text-secondary-foreground px-3 py-1.5 rounded-full flex items-center gap-1.5 font-medium">
-                          <Database className="w-3 h-3" /> Default
+                          <Database className="w-3 h-3" /> {t('foodChecker.default')}
                         </span>
                       )}
                     </div>
@@ -193,7 +195,7 @@ export default function FoodChecker() {
 
                     {isPersonal && (
                       <p className="text-xs text-muted-foreground">
-                        Based on your logged reactions
+                        {t('foodChecker.basedOnReactions')}
                       </p>
                     )}
                   </>
@@ -207,7 +209,7 @@ export default function FoodChecker() {
         {!selectedFood && !isCustomFood && searchQuery.length >= 1 && (
           <div className="space-y-2 animate-fade-in">
             <h3 className="font-display font-semibold text-muted-foreground text-xs uppercase tracking-wide">
-              Search Results ({filteredFoods.length})
+              {t('foodChecker.searchResults')} ({filteredFoods.length})
             </h3>
             {filteredFoods.length > 0 ? (
               filteredFoods.map((food) => {
@@ -224,7 +226,7 @@ export default function FoodChecker() {
                           {getFoodDisplayName(food)}
                         </span>
                         {isPersonal && (
-                          <span className="text-xs text-primary ml-2 font-medium">• Personal</span>
+                          <span className="text-xs text-primary ml-2 font-medium">• {t('dashboard.personal')}</span>
                         )}
                       </div>
                       <StatusBadge status={status} size="sm" />
@@ -234,7 +236,7 @@ export default function FoodChecker() {
               })
             ) : (
               <p className="text-center text-muted-foreground text-sm py-6">
-                No foods found
+                {t('foodChecker.noFoodsFound')}
               </p>
             )}
           </div>
@@ -244,7 +246,7 @@ export default function FoodChecker() {
         {!selectedFood && !searchQuery && (
           <div className="space-y-3">
             <h3 className="font-display font-semibold text-muted-foreground text-xs uppercase tracking-wide">
-              Browse Foods ({foods.length})
+              {t('foodChecker.browseFoods')} ({foods.length})
             </h3>
             
             {isLoading ? (
@@ -265,7 +267,7 @@ export default function FoodChecker() {
                             {getFoodDisplayName(food)}
                           </span>
                           {isPersonal && (
-                            <span className="text-xs text-primary ml-2 font-medium">• Personal</span>
+                            <span className="text-xs text-primary ml-2 font-medium">• {t('dashboard.personal')}</span>
                           )}
                         </div>
                         <StatusBadge status={status} size="sm" />

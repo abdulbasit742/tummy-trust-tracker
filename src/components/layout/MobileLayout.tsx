@@ -4,23 +4,25 @@ import { LayoutDashboard, Search, PlusCircle, BarChart3, User } from 'lucide-rea
 import { cn } from '@/lib/utils';
 import { NetworkStatus } from '@/components/ui/NetworkStatus';
 import { hapticMedium } from '@/lib/haptics';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface MobileLayoutProps {
   children: React.ReactNode;
   showNav?: boolean;
 }
 
-const navItems = [
-  { path: '/', icon: LayoutDashboard, label: 'Home' },
-  { path: '/food-checker', icon: Search, label: 'Check' },
-  { path: '/log-meal', icon: PlusCircle, label: 'Log', isMain: true },
-  { path: '/insights', icon: BarChart3, label: 'Insights' },
-  { path: '/profile', icon: User, label: 'Profile' },
-];
-
 export function MobileLayout({ children, showNav = true }: MobileLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t, isUrdu } = useLanguage();
+
+  const navItems = [
+    { path: '/', icon: LayoutDashboard, label: t('nav.home') },
+    { path: '/food-checker', icon: Search, label: t('nav.check') },
+    { path: '/log-meal', icon: PlusCircle, label: t('nav.log'), isMain: true },
+    { path: '/insights', icon: BarChart3, label: t('nav.insights') },
+    { path: '/profile', icon: User, label: t('nav.profile') },
+  ];
 
   // Scroll to top on route change
   useEffect(() => {
@@ -68,7 +70,8 @@ export function MobileLayout({ children, showNav = true }: MobileLayoutProps) {
                     </div>
                     <span className={cn(
                       "text-[10px] font-semibold mt-1.5 transition-colors",
-                      isActive ? "text-primary" : "text-muted-foreground"
+                      isActive ? "text-primary" : "text-muted-foreground",
+                      isUrdu && "font-medium"
                     )}>
                       {item.label}
                     </span>
@@ -99,7 +102,8 @@ export function MobileLayout({ children, showNav = true }: MobileLayoutProps) {
                   </div>
                   <span className={cn(
                     "text-[10px] font-medium mt-0.5 transition-all",
-                    isActive && "font-semibold"
+                    isActive && "font-semibold",
+                    isUrdu && "font-medium"
                   )}>
                     {item.label}
                   </span>

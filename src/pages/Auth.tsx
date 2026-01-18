@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Disclaimer } from '@/components/ui/Disclaimer';
@@ -8,14 +9,10 @@ import { Heart, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 
-const authSchema = z.object({
-  email: z.string().email('Please enter a valid email'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-});
-
 export default function Auth() {
   const navigate = useNavigate();
   const { signIn, signUp, user } = useAuth();
+  const { t, isUrdu } = useLanguage();
   const { toast } = useToast();
   
   const [isLogin, setIsLogin] = useState(true);
@@ -23,6 +20,11 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const authSchema = z.object({
+    email: z.string().email(t('auth.invalidEmail')),
+    password: z.string().min(6, t('auth.passwordMinLength')),
+  });
 
   // Redirect if already logged in
   React.useEffect(() => {
@@ -37,7 +39,7 @@ export default function Auth() {
     const validation = authSchema.safeParse({ email, password });
     if (!validation.success) {
       toast({
-        title: "Validation Error",
+        title: t('auth.validationError'),
         description: validation.error.errors[0].message,
         variant: "destructive",
       });
@@ -51,7 +53,7 @@ export default function Auth() {
         const { error } = await signIn(email, password);
         if (error) {
           toast({
-            title: "Sign in failed",
+            title: t('auth.signInFailed'),
             description: error.message,
             variant: "destructive",
           });
@@ -62,14 +64,14 @@ export default function Auth() {
         const { error } = await signUp(email, password);
         if (error) {
           toast({
-            title: "Sign up failed",
+            title: t('auth.signUpFailed'),
             description: error.message,
             variant: "destructive",
           });
         } else {
           toast({
-            title: "Account created!",
-            description: "Please complete your profile setup.",
+            title: t('auth.accountCreated'),
+            description: t('auth.completeProfile'),
           });
           navigate('/');
         }
@@ -91,43 +93,43 @@ export default function Auth() {
             IBS Diet Companion
           </h1>
           <p className="text-muted-foreground mt-1 text-sm">
-            {isLogin ? 'Welcome back' : 'Create your account'}
+            {isLogin ? t('auth.welcomeBack') : t('auth.createAccount')}
           </p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4 animate-slide-up">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Email</label>
+            <label className="text-sm font-medium text-foreground">{t('auth.email')}</label>
             <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Mail className={`absolute ${isUrdu ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground`} />
               <Input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="your@email.com"
-                className="pl-12 h-14 rounded-xl"
+                className={`${isUrdu ? 'pr-12' : 'pl-12'} h-14 rounded-xl`}
                 required
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Password</label>
+            <label className="text-sm font-medium text-foreground">{t('auth.password')}</label>
             <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Lock className={`absolute ${isUrdu ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground`} />
               <Input
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="pl-12 pr-12 h-14 rounded-xl"
+                className={`${isUrdu ? 'pr-12 pl-12' : 'pl-12 pr-12'} h-14 rounded-xl`}
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground transition-colors"
+                className={`absolute ${isUrdu ? 'left-4' : 'right-4'} top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground transition-colors`}
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
@@ -139,19 +141,19 @@ export default function Auth() {
             disabled={isLoading}
             className="w-full h-14 text-base font-semibold rounded-xl gradient-calm text-primary-foreground border-0 shadow-soft"
           >
-            {isLoading ? 'Please wait...' : isLogin ? 'Sign In' : 'Create Account'}
+            {isLoading ? t('auth.pleaseWait') : isLogin ? t('auth.signIn') : t('auth.signUp')}
           </Button>
         </form>
 
         {/* Toggle */}
         <p className="text-center mt-6 text-sm text-muted-foreground">
-          {isLogin ? "Don't have an account? " : "Already have an account? "}
+          {isLogin ? t('auth.dontHaveAccount') + ' ' : t('auth.alreadyHaveAccount') + ' '}
           <button
             type="button"
             onClick={() => setIsLogin(!isLogin)}
             className="text-primary font-semibold hover:underline"
           >
-            {isLogin ? 'Sign up' : 'Sign in'}
+            {isLogin ? t('auth.signUp') : t('auth.signIn')}
           </button>
         </p>
 

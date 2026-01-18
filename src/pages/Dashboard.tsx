@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { ToleranceBar } from '@/components/ui/ToleranceBar';
@@ -26,6 +27,7 @@ import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
+  const { t, isUrdu } = useLanguage();
   
   const [todayMeals, setTodayMeals] = useState<MealLog[]>([]);
   const [toleranceData, setToleranceData] = useState<ToleranceData[]>([]);
@@ -132,7 +134,7 @@ export default function Dashboard() {
         <div className="flex items-center justify-between animate-fade-in">
           <div>
             <h1 className="font-display text-2xl font-bold text-foreground leading-none">
-              Dashboard
+              {t('dashboard.title')}
             </h1>
             <p className="text-muted-foreground text-sm mt-1.5">
               {format(new Date(), 'EEEE, MMMM d, yyyy')}{profile?.ibs_type && ` • ${profile.ibs_type}`}
@@ -148,14 +150,14 @@ export default function Dashboard() {
             className="quick-action-card bg-primary/8 text-primary hover:bg-primary/12 shadow-soft active:scale-[0.97] transition-transform"
           >
             <Search className="w-6 h-6" />
-            <span className="font-semibold text-sm">Food Check</span>
+            <span className="font-semibold text-sm">{t('dashboard.foodCheck')}</span>
           </Button>
           <Button
             onClick={() => navigate('/log-meal')}
             className="quick-action-card bg-success/8 text-success hover:bg-success/12 shadow-soft active:scale-[0.97] transition-transform"
           >
             <PlusCircle className="w-6 h-6" />
-            <span className="font-semibold text-sm">Log Meal</span>
+            <span className="font-semibold text-sm">{t('dashboard.logMeal')}</span>
           </Button>
         </div>
 
@@ -164,23 +166,23 @@ export default function Dashboard() {
           <div className="flex items-center gap-2.5 mb-4">
             <Database className="w-4 h-4 text-primary" />
             <h2 className="font-display text-sm font-semibold text-foreground">
-              Starter Foods ({foods.length})
+              {t('dashboard.starterFoods')} ({foods.length})
             </h2>
           </div>
           
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className={`absolute ${isUrdu ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground`} />
             <Input
               value={foodSearch}
               onChange={(e) => setFoodSearch(e.target.value)}
-              placeholder="Search: Rice, چاول, chawal"
-              className="pl-11 pr-11 h-13"
+              placeholder={t('dashboard.searchPlaceholder')}
+              className={`${isUrdu ? 'pr-11 pl-11' : 'pl-11 pr-11'} h-13`}
               dir="auto"
             />
             {foodSearch && (
               <button
                 onClick={() => setFoodSearch('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg hover:bg-muted transition-colors"
+                className={`absolute ${isUrdu ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 p-2 rounded-lg hover:bg-muted transition-colors`}
               >
                 <X className="w-4 h-4 text-muted-foreground" />
               </button>
@@ -202,7 +204,7 @@ export default function Dashboard() {
                         {getFoodDisplayName(food)}
                       </span>
                       {isPersonal && (
-                        <span className="text-xs text-primary ml-2 font-medium">• Personal</span>
+                        <span className="text-xs text-primary ml-2 font-medium">• {t('dashboard.personal')}</span>
                       )}
                     </div>
                     <StatusBadge status={status} size="sm" />
@@ -218,7 +220,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-2.5 mb-4">
             <Calendar className="w-4 h-4 text-primary" />
             <h2 className="font-display text-sm font-semibold text-foreground">
-              Today's Meals
+              {t('dashboard.todaysMeals')}
             </h2>
           </div>
 
@@ -256,16 +258,16 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="empty-state">
-              <p className="text-muted-foreground text-sm">No meals logged today</p>
+              <p className="text-muted-foreground text-sm">{t('dashboard.noMealsToday')}</p>
               <p className="text-muted-foreground/70 text-xs mt-2 leading-relaxed">
-                Log meals consistently for better insights.
+                {t('dashboard.logConsistently')}
               </p>
               <Button 
                 variant="link" 
                 className="mt-3 text-primary text-sm p-0 h-auto font-semibold"
                 onClick={() => navigate('/log-meal')}
               >
-                Log your first meal
+                {t('dashboard.logFirstMeal')}
               </Button>
             </div>
           )}
@@ -279,7 +281,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-2.5 mb-4">
             <TrendingUp className="w-4 h-4 text-success" />
             <h2 className="font-display text-sm font-semibold text-foreground">
-              Top 5 Safe Foods
+              {t('dashboard.topSafeFoods')}
             </h2>
           </div>
 
@@ -291,7 +293,7 @@ export default function Dashboard() {
                     <span className="font-medium text-foreground text-sm" dir="auto">
                       {getDisplayNameWithUrdu(food.food_name, foods)}
                     </span>
-                    <span className="text-xs text-muted-foreground font-medium">{food.meal_count} logs</span>
+                    <span className="text-xs text-muted-foreground font-medium">{food.meal_count} {t('dashboard.logs')}</span>
                   </div>
                   <ToleranceBar score={food.tolerance_percent} showLabel={false} size="sm" />
                 </div>
@@ -300,10 +302,10 @@ export default function Dashboard() {
           ) : (
             <div className="empty-state">
               <p className="text-muted-foreground text-sm leading-relaxed">
-                Log meals with symptoms to discover your safe foods.
+                {t('dashboard.discoverSafe')}
               </p>
               <p className="text-primary/70 text-xs mt-2.5 font-medium">
-                The more you log, the clearer your triggers become.
+                {t('dashboard.moreYouLog')}
               </p>
             </div>
           )}
@@ -314,7 +316,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-2.5 mb-4">
             <TrendingDown className="w-4 h-4 text-destructive" />
             <h2 className="font-display text-sm font-semibold text-foreground">
-              Top 5 Triggers
+              {t('dashboard.topTriggers')}
             </h2>
           </div>
 
@@ -326,7 +328,7 @@ export default function Dashboard() {
                     <span className="font-medium text-foreground text-sm" dir="auto">
                       {getDisplayNameWithUrdu(food.food_name, foods)}
                     </span>
-                    <span className="text-xs text-muted-foreground font-medium">{food.meal_count} logs</span>
+                    <span className="text-xs text-muted-foreground font-medium">{food.meal_count} {t('dashboard.logs')}</span>
                   </div>
                   <ToleranceBar score={food.tolerance_percent} showLabel={false} size="sm" />
                 </div>
@@ -335,7 +337,7 @@ export default function Dashboard() {
           ) : (
             <div className="empty-state">
               <p className="text-muted-foreground text-sm">
-                No trigger foods identified yet
+                {t('dashboard.noTriggersYet')}
               </p>
             </div>
           )}
