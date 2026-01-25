@@ -7,10 +7,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { StatusBadge } from '@/components/ui/StatusBadge';
+import { SyncStatusIndicator } from '@/components/ui/SyncStatusIndicator';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAnalytics } from '@/hooks/use-analytics';
-import { supabase } from '@/integrations/supabase/client';
+import { useOfflineData } from '@/hooks/use-offline-data';
 import { FoodReference, PortionSize, FoodStatus } from '@/types';
 import { normalizeFoodName, displayFoodName, searchFoods, getFoodDisplayName } from '@/lib/utils/foodUtils';
 import { useToast } from '@/hooks/use-toast';
@@ -49,16 +50,19 @@ export default function LogMeal() {
     { value: 'L', label: t('logMeal.large') },
   ];
 
+  const { getFoods, addMealLog, addSymptomLog, isOnline: networkOnline } = useOfflineData();
+
   useEffect(() => {
     loadFoods();
   }, []);
 
   const loadFoods = async () => {
-    const { data } = await supabase
-      .from('food_reference')
-      .select('*')
-      .order('name');
-    setFoods((data as FoodReference[]) || []);
+    try {
+      const data = await getFoods();
+      setFoods(data || []);
+    } catch (error) {
+      console.error('Error loading foods:', error);
+    }
   };
 
   // Use bilingual search
@@ -83,35 +87,38 @@ export default function LogMeal() {
     // Store normalized food name for consistent matching
     const normalizedFoodName = displayFoodName(foodName);
     
-    const { data, error } = await supabase
-      .from('meal_logs')
-      .insert({
-        user_id: user.id,
+    try {
+      const data = await addMealLog({
         food_name: normalizedFoodName,
         portion: portion,
         eaten_at: new Date().toISOString(),
         notes: notes.trim(),
-      })
-      .select()
-      .single();
+      });
 
-    if (error) {
+      setMealLogId(data.id);
+      trackEvent({ 
+        eventType: 'meal_logged', 
+        metadata: { food_name: normalizedFoodName, portion: portion, offline: !networkOnline } 
+      });
+      
+      // Show offline indicator if saved offline
+      if (!networkOnline) {
+        toast({
+          title: t('logMeal.mealLogged'),
+          description: "Saved offline. Will sync when back online.",
+        });
+      }
+      
+      setStep('symptoms');
+    } catch (error: any) {
       toast({
         title: t('logMeal.errorLogging'),
         description: error.message,
         variant: "destructive",
       });
+    } finally {
       setIsSubmitting(false);
-      return;
     }
-
-    setMealLogId(data.id);
-    trackEvent({ 
-      eventType: 'meal_logged', 
-      metadata: { food_name: normalizedFoodName, portion: portion } 
-    });
-    setStep('symptoms');
-    setIsSubmitting(false);
   };
 
   const handleSymptomSubmit = async () => {
@@ -119,36 +126,34 @@ export default function LogMeal() {
 
     setIsSubmitting(true);
 
-    const { error } = await supabase
-      .from('symptom_logs')
-      .insert({
+    try {
+      await addSymptomLog({
         meal_log_id: mealLogId,
         bloating_0_10: bloating[0],
         pain_0_10: pain[0],
         stool_issue: stoolIssue,
       });
 
-    if (error) {
+      trackEvent({ 
+        eventType: 'symptom_logged', 
+        metadata: { bloating: bloating[0], pain: pain[0], stool_issue: stoolIssue, offline: !networkOnline } 
+      });
+
+      toast({
+        title: t('logMeal.loggedSuccessfully'),
+        description: `${displayFoodName(foodName)} ${t('logMeal.andSymptomsRecorded')}${!networkOnline ? ' (offline)' : ''}`,
+      });
+
+      navigate('/');
+    } catch (error: any) {
       toast({
         title: t('logMeal.errorLoggingSymptoms'),
         description: error.message,
         variant: "destructive",
       });
+    } finally {
       setIsSubmitting(false);
-      return;
     }
-
-    trackEvent({ 
-      eventType: 'symptom_logged', 
-      metadata: { bloating: bloating[0], pain: pain[0], stool_issue: stoolIssue } 
-    });
-
-    toast({
-      title: t('logMeal.loggedSuccessfully'),
-      description: `${displayFoodName(foodName)} ${t('logMeal.andSymptomsRecorded')}`,
-    });
-
-    navigate('/');
   };
 
   const handleSkipSymptoms = () => {
@@ -176,6 +181,9 @@ export default function LogMeal() {
   return (
     <MobileLayout>
       <div className="px-5 py-6 space-y-6">
+        {/* Sync Status */}
+        <SyncStatusIndicator className="justify-end" />
+        
         {/* Header */}
         <div className="animate-fade-in">
           <h1 className="font-display text-2xl font-bold text-foreground">
