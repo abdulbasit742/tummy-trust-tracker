@@ -1,12 +1,13 @@
 // IndexedDB wrapper for offline storage
 const DB_NAME = 'ibs_diet_companion';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 interface OfflineStore {
   foods: any[];
   mealLogs: any[];
   symptomLogs: any[];
   waterLogs: any[];
+  toleranceData: any[];
   profile: any | null;
   syncQueue: SyncQueueItem[];
   lastSyncTime: number;
@@ -59,6 +60,10 @@ const openDB = (): Promise<IDBDatabase> => {
         const waterStore = database.createObjectStore('waterLogs', { keyPath: 'id' });
         waterStore.createIndex('user_id', 'user_id', { unique: false });
         waterStore.createIndex('logged_at', 'logged_at', { unique: false });
+      }
+      if (!database.objectStoreNames.contains('toleranceData')) {
+        const toleranceStore = database.createObjectStore('toleranceData', { keyPath: 'food_name' });
+        toleranceStore.createIndex('user_id', 'user_id', { unique: false });
       }
       if (!database.objectStoreNames.contains('syncQueue')) {
         database.createObjectStore('syncQueue', { keyPath: 'id' });
@@ -193,6 +198,23 @@ export const offlineWaterLogs = {
       w.user_id === userId && 
       new Date(w.logged_at) >= today
     );
+  },
+};
+
+// Tolerance Data operations
+export const offlineToleranceData = {
+  getAll: () => getAll<any>('toleranceData'),
+  save: (data: any) => put('toleranceData', data),
+  saveAll: async (items: any[], userId: string) => {
+    // Add user_id to each item for filtering
+    const withUserId = items.map(item => ({ ...item, user_id: userId }));
+    await putMany('toleranceData', withUserId);
+  },
+  clear: () => clearStore('toleranceData'),
+  
+  getByUserId: async (userId: string): Promise<any[]> => {
+    const all = await getAll<any>('toleranceData');
+    return all.filter(t => t.user_id === userId);
   },
 };
 

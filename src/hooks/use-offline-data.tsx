@@ -6,12 +6,14 @@ import {
   offlineMealLogs, 
   offlineSymptomLogs, 
   offlineWaterLogs,
+  offlineToleranceData,
   isOnline,
   generateOfflineId,
   metadata
 } from '@/lib/offlineStorage';
 import { addToSyncQueue, processSyncQueue, getPendingSyncCount } from '@/lib/syncQueue';
-import { FoodReference } from '@/types';
+import { FoodReference, ToleranceData, FoodStatus, SymptomLog } from '@/types';
+import { normalizeFoodName, displayFoodName, calculateSymptomScore } from '@/lib/utils/foodUtils';
 
 export function useOfflineData() {
   const { user } = useAuth();
@@ -281,6 +283,67 @@ export function useOfflineData() {
     }
   }, [user, updatePendingCount]);
 
+  // Tolerance Data - with offline support and caching
+  const getToleranceData = useCallback(async (): Promise<ToleranceData[]> => {
+    if (!user) return [];
+    
+    try {
+      if (isOnline()) {
+        // Fetch all meal logs with their symptom logs
+        const { data: mealLogs, error: mealError } = await supabase
+          .from('meal_logs')
+          .select('*')
+          .eq('user_id', user.id);
+
+        if (mealError || !mealLogs) {
+          throw new Error('Failed to fetch meal logs');
+        }
+
+        // Cache meal logs for offline
+        await offlineMealLogs.saveAll(mealLogs);
+
+        const { data: symptomLogs, error: symptomError } = await supabase
+          .from('symptom_logs')
+          .select('*')
+          .in('meal_log_id', mealLogs.map(m => m.id));
+
+        if (symptomError) {
+          throw new Error('Failed to fetch symptom logs');
+        }
+
+        // Cache symptom logs for offline
+        if (symptomLogs) {
+          await offlineSymptomLogs.saveAll(symptomLogs);
+        }
+
+        // Calculate tolerance scores
+        const toleranceData = calculateToleranceFromLogs(mealLogs, symptomLogs || []);
+        
+        // Cache tolerance data for offline
+        await offlineToleranceData.saveAll(toleranceData, user.id);
+        await metadata.set('tolerance_last_sync', Date.now());
+        
+        return toleranceData;
+      }
+    } catch (error) {
+      console.log('Falling back to offline tolerance data');
+    }
+    
+    // Fallback to cached tolerance data
+    const cached = await offlineToleranceData.getByUserId(user.id);
+    if (cached.length > 0) {
+      return cached;
+    }
+    
+    // If no cached tolerance, try to calculate from cached logs
+    const cachedMeals = await offlineMealLogs.getByUserId(user.id);
+    const cachedSymptoms = await offlineSymptomLogs.getAll();
+    const mealIds = cachedMeals.map(m => m.id);
+    const relevantSymptoms = cachedSymptoms.filter(s => mealIds.includes(s.meal_log_id));
+    
+    return calculateToleranceFromLogs(cachedMeals, relevantSymptoms);
+  }, [user]);
+
   return {
     // Status
     isOnline: isOnline(),
@@ -303,5 +366,71 @@ export function useOfflineData() {
     // Water Logs
     getTodayWaterLogs,
     addWaterLog,
+    
+    // Tolerance Data
+    getToleranceData,
   };
+}
+
+// Helper function to calculate tolerance from logs (used for both online and offline)
+function calculateToleranceFromLogs(mealLogs: any[], symptomLogs: any[]): ToleranceData[] {
+  // Group symptoms by normalized food name
+  const foodSymptoms: Record<string, { symptoms: any[]; count: number; displayName: string }> = {};
+
+  mealLogs.forEach(meal => {
+    const mealSymptoms = symptomLogs.filter(s => s.meal_log_id === meal.id);
+    const normalizedName = normalizeFoodName(meal.food_name);
+    
+    if (!foodSymptoms[normalizedName]) {
+      foodSymptoms[normalizedName] = { 
+        symptoms: [], 
+        count: 0, 
+        displayName: displayFoodName(meal.food_name) 
+      };
+    }
+    
+    foodSymptoms[normalizedName].symptoms.push(...mealSymptoms);
+    foodSymptoms[normalizedName].count++;
+  });
+
+  // Calculate tolerance for each food
+  const toleranceData: ToleranceData[] = [];
+
+  Object.entries(foodSymptoms).forEach(([normalizedName, data]) => {
+    if (data.symptoms.length === 0) {
+      toleranceData.push({
+        food_name: data.displayName,
+        tolerance_percent: 50,
+        status: 'caution',
+        meal_count: data.count,
+        symptom_log_count: 0,
+      });
+      return;
+    }
+
+    // Calculate average symptom score using the standard formula
+    const avgScore = data.symptoms.reduce((sum: number, s: any) => {
+      const score = calculateSymptomScore(s.bloating_0_10, s.pain_0_10, s.stool_issue);
+      return sum + score;
+    }, 0) / data.symptoms.length;
+
+    // tolerance_percent = clamp(100 - (average * 10), 0, 100)
+    const tolerancePercent = Math.max(0, Math.min(100, Math.round(100 - avgScore * 10)));
+
+    // Classify status
+    let status: FoodStatus;
+    if (tolerancePercent >= 70) status = 'safe';
+    else if (tolerancePercent >= 40) status = 'caution';
+    else status = 'avoid';
+
+    toleranceData.push({
+      food_name: data.displayName,
+      tolerance_percent: tolerancePercent,
+      status,
+      meal_count: data.count,
+      symptom_log_count: data.symptoms.length,
+    });
+  });
+
+  return toleranceData.sort((a, b) => b.tolerance_percent - a.tolerance_percent);
 }

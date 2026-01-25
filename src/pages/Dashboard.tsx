@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { supabase } from '@/integrations/supabase/client';
+import { useOfflineData } from '@/hooks/use-offline-data';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { ToleranceBar } from '@/components/ui/ToleranceBar';
 import { StatusBadge } from '@/components/ui/StatusBadge';
@@ -13,13 +13,14 @@ import { ShareButton } from '@/components/ui/ShareButton';
 import { MotivationalTip } from '@/components/ui/MotivationalTip';
 import { WaterTracker } from '@/components/ui/WaterTracker';
 import { WaterReminder } from '@/components/ui/WaterReminder';
+import { SyncStatusIndicator } from '@/components/ui/SyncStatusIndicator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DashboardSkeleton, CardSkeleton, FoodListSkeleton } from '@/components/ui/skeletons';
-import { calculateToleranceScores, shouldUsePersonalTolerance } from '@/lib/toleranceEngine';
+import { shouldUsePersonalTolerance } from '@/lib/toleranceEngine';
 import { getDisplayNameWithUrdu, searchFoods, getFoodDisplayName } from '@/lib/utils/foodUtils';
 import { MealLog, ToleranceData, FoodReference, FoodStatus } from '@/types';
-import { Search, PlusCircle, TrendingUp, TrendingDown, Calendar, Database, X } from 'lucide-react';
+import { Search, PlusCircle, TrendingUp, TrendingDown, Calendar, Database, X, WifiOff } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
@@ -28,52 +29,54 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   const { t, isUrdu } = useLanguage();
+  const { 
+    getFoods, 
+    getTodayMealLogs, 
+    getToleranceData,
+    isOnline: online,
+    pendingSyncCount,
+    isSyncing 
+  } = useOfflineData();
   
   const [todayMeals, setTodayMeals] = useState<MealLog[]>([]);
   const [toleranceData, setToleranceData] = useState<ToleranceData[]>([]);
   const [foods, setFoods] = useState<FoodReference[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isOfflineData, setIsOfflineData] = useState(false);
   
   // Starter foods search
   const [foodSearch, setFoodSearch] = useState('');
-
-  useEffect(() => {
-    if (user) {
-      loadData();
-    }
-  }, [user]);
 
   const loadData = useCallback(async () => {
     if (!user) return;
     
     setIsLoading(true);
+    setIsOfflineData(!navigator.onLine);
 
-    // Fetch today's meals
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const { data: meals } = await supabase
-      .from('meal_logs')
-      .select('*')
-      .eq('user_id', user.id)
-      .gte('eaten_at', today.toISOString())
-      .order('eaten_at', { ascending: false });
+    try {
+      // Fetch today's meals with offline fallback
+      const meals = await getTodayMealLogs();
+      setTodayMeals((meals as MealLog[]) || []);
 
-    setTodayMeals((meals as MealLog[]) || []);
+      // Calculate tolerance scores with offline fallback
+      const scores = await getToleranceData();
+      setToleranceData(scores);
 
-    // Calculate tolerance scores
-    const scores = await calculateToleranceScores(user.id);
-    setToleranceData(scores);
-
-    // Fetch food reference
-    const { data: foodData } = await supabase
-      .from('food_reference')
-      .select('*')
-      .order('name');
-    setFoods((foodData as FoodReference[]) || []);
+      // Fetch food reference with offline fallback
+      const foodData = await getFoods();
+      setFoods((foodData as FoodReference[]) || []);
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+    }
 
     setIsLoading(false);
-  }, [user]);
+  }, [user, getTodayMealLogs, getToleranceData, getFoods]);
+
+  useEffect(() => {
+    if (user) {
+      loadData();
+    }
+  }, [user, loadData]);
 
   const { handlers, PullIndicator } = usePullToRefresh({
     onRefresh: loadData,
@@ -133,14 +136,22 @@ export default function Dashboard() {
         {/* Header */}
         <div className="flex items-center justify-between animate-fade-in">
           <div>
-            <h1 className="font-display text-2xl font-bold text-foreground leading-none">
-              {t('dashboard.title')}
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className="font-display text-2xl font-bold text-foreground leading-none">
+                {t('dashboard.title')}
+              </h1>
+              {isOfflineData && (
+                <WifiOff className="w-4 h-4 text-warning" />
+              )}
+            </div>
             <p className="text-muted-foreground text-sm mt-1.5">
               {format(new Date(), 'EEEE, MMMM d, yyyy')}{profile?.ibs_type && ` • ${profile.ibs_type}`}
             </p>
           </div>
-          <ShareButton variant="icon" />
+          <div className="flex items-center gap-2">
+            <SyncStatusIndicator />
+            <ShareButton variant="icon" />
+          </div>
         </div>
 
         {/* Quick Actions */}
