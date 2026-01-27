@@ -220,7 +220,10 @@ export default function Insights() {
         <PullIndicator />
         
         {/* Sync Status */}
-        <SyncStatusIndicator />
+        <SyncStatusIndicator 
+          showRefreshButton={true}
+          onRefresh={loadData}
+        />
         
         {/* Header */}
         <div className="animate-fade-in">
