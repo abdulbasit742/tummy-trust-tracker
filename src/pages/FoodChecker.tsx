@@ -96,7 +96,10 @@ export default function FoodChecker() {
     <MobileLayout>
       <div className="px-5 py-6 space-y-5">
         {/* Sync Status */}
-        <SyncStatusIndicator />
+        <SyncStatusIndicator 
+          showRefreshButton={true}
+          onRefresh={loadData}
+        />
 
         {/* Header */}
         <div className="animate-fade-in">

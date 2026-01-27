@@ -27,6 +27,9 @@ export const translations = {
       pendingSync: 'items pending sync',
       syncing: 'Syncing...',
       syncComplete: 'Sync complete!',
+      refreshing: 'Refreshing...',
+      refresh: 'Refresh',
+      syncNow: 'Sync Now',
     },
 
     // Navigation
@@ -325,6 +328,9 @@ export const translations = {
       pendingSync: 'آئٹمز سنک ہونے باقی ہیں',
       syncing: 'سنک ہو رہا ہے...',
       syncComplete: 'سنک مکمل!',
+      refreshing: 'ریفریش ہو رہا ہے...',
+      refresh: 'ریفریش',
+      syncNow: 'ابھی سنک کریں',
     },
 
     // Navigation
