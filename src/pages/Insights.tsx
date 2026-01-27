@@ -1,21 +1,23 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { Disclaimer } from '@/components/ui/Disclaimer';
 import { ToleranceBar } from '@/components/ui/ToleranceBar';
 import { Button } from '@/components/ui/button';
 import { InsightsSkeleton } from '@/components/ui/skeletons';
-import { calculateToleranceScores, getToleranceLabel } from '@/lib/toleranceEngine';
-import { calculateProgressData, ProgressData } from '@/lib/progressEngine';
+import { SyncStatusIndicator } from '@/components/ui/SyncStatusIndicator';
+import { getToleranceLabel } from '@/lib/toleranceEngine';
+import { ProgressData } from '@/lib/progressEngine';
 import { getDisplayNameWithUrdu } from '@/lib/utils/foodUtils';
+import { isOnline } from '@/lib/offlineStorage';
+import { useOfflineData } from '@/hooks/use-offline-data';
 import { ToleranceData, FoodReference } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 import { 
   TrendingUp, TrendingDown, Minus, Activity, 
   Target, FileText, Copy, CheckCircle, AlertTriangle,
-  Calendar, ClipboardList, Utensils, Sunrise, Sun, Moon, RefreshCw
+  Calendar, ClipboardList, Utensils, Sunrise, Sun, Moon, RefreshCw, WifiOff
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -24,6 +26,7 @@ type TabType = 'progress' | 'triggers' | 'doctor' | 'suggestions';
 export default function Insights() {
   const { user, profile } = useAuth();
   const { toast } = useToast();
+  const { getProgressData, getToleranceData, getFoods, getDefaultSafeFoods } = useOfflineData();
   
   const [activeTab, setActiveTab] = useState<TabType>('progress');
   const [progressData, setProgressData] = useState<ProgressData | null>(null);
@@ -32,6 +35,7 @@ export default function Insights() {
   const [foods, setFoods] = useState<FoodReference[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [isOfflineData, setIsOfflineData] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -42,20 +46,22 @@ export default function Insights() {
   const loadData = useCallback(async () => {
     if (!user) return;
     setIsLoading(true);
+    const online = isOnline();
+    setIsOfflineData(!online);
     
-    const [progress, tolerance, foodsData, allFoods] = await Promise.all([
-      calculateProgressData(user.id),
-      calculateToleranceScores(user.id),
-      supabase.from('food_reference').select('name').eq('default_status', 'safe'),
-      supabase.from('food_reference').select('*').order('name'),
+    const [progress, tolerance, safeFoods, allFoods] = await Promise.all([
+      getProgressData(),
+      getToleranceData(),
+      getDefaultSafeFoods(),
+      getFoods(),
     ]);
     
     setProgressData(progress);
     setToleranceData(tolerance);
-    setDefaultSafeFoods(foodsData.data?.map(f => f.name) || []);
-    setFoods((allFoods.data as FoodReference[]) || []);
+    setDefaultSafeFoods(safeFoods);
+    setFoods(allFoods);
     setIsLoading(false);
-  }, [user]);
+  }, [user, getProgressData, getToleranceData, getDefaultSafeFoods, getFoods]);
 
   const { handlers, PullIndicator } = usePullToRefresh({
     onRefresh: loadData,
@@ -212,11 +218,20 @@ export default function Insights() {
         onTouchEnd={handlers.onTouchEnd}
       >
         <PullIndicator />
+        
+        {/* Sync Status */}
+        <SyncStatusIndicator />
+        
         {/* Header */}
         <div className="animate-fade-in">
-          <h1 className="font-display text-2xl font-bold text-foreground">
-            Insights
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="font-display text-2xl font-bold text-foreground">
+              Insights
+            </h1>
+            {isOfflineData && (
+              <WifiOff className="w-4 h-4 text-muted-foreground" />
+            )}
+          </div>
           <p className="text-muted-foreground text-sm mt-1 leading-relaxed">
             Understand your IBS patterns
           </p>

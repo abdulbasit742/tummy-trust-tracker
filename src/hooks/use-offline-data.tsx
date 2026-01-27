@@ -14,6 +14,7 @@ import {
 import { addToSyncQueue, processSyncQueue, getPendingSyncCount } from '@/lib/syncQueue';
 import { FoodReference, ToleranceData, FoodStatus, SymptomLog } from '@/types';
 import { normalizeFoodName, displayFoodName, calculateSymptomScore } from '@/lib/utils/foodUtils';
+import { ProgressData, calculateProgressData, calculateProgressFromLogs } from '@/lib/progressEngine';
 
 export function useOfflineData() {
   const { user } = useAuth();
@@ -344,6 +345,39 @@ export function useOfflineData() {
     return calculateToleranceFromLogs(cachedMeals, relevantSymptoms);
   }, [user]);
 
+  // Progress Data - with offline support
+  const getProgressData = useCallback(async (): Promise<ProgressData | null> => {
+    if (!user) return null;
+    
+    // calculateProgressData already handles offline fallback
+    return calculateProgressData(user.id);
+  }, [user]);
+
+  // Get default safe foods for suggestions
+  const getDefaultSafeFoods = useCallback(async (): Promise<string[]> => {
+    try {
+      if (isOnline()) {
+        const { data } = await supabase
+          .from('food_reference')
+          .select('name')
+          .eq('default_status', 'safe');
+        
+        const names = data?.map(f => f.name) || [];
+        
+        // Cache for offline
+        await metadata.set('default_safe_foods', names);
+        
+        return names;
+      }
+    } catch (error) {
+      console.log('Falling back to cached default safe foods');
+    }
+    
+    // Fallback to cached
+    const cached = await metadata.get('default_safe_foods');
+    return cached || [];
+  }, []);
+
   return {
     // Status
     isOnline: isOnline(),
@@ -369,6 +403,12 @@ export function useOfflineData() {
     
     // Tolerance Data
     getToleranceData,
+    
+    // Progress Data
+    getProgressData,
+    
+    // Default Safe Foods
+    getDefaultSafeFoods,
   };
 }
 

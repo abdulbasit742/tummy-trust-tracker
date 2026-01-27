@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { SymptomLog } from '@/types';
 import { calculateSymptomScore } from './utils/foodUtils';
+import { isOnline, offlineMealLogs, offlineSymptomLogs, metadata } from './offlineStorage';
 
 export interface ProgressData {
   last7DaysAvg: number | null;
@@ -12,31 +13,18 @@ export interface ProgressData {
   guidanceMessage: string;
 }
 
-export async function calculateProgressData(userId: string): Promise<ProgressData> {
+// Calculate progress from provided meal and symptom logs (for offline use)
+export function calculateProgressFromLogs(mealLogs: any[], symptomLogs: any[]): ProgressData {
   const now = new Date();
   const day7Ago = new Date(now);
   day7Ago.setDate(day7Ago.getDate() - 7);
   const day14Ago = new Date(now);
   day14Ago.setDate(day14Ago.getDate() - 14);
 
-  // Fetch meal logs for last 14 days
-  const { data: mealLogs } = await supabase
-    .from('meal_logs')
-    .select('*')
-    .eq('user_id', userId)
-    .gte('eaten_at', day14Ago.toISOString())
-    .order('eaten_at', { ascending: false });
-
-  const meals = mealLogs || [];
-  
-  // Get symptom logs for these meals
+  // Filter meals from last 14 days
+  const meals = mealLogs.filter(m => new Date(m.eaten_at) >= day14Ago);
   const mealIds = meals.map(m => m.id);
-  const { data: symptomLogs } = await supabase
-    .from('symptom_logs')
-    .select('*')
-    .in('meal_log_id', mealIds);
-
-  const symptoms = (symptomLogs || []) as SymptomLog[];
+  const symptoms = symptomLogs.filter(s => mealIds.includes(s.meal_log_id)) as SymptomLog[];
 
   // Split into last 7 days and previous 7 days
   const mealsLast7 = meals.filter(m => new Date(m.eaten_at) >= day7Ago);
@@ -104,4 +92,64 @@ export async function calculateProgressData(userId: string): Promise<ProgressDat
     completionRatio,
     guidanceMessage,
   };
+}
+
+export async function calculateProgressData(userId: string): Promise<ProgressData> {
+  const now = new Date();
+  const day14Ago = new Date(now);
+  day14Ago.setDate(day14Ago.getDate() - 14);
+
+  try {
+    if (isOnline()) {
+      // Fetch meal logs for last 14 days
+      const { data: mealLogs } = await supabase
+        .from('meal_logs')
+        .select('*')
+        .eq('user_id', userId)
+        .gte('eaten_at', day14Ago.toISOString())
+        .order('eaten_at', { ascending: false });
+
+      const meals = mealLogs || [];
+      
+      // Cache meal logs for offline
+      if (meals.length > 0) {
+        await offlineMealLogs.saveAll(meals);
+      }
+      
+      // Get symptom logs for these meals
+      const mealIds = meals.map(m => m.id);
+      const { data: symptomLogs } = await supabase
+        .from('symptom_logs')
+        .select('*')
+        .in('meal_log_id', mealIds);
+
+      const symptoms = symptomLogs || [];
+      
+      // Cache symptom logs for offline
+      if (symptoms.length > 0) {
+        await offlineSymptomLogs.saveAll(symptoms);
+      }
+
+      const result = calculateProgressFromLogs(meals, symptoms);
+      
+      // Cache progress data
+      await metadata.set(`progress_${userId}`, { ...result, cachedAt: Date.now() });
+      
+      return result;
+    }
+  } catch (error) {
+    console.log('Falling back to offline progress data');
+  }
+
+  // Offline: try cached progress first
+  const cachedProgress = await metadata.get(`progress_${userId}`);
+  if (cachedProgress) {
+    return cachedProgress;
+  }
+
+  // Calculate from cached logs
+  const cachedMeals = await offlineMealLogs.getByUserId(userId);
+  const cachedSymptoms = await offlineSymptomLogs.getAll();
+  
+  return calculateProgressFromLogs(cachedMeals, cachedSymptoms);
 }
