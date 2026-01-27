@@ -4,25 +4,29 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Disclaimer } from '@/components/ui/Disclaimer';
 import { Input } from '@/components/ui/input';
 import { FoodListSkeleton } from '@/components/ui/skeletons';
-import { supabase } from '@/integrations/supabase/client';
+import { SyncStatusIndicator } from '@/components/ui/SyncStatusIndicator';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAnalytics } from '@/hooks/use-analytics';
-import { calculateToleranceScores, shouldUsePersonalTolerance } from '@/lib/toleranceEngine';
+import { useOfflineData } from '@/hooks/use-offline-data';
+import { shouldUsePersonalTolerance } from '@/lib/toleranceEngine';
 import { normalizeFoodName, getFoodDisplayName, searchFoods } from '@/lib/utils/foodUtils';
 import { FoodReference, FoodStatus, ToleranceData } from '@/types';
-import { Search, X, Info, User, Database } from 'lucide-react';
+import { Search, X, Info, User, Database, WifiOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { isOnline } from '@/lib/offlineStorage';
 
 export default function FoodChecker() {
   const { user } = useAuth();
   const { t, isUrdu } = useLanguage();
   const { trackEvent } = useAnalytics();
+  const { getFoods, getToleranceData } = useOfflineData();
   const [searchQuery, setSearchQuery] = useState('');
   const [foods, setFoods] = useState<FoodReference[]>([]);
   const [toleranceData, setToleranceData] = useState<ToleranceData[]>([]);
   const [selectedFood, setSelectedFood] = useState<FoodReference | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isOfflineData, setIsOfflineData] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -30,18 +34,16 @@ export default function FoodChecker() {
 
   const loadData = async () => {
     setIsLoading(true);
+    const online = isOnline();
+    setIsOfflineData(!online);
     
-    // Fetch food reference
-    const { data: foodData } = await supabase
-      .from('food_reference')
-      .select('*')
-      .order('name');
-    
-    setFoods((foodData as FoodReference[]) || []);
+    // Fetch food reference (online or cached)
+    const foodData = await getFoods();
+    setFoods(foodData || []);
 
-    // Get personal tolerance data
+    // Get personal tolerance data (online or cached)
     if (user) {
-      const scores = await calculateToleranceScores(user.id);
+      const scores = await getToleranceData();
       setToleranceData(scores);
     }
     
@@ -93,11 +95,19 @@ export default function FoodChecker() {
   return (
     <MobileLayout>
       <div className="px-5 py-6 space-y-5">
+        {/* Sync Status */}
+        <SyncStatusIndicator />
+
         {/* Header */}
         <div className="animate-fade-in">
-          <h1 className="font-display text-2xl font-bold text-foreground">
-            {t('foodChecker.title')}
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="font-display text-2xl font-bold text-foreground">
+              {t('foodChecker.title')}
+            </h1>
+            {isOfflineData && (
+              <WifiOff className="w-4 h-4 text-muted-foreground" />
+            )}
+          </div>
           <p className="text-muted-foreground text-sm mt-1 leading-relaxed">
             {t('foodChecker.subtitle')}
           </p>
