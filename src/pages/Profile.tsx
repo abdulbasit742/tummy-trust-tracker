@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -9,6 +9,8 @@ import { Disclaimer } from '@/components/ui/Disclaimer';
 import { EarlyUserStatus, WhyThisApp } from '@/components/ui/FreeAccessBanner';
 import { ShareButton } from '@/components/ui/ShareButton';
 import { CustomTipsEditor } from '@/components/ui/CustomTipsEditor';
+import { SyncStatusIndicator } from '@/components/ui/SyncStatusIndicator';
+import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
@@ -53,13 +55,7 @@ export default function Profile() {
   const [isEditingTips, setIsEditingTips] = useState(false);
   const [isSavingTips, setIsSavingTips] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      loadData();
-    }
-  }, [user]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!user) return;
     
     setIsLoading(true);
@@ -88,7 +84,17 @@ export default function Profile() {
     setToleranceData(scores);
 
     setIsLoading(false);
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      loadData();
+    }
+  }, [user, loadData]);
+
+  const { handlers, PullIndicator } = usePullToRefresh({
+    onRefresh: loadData,
+  });
 
   const handleDeleteMeal = async (mealId: string) => {
     const { error } = await supabase
@@ -286,7 +292,18 @@ export default function Profile() {
 
   return (
     <MobileLayout>
-      <div className="px-5 py-6 space-y-6">
+      <div 
+        className="px-5 py-6 space-y-6"
+        {...handlers}
+      >
+        <PullIndicator />
+        {/* Sync Status */}
+        <SyncStatusIndicator 
+          className="justify-end" 
+          showRefreshButton 
+          onRefresh={loadData}
+        />
+        
         {/* Header */}
         <div className="flex items-center justify-between animate-fade-in">
           <div>

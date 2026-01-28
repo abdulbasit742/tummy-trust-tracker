@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MobileLayout } from '@/components/layout/MobileLayout';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { SyncStatusIndicator } from '@/components/ui/SyncStatusIndicator';
+import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAnalytics } from '@/hooks/use-analytics';
@@ -52,18 +53,22 @@ export default function LogMeal() {
 
   const { getFoods, addMealLog, addSymptomLog, isOnline: networkOnline } = useOfflineData();
 
-  useEffect(() => {
-    loadFoods();
-  }, []);
-
-  const loadFoods = async () => {
+  const loadData = useCallback(async () => {
     try {
       const data = await getFoods();
       setFoods(data || []);
     } catch (error) {
       console.error('Error loading foods:', error);
     }
-  };
+  }, [getFoods]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const { handlers, PullIndicator } = usePullToRefresh({
+    onRefresh: loadData,
+  });
 
   // Use bilingual search
   const suggestions = searchFoods(foodName, foods).slice(0, 6);
@@ -180,9 +185,17 @@ export default function LogMeal() {
 
   return (
     <MobileLayout>
-      <div className="px-5 py-6 space-y-6">
+      <div 
+        className="px-5 py-6 space-y-6"
+        {...handlers}
+      >
+        <PullIndicator />
         {/* Sync Status */}
-        <SyncStatusIndicator className="justify-end" />
+        <SyncStatusIndicator 
+          className="justify-end" 
+          showRefreshButton 
+          onRefresh={loadData}
+        />
         
         {/* Header */}
         <div className="animate-fade-in">
