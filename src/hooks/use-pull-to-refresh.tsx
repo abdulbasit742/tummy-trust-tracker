@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, TouchEvent } from 'react';
+import { hapticLight, hapticMedium } from '@/lib/haptics';
 
 interface UsePullToRefreshOptions {
   onRefresh: () => Promise<void>;
@@ -26,12 +27,14 @@ export function usePullToRefresh({
   const [pullDistance, setPullDistance] = useState(0);
   const startY = useRef(0);
   const isPulling = useRef(false);
+  const hasTriggeredThresholdHaptic = useRef(false);
 
   const onTouchStart = useCallback((e: TouchEvent) => {
     // Only enable pull-to-refresh when at top of page
     if (window.scrollY === 0 && !isRefreshing) {
       startY.current = e.touches[0].clientY;
       isPulling.current = true;
+      hasTriggeredThresholdHaptic.current = false;
     }
   }, [isRefreshing]);
 
@@ -46,8 +49,17 @@ export function usePullToRefresh({
       const resistance = 0.5;
       const pull = Math.min(diff * resistance, maxPull);
       setPullDistance(pull);
+      
+      // Trigger haptic when crossing threshold
+      if (pull >= threshold && !hasTriggeredThresholdHaptic.current) {
+        hapticLight();
+        hasTriggeredThresholdHaptic.current = true;
+      } else if (pull < threshold && hasTriggeredThresholdHaptic.current) {
+        // Reset if user pulls back below threshold
+        hasTriggeredThresholdHaptic.current = false;
+      }
     }
-  }, [isRefreshing, maxPull]);
+  }, [isRefreshing, maxPull, threshold]);
 
   const onTouchEnd = useCallback(async () => {
     if (!isPulling.current) return;
@@ -56,6 +68,7 @@ export function usePullToRefresh({
     if (pullDistance >= threshold && !isRefreshing) {
       setIsRefreshing(true);
       setPullDistance(threshold); // Hold at threshold during refresh
+      hapticMedium(); // Stronger haptic when refresh triggers
       
       try {
         await onRefresh();
