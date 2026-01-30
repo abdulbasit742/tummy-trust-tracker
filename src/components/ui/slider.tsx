@@ -2,19 +2,33 @@ import * as React from "react";
 import * as SliderPrimitive from "@radix-ui/react-slider";
 
 import { cn } from "@/lib/utils";
+import { hapticLight } from "@/lib/haptics";
 
 const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>
->(({ className, ...props }, ref) => (
-  <SliderPrimitive.Root
-    ref={ref}
-    className={cn(
-      "relative flex w-full touch-none select-none items-center py-3",
-      className
-    )}
-    {...props}
-  >
+>(({ className, onValueChange, ...props }, ref) => {
+  const lastValue = React.useRef<number | null>(null);
+
+  const handleValueChange = React.useCallback((value: number[]) => {
+    // Trigger haptic on each step change
+    if (lastValue.current !== null && lastValue.current !== value[0]) {
+      hapticLight();
+    }
+    lastValue.current = value[0];
+    onValueChange?.(value);
+  }, [onValueChange]);
+
+  return (
+    <SliderPrimitive.Root
+      ref={ref}
+      className={cn(
+        "relative flex w-full touch-none select-none items-center py-3",
+        className
+      )}
+      onValueChange={handleValueChange}
+      {...props}
+    >
     <SliderPrimitive.Track className="relative h-3 w-full grow overflow-hidden rounded-full bg-secondary">
       <SliderPrimitive.Range className="absolute h-full bg-primary transition-all duration-150" />
     </SliderPrimitive.Track>
@@ -28,8 +42,9 @@ const Slider = React.forwardRef<
         "cursor-grab active:cursor-grabbing"
       )}
     />
-  </SliderPrimitive.Root>
-));
+    </SliderPrimitive.Root>
+  );
+});
 Slider.displayName = SliderPrimitive.Root.displayName;
 
 export { Slider };
