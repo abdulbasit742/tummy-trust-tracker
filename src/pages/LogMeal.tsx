@@ -17,6 +17,7 @@ import { FoodReference, PortionSize, FoodStatus } from '@/types';
 import { normalizeFoodName, displayFoodName, searchFoods, getFoodDisplayName } from '@/lib/utils/foodUtils';
 import { useToast } from '@/hooks/use-toast';
 import { Utensils, CheckCircle, AlertCircle, Info, X } from 'lucide-react';
+import { hapticLight } from '@/lib/haptics';
 import { cn } from '@/lib/utils';
 
 type Step = 'meal' | 'symptoms';
@@ -341,7 +342,10 @@ export default function LogMeal() {
                 {PORTION_SIZES.map((size) => (
                   <button
                     key={size.value}
-                    onClick={() => setPortion(size.value as PortionSize)}
+                    onClick={() => {
+                      hapticLight();
+                      setPortion(size.value as PortionSize);
+                    }}
                     className={cn(
                       "pill-button text-center",
                       portion === size.value && "pill-button-active"
