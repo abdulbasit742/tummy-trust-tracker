@@ -431,7 +431,10 @@ export default function LogMeal() {
               </div>
               <Switch
                 checked={stoolIssue}
-                onCheckedChange={setStoolIssue}
+                onCheckedChange={(checked) => {
+                  hapticLight();
+                  setStoolIssue(checked);
+                }}
               />
             </div>
 
