@@ -276,10 +276,11 @@ export default function LogMeal() {
                       {suggestions.map((food) => (
                         <button
                           key={food.id}
-                          onClick={() => {
-                            setFoodName(food.name);
-                            setShowSuggestions(false);
-                          }}
+                        onClick={() => {
+                          hapticLight();
+                          setFoodName(food.name);
+                          setShowSuggestions(false);
+                        }}
                           className="w-full text-left px-4 py-3.5 transition-colors flex items-center justify-between min-h-[52px]"
                           style={{ backgroundColor: 'hsl(40 40% 99%)' }}
                           onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(42 18% 94%)'}
