@@ -2,7 +2,7 @@ import * as React from "react";
 import * as SliderPrimitive from "@radix-ui/react-slider";
 
 import { cn } from "@/lib/utils";
-import { hapticLight } from "@/lib/haptics";
+import { hapticForSliderThreshold } from "@/lib/haptics";
 
 const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
@@ -11,9 +11,9 @@ const Slider = React.forwardRef<
   const lastValue = React.useRef<number | null>(null);
 
   const handleValueChange = React.useCallback((value: number[]) => {
-    // Trigger haptic on each step change
+    // Trigger haptic with threshold detection (0-10 scale thresholds)
     if (lastValue.current !== null && lastValue.current !== value[0]) {
-      hapticLight();
+      hapticForSliderThreshold(value[0], lastValue.current, [3, 5, 7]);
     }
     lastValue.current = value[0];
     onValueChange?.(value);

@@ -17,7 +17,7 @@ import { FoodReference, PortionSize, FoodStatus } from '@/types';
 import { normalizeFoodName, displayFoodName, searchFoods, getFoodDisplayName } from '@/lib/utils/foodUtils';
 import { useToast } from '@/hooks/use-toast';
 import { Utensils, CheckCircle, AlertCircle, Info, X } from 'lucide-react';
-import { hapticLight } from '@/lib/haptics';
+import { hapticSelection, hapticSuccess, hapticLight } from '@/lib/haptics';
 import { cn } from '@/lib/utils';
 
 type Step = 'meal' | 'symptoms';
@@ -139,6 +139,9 @@ export default function LogMeal() {
         pain_0_10: pain[0],
         stool_issue: stoolIssue,
       });
+
+      // Success haptic for completed entry
+      hapticSuccess();
 
       trackEvent({ 
         eventType: 'symptom_logged', 
@@ -277,7 +280,7 @@ export default function LogMeal() {
                         <button
                           key={food.id}
                         onClick={() => {
-                          hapticLight();
+                          hapticSelection();
                           setFoodName(food.name);
                           setShowSuggestions(false);
                         }}
@@ -344,7 +347,7 @@ export default function LogMeal() {
                   <button
                     key={size.value}
                     onClick={() => {
-                      hapticLight();
+                      hapticSelection();
                       setPortion(size.value as PortionSize);
                     }}
                     className={cn(
