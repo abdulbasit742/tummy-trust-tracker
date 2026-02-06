@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, TouchEvent } from 'react';
-import { hapticLight, hapticMedium } from '@/lib/haptics';
+import { hapticSelection, hapticSuccess } from '@/lib/haptics';
 
 interface UsePullToRefreshOptions {
   onRefresh: () => Promise<void>;
@@ -52,7 +52,7 @@ export function usePullToRefresh({
       
       // Trigger haptic when crossing threshold
       if (pull >= threshold && !hasTriggeredThresholdHaptic.current) {
-        hapticLight();
+        hapticSelection();
         hasTriggeredThresholdHaptic.current = true;
       } else if (pull < threshold && hasTriggeredThresholdHaptic.current) {
         // Reset if user pulls back below threshold
@@ -68,7 +68,7 @@ export function usePullToRefresh({
     if (pullDistance >= threshold && !isRefreshing) {
       setIsRefreshing(true);
       setPullDistance(threshold); // Hold at threshold during refresh
-      hapticMedium(); // Stronger haptic when refresh triggers
+      hapticSuccess(); // Success haptic when refresh triggers
       
       try {
         await onRefresh();

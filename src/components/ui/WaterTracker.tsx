@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Droplets, Plus, Minus, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { hapticCelebrate, hapticCount } from '@/lib/haptics';
 
 const DAILY_GOAL = 8; // 8 glasses recommended
 
@@ -53,6 +54,19 @@ export function WaterTracker() {
     
     const newTotal = Math.max(0, todayGlasses + amount);
     if (amount < 0 && todayGlasses === 0) return;
+
+    // Haptic feedback based on progress
+    if (amount > 0) {
+      if (newTotal >= DAILY_GOAL && todayGlasses < DAILY_GOAL) {
+        // Goal achievement - celebration haptic!
+        hapticCelebrate();
+      } else {
+        // Progress haptic - intensity increases with count
+        hapticCount(newTotal, DAILY_GOAL);
+      }
+    } else {
+      hapticCount(newTotal, DAILY_GOAL);
+    }
 
     setIsUpdating(true);
     setTodayGlasses(newTotal);

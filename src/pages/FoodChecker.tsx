@@ -15,6 +15,7 @@ import { FoodReference, FoodStatus, ToleranceData } from '@/types';
 import { Search, X, Info, User, Database, WifiOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { isOnline } from '@/lib/offlineStorage';
+import { hapticSelection, hapticForFoodStatus } from '@/lib/haptics';
 
 export default function FoodChecker() {
   const { user } = useAuth();
@@ -79,6 +80,11 @@ export default function FoodChecker() {
     !foods.some(f => normalizeFoodName(f.name) === normalizedSearch);
 
   const handleFoodSelect = (food: FoodReference) => {
+    const { status } = getStatusInfo(food.name, food.default_status as FoodStatus);
+    
+    // Haptic feedback based on food status
+    hapticForFoodStatus(status);
+    
     setSelectedFood(food);
     setSearchQuery(food.name);
     trackEvent({ 

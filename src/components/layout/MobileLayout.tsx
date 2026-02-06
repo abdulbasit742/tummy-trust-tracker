@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Search, PlusCircle, BarChart3, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { NetworkStatus } from '@/components/ui/NetworkStatus';
-import { hapticMedium } from '@/lib/haptics';
+import { hapticNavigation } from '@/lib/haptics';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface MobileLayoutProps {
@@ -30,7 +30,7 @@ export function MobileLayout({ children, showNav = true }: MobileLayoutProps) {
   }, [location.pathname]);
 
   const handleNavClick = useCallback((path: string) => {
-    hapticMedium();
+    hapticNavigation();
     navigate(path);
   }, [navigate]);
 
