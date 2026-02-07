@@ -2,10 +2,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AnalyticsProvider } from "@/hooks/use-analytics";
+import { AnimatePresence } from "framer-motion";
+import { PageTransition } from "@/components/layout/PageTransition";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import FoodChecker from "./pages/FoodChecker";
@@ -38,37 +40,59 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function AppRoutes() {
+  const location = useLocation();
+  
   return (
-    <Routes>
-      <Route path="/auth" element={<Auth />} />
-      <Route path="/" element={
-        <ProtectedRoute>
-          <Index />
-        </ProtectedRoute>
-      } />
-      <Route path="/food-checker" element={
-        <ProtectedRoute>
-          <FoodChecker />
-        </ProtectedRoute>
-      } />
-      <Route path="/log-meal" element={
-        <ProtectedRoute>
-          <LogMeal />
-        </ProtectedRoute>
-      } />
-      <Route path="/insights" element={
-        <ProtectedRoute>
-          <Insights />
-        </ProtectedRoute>
-      } />
-      <Route path="/profile" element={
-        <ProtectedRoute>
-          <Profile />
-        </ProtectedRoute>
-      } />
-      <Route path="/suggestions" element={<Navigate to="/insights" replace />} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <AnimatePresence mode="wait" initial={false}>
+      <Routes location={location} key={location.pathname}>
+        <Route path="/auth" element={
+          <PageTransition>
+            <Auth />
+          </PageTransition>
+        } />
+        <Route path="/" element={
+          <ProtectedRoute>
+            <PageTransition>
+              <Index />
+            </PageTransition>
+          </ProtectedRoute>
+        } />
+        <Route path="/food-checker" element={
+          <ProtectedRoute>
+            <PageTransition>
+              <FoodChecker />
+            </PageTransition>
+          </ProtectedRoute>
+        } />
+        <Route path="/log-meal" element={
+          <ProtectedRoute>
+            <PageTransition>
+              <LogMeal />
+            </PageTransition>
+          </ProtectedRoute>
+        } />
+        <Route path="/insights" element={
+          <ProtectedRoute>
+            <PageTransition>
+              <Insights />
+            </PageTransition>
+          </ProtectedRoute>
+        } />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <PageTransition>
+              <Profile />
+            </PageTransition>
+          </ProtectedRoute>
+        } />
+        <Route path="/suggestions" element={<Navigate to="/insights" replace />} />
+        <Route path="*" element={
+          <PageTransition>
+            <NotFound />
+          </PageTransition>
+        } />
+      </Routes>
+    </AnimatePresence>
   );
 }
 
