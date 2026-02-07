@@ -30,16 +30,21 @@ const Slider = React.forwardRef<
       {...props}
     >
     <SliderPrimitive.Track className="relative h-3 w-full grow overflow-hidden rounded-full bg-secondary">
-      <SliderPrimitive.Range className="absolute h-full bg-primary transition-all duration-150" />
+      <SliderPrimitive.Range className="absolute h-full bg-primary transition-all duration-200 ease-out">
+        {/* Shimmer effect */}
+        <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+      </SliderPrimitive.Range>
     </SliderPrimitive.Track>
     <SliderPrimitive.Thumb 
       className={cn(
         "block h-8 w-8 rounded-full border-[3px] border-primary bg-card shadow-elevated",
-        "ring-offset-background transition-all duration-150",
+        "ring-offset-background transition-all duration-200 ease-out",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-        "hover:scale-105 active:scale-110 active:shadow-glow",
+        "hover:scale-110 hover:shadow-glow active:scale-125 active:shadow-glow",
         "disabled:pointer-events-none disabled:opacity-50",
-        "cursor-grab active:cursor-grabbing"
+        "cursor-grab active:cursor-grabbing",
+        "before:absolute before:inset-0 before:rounded-full before:bg-primary/10 before:scale-0 before:transition-transform before:duration-200",
+        "active:before:scale-150 active:before:opacity-0"
       )}
     />
     </SliderPrimitive.Root>

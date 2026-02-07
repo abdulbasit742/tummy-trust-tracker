@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAnalytics } from '@/hooks/use-analytics';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Droplets, Plus, Minus, Target } from 'lucide-react';
+import { Droplets, Plus, Minus, Target, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { hapticCelebrate, hapticCount } from '@/lib/haptics';
 
@@ -27,6 +27,10 @@ export function WaterTracker() {
   const [todayGlasses, setTodayGlasses] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [countAnimation, setCountAnimation] = useState<'up' | 'down' | null>(null);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [showRipple, setShowRipple] = useState(false);
+  const prevGlasses = useRef(0);
 
   const loadTodayWater = useCallback(async () => {
     if (!user) return;
@@ -55,19 +59,30 @@ export function WaterTracker() {
     const newTotal = Math.max(0, todayGlasses + amount);
     if (amount < 0 && todayGlasses === 0) return;
 
-    // Haptic feedback based on progress
+    // Visual + Haptic feedback based on progress
     if (amount > 0) {
-      if (newTotal >= DAILY_GOAL && todayGlasses < DAILY_GOAL) {
-        // Goal achievement - celebration haptic!
+      setCountAnimation('up');
+      setShowRipple(true);
+      setTimeout(() => setShowRipple(false), 600);
+      
+      if (newTotal >= DAILY_GOAL && prevGlasses.current < DAILY_GOAL) {
+        // Goal achievement - celebration!
         hapticCelebrate();
+        setShowCelebration(true);
+        setTimeout(() => setShowCelebration(false), 1500);
       } else {
         // Progress haptic - intensity increases with count
         hapticCount(newTotal, DAILY_GOAL);
       }
     } else {
+      setCountAnimation('down');
       hapticCount(newTotal, DAILY_GOAL);
     }
-
+    
+    // Clear animation after it plays
+    setTimeout(() => setCountAnimation(null), 300);
+    
+    prevGlasses.current = todayGlasses;
     setIsUpdating(true);
     setTodayGlasses(newTotal);
 
@@ -153,52 +168,91 @@ export function WaterTracker() {
         </div>
       </div>
 
-      {/* Progress bar */}
+      {/* Progress bar with animation */}
       <div className="relative h-3 bg-muted rounded-full overflow-hidden mb-4">
         <div 
           className={cn(
-            "absolute left-0 top-0 h-full rounded-full transition-all duration-500",
-            isGoalMet ? "bg-primary" : "bg-blue-500"
+            "absolute left-0 top-0 h-full rounded-full transition-all duration-500 ease-out",
+            isGoalMet ? "bg-primary animate-glow-pulse" : "bg-blue-500"
           )}
-          style={{ width: `${progressPercent}%` }}
+          style={{ 
+            width: `${progressPercent}%`,
+            '--progress-width': `${progressPercent}%`
+          } as React.CSSProperties}
         />
+        {/* Shimmer effect on progress */}
+        {progressPercent > 0 && progressPercent < 100 && (
+          <div 
+            className="absolute inset-0 overflow-hidden rounded-full"
+            style={{ width: `${progressPercent}%` }}
+          >
+            <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          </div>
+        )}
       </div>
 
-      {/* Counter */}
+      {/* Counter with animations */}
       <div className="flex items-center justify-between">
         <Button
           variant="outline"
           size="icon"
           onClick={() => addWater(-1)}
           disabled={todayGlasses === 0 || isUpdating}
-          className="h-12 w-12 rounded-xl"
+          className="h-12 w-12 rounded-xl transition-transform active:scale-90"
         >
           <Minus className="w-5 h-5" />
         </Button>
 
-        <div className="text-center">
-          <span className={cn(
-            "font-display text-4xl font-bold",
-            isGoalMet ? "text-primary" : "text-foreground"
-          )}>
-            {todayGlasses}
-          </span>
+        <div className="text-center relative">
+          {/* Celebration particles */}
+          {showCelebration && (
+            <div className="absolute inset-0 pointer-events-none">
+              <Sparkles className="absolute -top-2 left-1/2 -translate-x-1/2 w-6 h-6 text-primary animate-bounce-subtle" />
+              <div className="absolute top-1/2 left-0 w-2 h-2 rounded-full bg-primary animate-pop" style={{ animationDelay: '0.1s' }} />
+              <div className="absolute top-1/2 right-0 w-2 h-2 rounded-full bg-success animate-pop" style={{ animationDelay: '0.2s' }} />
+              <div className="absolute bottom-0 left-1/4 w-1.5 h-1.5 rounded-full bg-caution animate-pop" style={{ animationDelay: '0.15s' }} />
+              <div className="absolute bottom-0 right-1/4 w-1.5 h-1.5 rounded-full bg-primary animate-pop" style={{ animationDelay: '0.25s' }} />
+            </div>
+          )}
+          
+          <div className="overflow-hidden">
+            <span className={cn(
+              "font-display text-4xl font-bold inline-block transition-all duration-300",
+              isGoalMet ? "text-primary" : "text-foreground",
+              showCelebration && "animate-celebrate",
+              countAnimation === 'up' && "animate-count-up",
+              countAnimation === 'down' && "animate-count-down"
+            )}>
+              {todayGlasses}
+            </span>
+          </div>
           <span className="text-lg text-muted-foreground font-medium">/{DAILY_GOAL}</span>
           <p className="text-xs text-muted-foreground mt-1">{t('water.glasses')} today</p>
         </div>
 
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => addWater(1)}
-          disabled={isUpdating}
-          className={cn(
-            "h-12 w-12 rounded-xl",
-            !isGoalMet && "border-blue-500/30 text-blue-500 hover:bg-blue-500/10"
+        <div className="relative">
+          {/* Ripple effect */}
+          {showRipple && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-12 h-12 rounded-xl bg-primary/30 animate-ripple" />
+            </div>
           )}
-        >
-          <Plus className="w-5 h-5" />
-        </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => addWater(1)}
+            disabled={isUpdating}
+            className={cn(
+              "h-12 w-12 rounded-xl transition-transform active:scale-90",
+              !isGoalMet && "border-blue-500/30 text-blue-500 hover:bg-blue-500/10"
+            )}
+          >
+            <Plus className={cn(
+              "w-5 h-5 transition-transform",
+              showRipple && "animate-pop"
+            )} />
+          </Button>
+        </div>
       </div>
 
       {/* Encouragement message */}

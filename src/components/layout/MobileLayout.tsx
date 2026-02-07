@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Search, PlusCircle, BarChart3, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -15,6 +15,8 @@ export function MobileLayout({ children, showNav = true }: MobileLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { t, isUrdu } = useLanguage();
+  const [activeTab, setActiveTab] = useState(location.pathname);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const navItems = [
     { path: '/', icon: LayoutDashboard, label: t('nav.home') },
@@ -24,15 +26,25 @@ export function MobileLayout({ children, showNav = true }: MobileLayoutProps) {
     { path: '/profile', icon: User, label: t('nav.profile') },
   ];
 
-  // Scroll to top on route change
+  // Scroll to top on route change and update active tab
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
+    setActiveTab(location.pathname);
   }, [location.pathname]);
 
   const handleNavClick = useCallback((path: string) => {
+    if (path === location.pathname) return;
+    
     hapticNavigation();
-    navigate(path);
-  }, [navigate]);
+    setIsAnimating(true);
+    setActiveTab(path);
+    
+    // Brief animation before navigation
+    setTimeout(() => {
+      navigate(path);
+      setIsAnimating(false);
+    }, 50);
+  }, [navigate, location.pathname]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col max-w-[100vw] overflow-x-hidden">
@@ -48,7 +60,7 @@ export function MobileLayout({ children, showNav = true }: MobileLayoutProps) {
         <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-xl border-t border-border/50 safe-bottom z-50 shadow-elevated">
           <div className="flex items-end justify-around px-2 pt-2 pb-1.5 max-w-md mx-auto">
             {navItems.map((item) => {
-              const isActive = location.pathname === item.path;
+              const isActive = activeTab === item.path;
               const Icon = item.icon;
               
               if (item.isMain) {
@@ -61,15 +73,19 @@ export function MobileLayout({ children, showNav = true }: MobileLayoutProps) {
                     )}
                   >
                     <div className={cn(
-                      "w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-200",
+                      "w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 ease-out",
                       isActive 
-                        ? "gradient-calm shadow-glow scale-105" 
-                        : "bg-primary shadow-card hover:shadow-elevated hover:scale-105"
+                        ? "gradient-calm shadow-glow scale-110" 
+                        : "bg-primary shadow-card hover:shadow-elevated hover:scale-105",
+                      isActive && isAnimating && "animate-pop"
                     )}>
-                      <Icon className="w-6 h-6 text-primary-foreground" />
+                      <Icon className={cn(
+                        "w-6 h-6 text-primary-foreground transition-transform duration-200",
+                        isActive && "scale-110"
+                      )} />
                     </div>
                     <span className={cn(
-                      "text-[10px] font-semibold mt-1.5 transition-colors",
+                      "text-[10px] font-semibold mt-1.5 transition-all duration-200",
                       isActive ? "text-primary" : "text-muted-foreground",
                       isUrdu && "font-medium"
                     )}>
@@ -92,16 +108,20 @@ export function MobileLayout({ children, showNav = true }: MobileLayoutProps) {
                   )}
                 >
                   <div className={cn(
-                    "p-2.5 rounded-xl transition-all duration-200",
+                    "p-2.5 rounded-xl transition-all duration-300 ease-out relative overflow-hidden",
                     isActive && "bg-primary/10"
                   )}>
+                    {/* Active indicator dot */}
+                    {isActive && (
+                      <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary animate-scale-in" />
+                    )}
                     <Icon className={cn(
-                      "w-5 h-5 transition-transform duration-200",
-                      isActive && "scale-110"
+                      "w-5 h-5 transition-all duration-200",
+                      isActive && "scale-110 animate-tab-switch"
                     )} />
                   </div>
                   <span className={cn(
-                    "text-[10px] font-medium mt-0.5 transition-all",
+                    "text-[10px] font-medium mt-0.5 transition-all duration-200",
                     isActive && "font-semibold",
                     isUrdu && "font-medium"
                   )}>
