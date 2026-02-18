@@ -1,42 +1,27 @@
 
 
-# Staggered Entrance Animations + Enhanced Skeleton Shimmer
+# Staggered Animations for FoodChecker + LogMeal Pages
 
-The next premium upgrade: cards, list items, and sections gracefully animate into view with staggered timing, and skeleton loaders get a polished shimmer effect -- making every screen feel alive from the moment it loads.
+Extend the staggered entrance animations to the two remaining pages that still use basic `animate-fade-in` / `animate-slide-up`, bringing them in line with the premium feel of Dashboard, Insights, and Profile.
 
 ## What You'll See
 
-- Dashboard sections (quick actions, meals, water tracker, safe/trigger foods) cascade in one-by-one with smooth fade+slide
-- List items within cards stagger individually (e.g., today's meals, food search results)
-- Insights tabs content animates in when switching tabs
-- Profile sections cascade on load
-- Skeleton loaders get a gradient shimmer sweep instead of basic pulse
+- FoodChecker: header, search bar, food list, and detail cards cascade in with staggered timing instead of all appearing at once
+- LogMeal: form sections (food input, portion picker, notes, submit button) stagger in sequentially; symptom step cards also cascade
+- Food search results animate in individually as a staggered list
+- Consistent animation language across every page in the app
 
 ## Technical Details
 
-### 1. Create `src/components/ui/AnimatedList.tsx`
-Reusable framer-motion wrapper components:
-- `StaggerContainer` -- parent that orchestrates staggered children timing
-- `StaggerItem` -- child wrapper with fade+slide+scale entrance
-- `AnimatedCard` -- card-level entrance animation with configurable delay
+### 1. Update `src/pages/FoodChecker.tsx`
+- Import `StaggerContainer` and `StaggerItem` from `AnimatedList`
+- Wrap the main content `div` in `StaggerContainer`
+- Wrap header, search input, custom food warning, selected food detail, food list section, and disclaimer each in `StaggerItem`
+- Wrap individual food list items (browse + search results) in a nested `StaggerContainer`/`StaggerItem` for per-item stagger
 
-### 2. Update `src/components/ui/skeletons.tsx`
-- Replace `animate-pulse` with a CSS shimmer gradient animation
-- Add the shimmer keyframe to tailwind config (a light gradient sweep left-to-right)
-
-### 3. Update `src/pages/Dashboard.tsx`
-- Wrap section groups in `StaggerContainer`
-- Wrap each section (quick actions, starter foods, today's meals, water tracker, safe foods, trigger foods) in `StaggerItem`
-- Wrap individual list items (meal entries, food search results) in nested `StaggerItem`
-
-### 4. Update `src/pages/Insights.tsx`
-- Wrap tab content sections in `StaggerContainer`/`StaggerItem`
-- Animate metric cards, food lists, and doctor summary sections
-
-### 5. Update `src/pages/Profile.tsx`
-- Wrap profile sections (language toggle, profile card, early user status, share, custom tips, meal history) in `StaggerContainer`/`StaggerItem`
-
-### 6. Update `tailwind.config.ts`
-- Add `shimmer` keyframe: a gradient that sweeps across skeleton elements
-- Add `stagger-fade-in` utility class
-
+### 2. Update `src/pages/LogMeal.tsx`
+- Import `StaggerContainer` and `StaggerItem` from `AnimatedList`
+- Wrap the meal step form sections (food name input, portion size, notes, submit button) in `StaggerContainer`/`StaggerItem`
+- Wrap the symptom step sections (bloating slider, pain slider, stool toggle, buttons) in a separate `StaggerContainer`/`StaggerItem`
+- Replace existing `animate-slide-up` with `StaggerItem` wrappers for consistent timing
+- Remove manual `animationDelay` style props (the stagger container handles timing automatically)
