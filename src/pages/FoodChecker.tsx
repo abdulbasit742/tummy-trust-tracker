@@ -16,6 +16,7 @@ import { Search, X, Info, User, Database, WifiOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { isOnline } from '@/lib/offlineStorage';
 import { hapticSelection, hapticForFoodStatus } from '@/lib/haptics';
+import { StaggerContainer, StaggerItem } from '@/components/ui/AnimatedList';
 
 export default function FoodChecker() {
   const { user } = useAuth();
@@ -100,57 +101,63 @@ export default function FoodChecker() {
 
   return (
     <MobileLayout>
-      <div className="px-5 py-6 space-y-5">
+      <StaggerContainer className="px-5 py-6 space-y-5">
         {/* Sync Status */}
-        <SyncStatusIndicator 
-          showRefreshButton={true}
-          onRefresh={loadData}
-        />
+        <StaggerItem>
+          <SyncStatusIndicator 
+            showRefreshButton={true}
+            onRefresh={loadData}
+          />
+        </StaggerItem>
 
         {/* Header */}
-        <div className="animate-fade-in">
-          <div className="flex items-center gap-2">
-            <h1 className="font-display text-2xl font-bold text-foreground">
-              {t('foodChecker.title')}
-            </h1>
-            {isOfflineData && (
-              <WifiOff className="w-4 h-4 text-muted-foreground" />
-            )}
+        <StaggerItem>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="font-display text-2xl font-bold text-foreground">
+                {t('foodChecker.title')}
+              </h1>
+              {isOfflineData && (
+                <WifiOff className="w-4 h-4 text-muted-foreground" />
+              )}
+            </div>
+            <p className="text-muted-foreground text-sm mt-1 leading-relaxed">
+              {t('foodChecker.subtitle')}
+            </p>
+            <p className="text-xs text-primary/80 mt-1.5">
+              {t('foodChecker.personalNote')}
+            </p>
           </div>
-          <p className="text-muted-foreground text-sm mt-1 leading-relaxed">
-            {t('foodChecker.subtitle')}
-          </p>
-          <p className="text-xs text-primary/80 mt-1.5">
-            {t('foodChecker.personalNote')}
-          </p>
-        </div>
+        </StaggerItem>
 
         {/* Search with Autocomplete */}
-        <div className="relative animate-slide-up">
-          <Search className={`absolute ${isUrdu ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground`} />
-          <Input
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setSelectedFood(null);
-            }}
-            placeholder={t('dashboard.searchPlaceholder')}
-            className={`${isUrdu ? 'pr-12 pl-12' : 'pl-12 pr-12'} h-14 text-base rounded-xl bg-card border-border shadow-soft`}
-            dir="auto"
-          />
-          {searchQuery && (
-            <button
-              onClick={clearSearch}
-              className={`absolute ${isUrdu ? 'left-4' : 'right-4'} top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-xl bg-muted hover:bg-muted/80 transition-colors`}
-            >
-              <X className="w-4 h-4 text-muted-foreground" />
-            </button>
-          )}
-        </div>
+        <StaggerItem>
+          <div className="relative">
+            <Search className={`absolute ${isUrdu ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground`} />
+            <Input
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setSelectedFood(null);
+              }}
+              placeholder={t('dashboard.searchPlaceholder')}
+              className={`${isUrdu ? 'pr-12 pl-12' : 'pl-12 pr-12'} h-14 text-base rounded-xl bg-card border-border shadow-soft`}
+              dir="auto"
+            />
+            {searchQuery && (
+              <button
+                onClick={clearSearch}
+                className={`absolute ${isUrdu ? 'left-4' : 'right-4'} top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-xl bg-muted hover:bg-muted/80 transition-colors`}
+              >
+                <X className="w-4 h-4 text-muted-foreground" />
+              </button>
+            )}
+          </div>
+        </StaggerItem>
 
         {/* Custom Food Warning */}
         {isCustomFood && !selectedFood && (
-          <div className="animate-scale-in">
+          <StaggerItem>
             <div className="bg-caution/8 border border-caution/25 rounded-2xl p-4">
               <div className="flex items-start gap-3">
                 <div className="w-9 h-9 rounded-xl bg-caution/12 flex items-center justify-center flex-shrink-0">
@@ -170,12 +177,12 @@ export default function FoodChecker() {
                 </div>
               </div>
             </div>
-          </div>
+          </StaggerItem>
         )}
 
         {/* Selected Food Detail */}
         {selectedFood && (
-          <div className="animate-scale-in">
+          <StaggerItem>
             <div className="bg-card rounded-2xl p-5 shadow-card border border-border">
               {(() => {
                 const { status, isPersonal, tolerancePercent } = getStatusInfo(selectedFood.name, selectedFood.default_status as FoodStatus);
@@ -221,87 +228,97 @@ export default function FoodChecker() {
                 );
               })()}
             </div>
-          </div>
+          </StaggerItem>
         )}
 
         {/* Food List / Autocomplete */}
         {!selectedFood && !isCustomFood && searchQuery.length >= 1 && (
-          <div className="space-y-2 animate-fade-in">
-            <h3 className="font-display font-semibold text-muted-foreground text-xs uppercase tracking-wide">
-              {t('foodChecker.searchResults')} ({filteredFoods.length})
-            </h3>
-            {filteredFoods.length > 0 ? (
-              filteredFoods.map((food) => {
-                const { status, isPersonal } = getStatusInfo(food.name, food.default_status as FoodStatus);
-                return (
-                  <button
-                    key={food.id}
-                    onClick={() => handleFoodSelect(food)}
-                    className="w-full text-left bg-card rounded-xl p-4 border border-border hover:shadow-soft hover:border-primary/20 transition-all active:scale-[0.98]"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <span className="font-medium text-foreground text-sm" dir="auto">
-                          {getFoodDisplayName(food)}
-                        </span>
-                        {isPersonal && (
-                          <span className="text-xs text-primary ml-2 font-medium">• {t('dashboard.personal')}</span>
-                        )}
-                      </div>
-                      <StatusBadge status={status} size="sm" />
-                    </div>
-                  </button>
-                );
-              })
-            ) : (
-              <p className="text-center text-muted-foreground text-sm py-6">
-                {t('foodChecker.noFoodsFound')}
-              </p>
-            )}
-          </div>
+          <StaggerItem>
+            <div className="space-y-2">
+              <h3 className="font-display font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+                {t('foodChecker.searchResults')} ({filteredFoods.length})
+              </h3>
+              {filteredFoods.length > 0 ? (
+                <StaggerContainer className="space-y-2">
+                  {filteredFoods.map((food) => {
+                    const { status, isPersonal } = getStatusInfo(food.name, food.default_status as FoodStatus);
+                    return (
+                      <StaggerItem key={food.id}>
+                        <button
+                          onClick={() => handleFoodSelect(food)}
+                          className="w-full text-left bg-card rounded-xl p-4 border border-border hover:shadow-soft hover:border-primary/20 transition-all active:scale-[0.98]"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <span className="font-medium text-foreground text-sm" dir="auto">
+                                {getFoodDisplayName(food)}
+                              </span>
+                              {isPersonal && (
+                                <span className="text-xs text-primary ml-2 font-medium">• {t('dashboard.personal')}</span>
+                              )}
+                            </div>
+                            <StatusBadge status={status} size="sm" />
+                          </div>
+                        </button>
+                      </StaggerItem>
+                    );
+                  })}
+                </StaggerContainer>
+              ) : (
+                <p className="text-center text-muted-foreground text-sm py-6">
+                  {t('foodChecker.noFoodsFound')}
+                </p>
+              )}
+            </div>
+          </StaggerItem>
         )}
 
         {/* Browse Foods (when empty search) */}
         {!selectedFood && !searchQuery && (
-          <div className="space-y-3">
-            <h3 className="font-display font-semibold text-muted-foreground text-xs uppercase tracking-wide">
-              {t('foodChecker.browseFoods')} ({foods.length})
-            </h3>
-            
-            {isLoading ? (
-              <FoodListSkeleton count={5} />
-            ) : (
-              <div className="space-y-2">
-                {foods.map((food) => {
-                  const { status, isPersonal } = getStatusInfo(food.name, food.default_status as FoodStatus);
-                  return (
-                    <button
-                      key={food.id}
-                      onClick={() => handleFoodSelect(food)}
-                      className="w-full text-left bg-card rounded-xl p-4 border border-border hover:shadow-soft hover:border-primary/20 transition-all active:scale-[0.98]"
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <span className="font-medium text-foreground text-sm" dir="auto">
-                            {getFoodDisplayName(food)}
-                          </span>
-                          {isPersonal && (
-                            <span className="text-xs text-primary ml-2 font-medium">• {t('dashboard.personal')}</span>
-                          )}
-                        </div>
-                        <StatusBadge status={status} size="sm" />
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+          <StaggerItem>
+            <div className="space-y-3">
+              <h3 className="font-display font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+                {t('foodChecker.browseFoods')} ({foods.length})
+              </h3>
+              
+              {isLoading ? (
+                <FoodListSkeleton count={5} />
+              ) : (
+                <StaggerContainer className="space-y-2">
+                  {foods.map((food) => {
+                    const { status, isPersonal } = getStatusInfo(food.name, food.default_status as FoodStatus);
+                    return (
+                      <StaggerItem key={food.id}>
+                        <button
+                          onClick={() => handleFoodSelect(food)}
+                          className="w-full text-left bg-card rounded-xl p-4 border border-border hover:shadow-soft hover:border-primary/20 transition-all active:scale-[0.98]"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <span className="font-medium text-foreground text-sm" dir="auto">
+                                {getFoodDisplayName(food)}
+                              </span>
+                              {isPersonal && (
+                                <span className="text-xs text-primary ml-2 font-medium">• {t('dashboard.personal')}</span>
+                              )}
+                            </div>
+                            <StatusBadge status={status} size="sm" />
+                          </div>
+                        </button>
+                      </StaggerItem>
+                    );
+                  })}
+                </StaggerContainer>
+              )}
+            </div>
+          </StaggerItem>
         )}
 
         {/* Disclaimer */}
-        <Disclaimer />
-      </div>
+        <StaggerItem>
+          <Disclaimer />
+        </StaggerItem>
+      </StaggerContainer>
     </MobileLayout>
   );
 }
