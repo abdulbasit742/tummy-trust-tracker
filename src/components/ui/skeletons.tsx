@@ -1,15 +1,17 @@
 import { cn } from "@/lib/utils";
 
-// Base skeleton with subtle shimmer animation
+// Base skeleton with gradient shimmer animation
 function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={cn(
-        "animate-pulse rounded-xl bg-muted/60",
+        "relative overflow-hidden rounded-xl bg-muted/60",
         className
       )}
       {...props}
-    />
+    >
+      <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-background/60 to-transparent" />
+    </div>
   );
 }
 

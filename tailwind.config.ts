@@ -104,6 +104,7 @@ export default {
         },
         "shimmer": {
           "0%": { transform: "translateX(-100%)" },
+          "50%": { transform: "translateX(100%)" },
           "100%": { transform: "translateX(100%)" },
         },
         "spin-slow": {
@@ -176,7 +177,7 @@ export default {
         "slide-up": "slide-up 0.4s ease-out forwards",
         "pulse-soft": "pulse-soft 1.5s ease-in-out infinite",
         "scale-in": "scale-in 0.2s ease-out",
-        "shimmer": "shimmer 2s ease-in-out infinite",
+        "shimmer": "shimmer 2.5s ease-in-out infinite",
         "spin-slow": "spin-slow 1.2s linear infinite",
         // Micro-interaction animations
         "bounce-subtle": "bounce-subtle 0.4s ease-in-out",
