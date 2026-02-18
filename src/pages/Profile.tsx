@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { ProfileSkeleton, MealLogSkeleton } from '@/components/ui/skeletons';
+import { StaggerContainer, StaggerItem } from '@/components/ui/AnimatedList';
 import { calculateToleranceScores } from '@/lib/toleranceEngine';
 import { MealLog, SymptomLog, ToleranceData, IBSType, SeverityLevel } from '@/types';
 import { IBS_TYPES, SYMPTOMS, SEVERITY_LEVELS } from '@/data/constants';
@@ -292,20 +293,21 @@ export default function Profile() {
 
   return (
     <MobileLayout>
-      <div 
+      <StaggerContainer 
         className="px-5 py-6 space-y-6"
         {...handlers}
       >
         <PullIndicator />
-        {/* Sync Status */}
-        <SyncStatusIndicator 
-          className="justify-end" 
-          showRefreshButton 
-          onRefresh={loadData}
-        />
+        <StaggerItem>
+          <SyncStatusIndicator 
+            className="justify-end" 
+            showRefreshButton 
+            onRefresh={loadData}
+          />
+        </StaggerItem>
         
         {/* Header */}
-        <div className="flex items-center justify-between animate-fade-in">
+        <StaggerItem><div className="flex items-center justify-between">
           <div>
             <h1 className="font-display text-2xl font-bold text-foreground">
               {t('profile.title')}
@@ -326,10 +328,10 @@ export default function Profile() {
               {t('auth.signOut')}
             </Button>
           </div>
-        </div>
+        </div></StaggerItem>
 
         {/* Language Toggle */}
-        <div className="bg-card rounded-2xl p-5 border border-border shadow-soft animate-slide-up">
+        <StaggerItem><div className="bg-card rounded-2xl p-5 border border-border shadow-soft">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -351,11 +353,11 @@ export default function Profile() {
               <span className={cn("text-sm font-medium", language === 'ur' ? "text-primary" : "text-muted-foreground")}>اردو</span>
             </div>
           </div>
-        </div>
+        </div></StaggerItem>
 
         {/* Profile Summary - View Mode */}
         {profile && !isEditing && (
-          <div className="bg-card rounded-2xl p-5 border border-border shadow-soft animate-slide-up">
+          <StaggerItem><div className="bg-card rounded-2xl p-5 border border-border shadow-soft">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 gradient-calm rounded-2xl flex items-center justify-center shadow-glow">
@@ -393,12 +395,12 @@ export default function Profile() {
                 )}
               </div>
             )}
-          </div>
+          </div></StaggerItem>
         )}
 
         {/* Profile Edit Mode */}
         {profile && isEditing && (
-          <div className="bg-card rounded-2xl p-5 border border-border shadow-soft animate-slide-up space-y-5">
+          <StaggerItem><div className="bg-card rounded-2xl p-5 border border-border shadow-soft space-y-5">
             <div className="flex items-center justify-between">
               <h3 className="font-display font-bold text-foreground text-lg">Edit Profile</h3>
               <Button variant="ghost" size="sm" onClick={cancelEditing} className="rounded-xl h-10 w-10 p-0">
@@ -472,19 +474,19 @@ export default function Profile() {
               <Save className="w-5 h-5 mr-2" />
               {isSaving ? 'Saving...' : 'Save Changes'}
             </Button>
-          </div>
+          </div></StaggerItem>
         )}
 
         {/* Early User Status */}
-        <EarlyUserStatus />
+        <StaggerItem><EarlyUserStatus /></StaggerItem>
 
         {/* Share Section */}
-        <div className="bg-card rounded-2xl p-5 border border-border shadow-soft">
+        <StaggerItem><div className="bg-card rounded-2xl p-5 border border-border shadow-soft">
           <ShareButton variant="full" />
-        </div>
+        </div></StaggerItem>
 
         {/* Why This App */}
-        <WhyThisApp />
+        <StaggerItem><WhyThisApp /></StaggerItem>
 
         {/* Custom Tips Section */}
         {isEditingTips ? (
@@ -523,7 +525,7 @@ export default function Profile() {
         )}
 
         {/* Personal Tolerance */}
-        <div className="animate-slide-up">
+        <StaggerItem><div className="animate-slide-up">
           <h2 className="font-display text-lg font-bold text-foreground mb-4">
             Personal Tolerance
           </h2>
@@ -549,10 +551,10 @@ export default function Profile() {
               </p>
             </div>
           )}
-        </div>
+        </div></StaggerItem>
 
         {/* Meal History */}
-        <div className="animate-slide-up">
+        <StaggerItem><div>
           <h2 className="font-display text-lg font-bold text-foreground mb-4">
             Meal History
           </h2>
@@ -713,11 +715,11 @@ export default function Profile() {
               <p className="text-muted-foreground text-sm">No meal logs yet</p>
             </div>
           )}
-        </div>
+        </div></StaggerItem>
 
         {/* Disclaimer */}
-        <Disclaimer />
-      </div>
+        <StaggerItem><Disclaimer /></StaggerItem>
+      </StaggerContainer>
     </MobileLayout>
   );
 }

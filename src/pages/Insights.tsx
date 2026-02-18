@@ -6,6 +6,7 @@ import { ToleranceBar } from '@/components/ui/ToleranceBar';
 import { Button } from '@/components/ui/button';
 import { InsightsSkeleton } from '@/components/ui/skeletons';
 import { SyncStatusIndicator } from '@/components/ui/SyncStatusIndicator';
+import { StaggerContainer, StaggerItem } from '@/components/ui/AnimatedList';
 import { getToleranceLabel } from '@/lib/toleranceEngine';
 import { ProgressData } from '@/lib/progressEngine';
 import { getDisplayNameWithUrdu } from '@/lib/utils/foodUtils';
@@ -268,9 +269,9 @@ export default function Insights() {
           <>
             {/* Progress Tab */}
             {activeTab === 'progress' && progressData && (
-              <div className="space-y-4 animate-fade-in">
+              <StaggerContainer className="space-y-4">
                 {/* Week Trend */}
-                <div className="bg-card rounded-2xl p-5 border border-border shadow-soft">
+                <StaggerItem><div className="bg-card rounded-2xl p-5 border border-border shadow-soft">
                   <div className="flex items-center gap-3 mb-2">
                     {getTrendIcon()}
                     <span className={cn("font-display font-semibold text-base", getTrendColor())}>
@@ -282,10 +283,10 @@ export default function Insights() {
                       Log more meals with symptoms to see trends
                     </p>
                   )}
-                </div>
+                </div></StaggerItem>
 
                 {/* Averages */}
-                <div className="grid grid-cols-2 gap-3">
+                <StaggerItem><div className="grid grid-cols-2 gap-3">
                   <div className="bg-card rounded-2xl p-5 border border-border shadow-soft">
                     <p className="text-xs text-muted-foreground mb-2">Last 7 Days Avg</p>
                     <p className="font-display text-3xl font-bold text-foreground">
@@ -300,10 +301,10 @@ export default function Insights() {
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">/12 max</p>
                   </div>
-                </div>
+                </div></StaggerItem>
 
                 {/* Tracking Consistency */}
-                <div className="bg-card rounded-2xl p-5 border border-border shadow-soft">
+                <StaggerItem><div className="bg-card rounded-2xl p-5 border border-border shadow-soft">
                   <div className="flex items-center gap-2.5 mb-4">
                     <ClipboardList className="w-4 h-4 text-primary" />
                     <span className="font-display font-semibold text-foreground text-sm">
@@ -334,13 +335,13 @@ export default function Insights() {
                     }
                     {progressData.guidanceMessage}
                   </div>
-                </div>
-              </div>
+                </div></StaggerItem>
+              </StaggerContainer>
             )}
 
             {/* Triggers Tab */}
             {activeTab === 'triggers' && (
-              <div className="space-y-5 animate-fade-in">
+              <StaggerContainer className="space-y-5">
                 {validTolerance.length === 0 ? (
                   <div className="empty-state">
                     <Target className="empty-state-icon" />
@@ -418,12 +419,12 @@ export default function Insights() {
                     </p>
                   </>
                 )}
-              </div>
+              </StaggerContainer>
             )}
 
             {/* Doctor Summary Tab */}
             {activeTab === 'doctor' && (
-              <div className="space-y-4 animate-fade-in">
+              <StaggerContainer className="space-y-4">
                 <div className="bg-card rounded-2xl p-5 border border-border shadow-soft">
                   <h3 className="font-display font-semibold text-foreground mb-4 flex items-center gap-2.5">
                     <FileText className="w-4 h-4 text-primary" />
@@ -491,12 +492,12 @@ export default function Insights() {
                 <p className="text-xs text-muted-foreground text-center leading-relaxed">
                   Bring this summary to discuss with your doctor
                 </p>
-              </div>
+              </StaggerContainer>
             )}
 
             {/* Suggestions Tab */}
             {activeTab === 'suggestions' && (
-              <div className="space-y-4 animate-fade-in">
+              <StaggerContainer className="space-y-4">
                 <div className="flex items-center justify-between">
                   <p className="text-muted-foreground text-sm">
                     {hasPersonalSuggestionData ? 'Based on your safe foods' : 'Based on default safe foods'}
@@ -559,7 +560,7 @@ export default function Insights() {
                     </p>
                   </>
                 )}
-              </div>
+              </StaggerContainer>
             )}
           </>
         )}
