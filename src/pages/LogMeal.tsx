@@ -19,6 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Utensils, CheckCircle, AlertCircle, Info, X } from 'lucide-react';
 import { hapticSelection, hapticSuccess, hapticLight } from '@/lib/haptics';
 import { cn } from '@/lib/utils';
+import { StaggerContainer, StaggerItem } from '@/components/ui/AnimatedList';
 
 type Step = 'meal' | 'symptoms';
 
@@ -189,46 +190,50 @@ export default function LogMeal() {
 
   return (
     <MobileLayout>
-      <div 
+      <StaggerContainer 
         className="px-5 py-6 space-y-6"
         {...handlers}
       >
         <PullIndicator />
         {/* Sync Status */}
-        <SyncStatusIndicator 
-          className="justify-end" 
-          showRefreshButton 
-          onRefresh={loadData}
-        />
-        
+        <StaggerItem>
+          <SyncStatusIndicator 
+            className="justify-end" 
+            showRefreshButton 
+            onRefresh={loadData}
+          />
+        </StaggerItem>
         {/* Header */}
-        <div className="animate-fade-in">
-          <h1 className="font-display text-2xl font-bold text-foreground">
-            {step === 'meal' ? t('logMeal.title') : t('logMeal.logSymptoms')}
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1 leading-relaxed">
-            {step === 'meal' 
-              ? t('logMeal.whatDidYouEat') 
-              : `${t('logMeal.howDoYouFeel')} ${displayFoodName(foodName)}?`}
-          </p>
-        </div>
+        <StaggerItem>
+          <div>
+            <h1 className="font-display text-2xl font-bold text-foreground">
+              {step === 'meal' ? t('logMeal.title') : t('logMeal.logSymptoms')}
+            </h1>
+            <p className="text-muted-foreground text-sm mt-1 leading-relaxed">
+              {step === 'meal' 
+                ? t('logMeal.whatDidYouEat') 
+                : `${t('logMeal.howDoYouFeel')} ${displayFoodName(foodName)}?`}
+            </p>
+          </div>
+        </StaggerItem>
 
-        {/* Step indicator */}
-        <div className="flex items-center gap-2.5">
-          <div className={cn(
-            "flex-1 h-1.5 rounded-full transition-colors",
-            step === 'meal' ? "bg-primary" : "bg-primary"
-          )} />
-          <div className={cn(
-            "flex-1 h-1.5 rounded-full transition-colors",
-            step === 'symptoms' ? "bg-primary" : "bg-muted"
-          )} />
-        </div>
+        <StaggerItem>
+          <div className="flex items-center gap-2.5">
+            <div className={cn(
+              "flex-1 h-1.5 rounded-full transition-colors",
+              step === 'meal' ? "bg-primary" : "bg-primary"
+            )} />
+            <div className={cn(
+              "flex-1 h-1.5 rounded-full transition-colors",
+              step === 'symptoms' ? "bg-primary" : "bg-muted"
+            )} />
+          </div>
+        </StaggerItem>
 
         {step === 'meal' ? (
           <>
             {/* Food Name with Autocomplete */}
-            <div className="animate-slide-up space-y-3 relative z-20">
+            <StaggerItem className="space-y-3 relative z-20">
               <label className="flex items-center gap-2.5 text-sm font-semibold text-foreground">
                 <Utensils className="w-4 h-4 text-primary" />
                 {t('logMeal.foodNameRequired')}
@@ -335,10 +340,10 @@ export default function LogMeal() {
                   </Button>
                 </div>
               )}
-            </div>
+            </StaggerItem>
 
             {/* Portion Size */}
-            <div className="animate-slide-up space-y-3" style={{ animationDelay: '0.05s' }}>
+            <StaggerItem className="space-y-3">
               <label className="text-sm font-semibold text-foreground">
                 {t('logMeal.portionSizeRequired')}
               </label>
@@ -359,10 +364,10 @@ export default function LogMeal() {
                   </button>
                 ))}
               </div>
-            </div>
+            </StaggerItem>
 
             {/* Notes */}
-            <div className="animate-slide-up space-y-3" style={{ animationDelay: '0.1s' }}>
+            <StaggerItem className="space-y-3">
               <label className="text-sm font-semibold text-foreground">
                 {t('logMeal.notesOptional')}
               </label>
@@ -372,21 +377,22 @@ export default function LogMeal() {
                 placeholder={t('logMeal.additionalDetails')}
                 className="min-h-[80px]"
               />
-            </div>
+            </StaggerItem>
 
-            {/* Submit */}
-            <Button
-              onClick={handleMealSubmit}
-              disabled={isSubmitting || !foodName.trim() || !portion}
-              className="w-full h-14 text-base font-semibold rounded-xl gradient-calm text-primary-foreground border-0 shadow-soft active:scale-[0.98] transition-transform"
-            >
-              {isSubmitting ? t('logMeal.saving') : t('logMeal.nextLogSymptoms')}
-            </Button>
+            <StaggerItem>
+              <Button
+                onClick={handleMealSubmit}
+                disabled={isSubmitting || !foodName.trim() || !portion}
+                className="w-full h-14 text-base font-semibold rounded-xl gradient-calm text-primary-foreground border-0 shadow-soft active:scale-[0.98] transition-transform"
+              >
+                {isSubmitting ? t('logMeal.saving') : t('logMeal.nextLogSymptoms')}
+              </Button>
+            </StaggerItem>
           </>
         ) : (
           <>
             {/* Bloating Slider */}
-            <div className="animate-slide-up space-y-4 bg-card rounded-2xl p-5 border border-border">
+            <StaggerItem className="space-y-4 bg-card rounded-2xl p-5 border border-border">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-semibold text-foreground">{t('logMeal.bloating')}</label>
                 <span className={cn("font-bold text-sm", getSeverityColor(bloating[0]))}>
@@ -400,10 +406,10 @@ export default function LogMeal() {
                 step={1}
                 className="w-full"
               />
-            </div>
+            </StaggerItem>
 
             {/* Pain Slider */}
-            <div className="animate-slide-up space-y-4 bg-card rounded-2xl p-5 border border-border" style={{ animationDelay: '0.05s' }}>
+            <StaggerItem className="space-y-4 bg-card rounded-2xl p-5 border border-border">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-semibold text-foreground">{t('logMeal.painCramping')}</label>
                 <span className={cn("font-bold text-sm", getSeverityColor(pain[0]))}>
@@ -417,10 +423,10 @@ export default function LogMeal() {
                 step={1}
                 className="w-full"
               />
-            </div>
+            </StaggerItem>
 
             {/* Stool Issue Toggle */}
-            <div className="animate-slide-up flex items-center justify-between p-5 bg-card rounded-2xl border border-border" style={{ animationDelay: '0.1s' }}>
+            <StaggerItem className="flex items-center justify-between p-5 bg-card rounded-2xl border border-border">
               <div className="flex items-center gap-3">
                 <div className={cn(
                   "w-10 h-10 rounded-xl flex items-center justify-center",
@@ -440,29 +446,30 @@ export default function LogMeal() {
                   setStoolIssue(checked);
                 }}
               />
-            </div>
+            </StaggerItem>
 
-            {/* Buttons */}
-            <div className="space-y-3 pt-2">
-              <Button
-                onClick={handleSymptomSubmit}
-                disabled={isSubmitting}
-                className="w-full h-14 text-base font-semibold rounded-xl gradient-calm text-primary-foreground border-0 shadow-soft active:scale-[0.98] transition-transform"
-              >
-                <CheckCircle className="w-5 h-5 mr-2" />
-                {isSubmitting ? t('logMeal.saving') : t('logMeal.saveEntry')}
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={handleSkipSymptoms}
-                className="w-full h-12 text-muted-foreground font-medium hover:text-foreground"
-              >
-                {t('logMeal.skipSymptomLogging')}
-              </Button>
-            </div>
+            <StaggerItem>
+              <div className="space-y-3 pt-2">
+                <Button
+                  onClick={handleSymptomSubmit}
+                  disabled={isSubmitting}
+                  className="w-full h-14 text-base font-semibold rounded-xl gradient-calm text-primary-foreground border-0 shadow-soft active:scale-[0.98] transition-transform"
+                >
+                  <CheckCircle className="w-5 h-5 mr-2" />
+                  {isSubmitting ? t('logMeal.saving') : t('logMeal.saveEntry')}
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={handleSkipSymptoms}
+                  className="w-full h-12 text-muted-foreground font-medium hover:text-foreground"
+                >
+                  {t('logMeal.skipSymptomLogging')}
+                </Button>
+              </div>
+            </StaggerItem>
           </>
         )}
-      </div>
+      </StaggerContainer>
     </MobileLayout>
   );
 }
