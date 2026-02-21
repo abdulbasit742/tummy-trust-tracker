@@ -19,7 +19,7 @@ import { StaggerContainer, StaggerItem } from '@/components/ui/AnimatedList';
 import { calculateToleranceScores } from '@/lib/toleranceEngine';
 import { MealLog, SymptomLog, ToleranceData, IBSType, SeverityLevel } from '@/types';
 import { IBS_TYPES, SYMPTOMS, SEVERITY_LEVELS } from '@/data/constants';
-import { User, LogOut, Trash2, Edit2, ChevronRight, Save, X, AlertCircle, Lightbulb, Globe } from 'lucide-react';
+import { User, LogOut, Trash2, Edit2, ChevronRight, Save, X, AlertCircle, Lightbulb, Globe, Moon, Sun } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -55,6 +55,29 @@ export default function Profile() {
   // Custom tips editing state
   const [isEditingTips, setIsEditingTips] = useState(false);
   const [isSavingTips, setIsSavingTips] = useState(false);
+
+  // Dark mode state
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return document.documentElement.classList.contains('dark');
+    }
+    return false;
+  });
+
+  const toggleDarkMode = useCallback((checked: boolean) => {
+    setIsDark(checked);
+    document.documentElement.style.transition = 'background-color 0.3s ease, color 0.3s ease';
+    if (checked) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+    setTimeout(() => {
+      document.documentElement.style.transition = '';
+    }, 350);
+  }, []);
 
   const loadData = useCallback(async () => {
     if (!user) return;
@@ -327,6 +350,34 @@ export default function Profile() {
               <LogOut className="w-4 h-4 mr-2" />
               {t('auth.signOut')}
             </Button>
+          </div>
+        </div></StaggerItem>
+
+        {/* Dark Mode Toggle */}
+        <StaggerItem><div className="bg-card rounded-2xl p-5 border border-border shadow-soft">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={cn(
+                "w-10 h-10 rounded-xl flex items-center justify-center transition-colors duration-300",
+                isDark ? "bg-accent" : "bg-primary/10"
+              )}>
+                {isDark ? (
+                  <Moon className="w-5 h-5 text-accent-foreground" />
+                ) : (
+                  <Sun className="w-5 h-5 text-primary" />
+                )}
+              </div>
+              <div>
+                <h3 className="font-display font-semibold text-foreground">Dark Mode</h3>
+                <p className="text-xs text-muted-foreground">
+                  {isDark ? 'Dark theme active' : 'Light theme active'}
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={isDark}
+              onCheckedChange={toggleDarkMode}
+            />
           </div>
         </div></StaggerItem>
 
