@@ -378,9 +378,9 @@ export default function Profile() {
               </Button>
             </div>
             
-            {profile.symptoms.length > 0 && (
+            {(profile.symptoms?.length ?? 0) > 0 && (
               <div className="flex flex-wrap gap-2">
-                {profile.symptoms.slice(0, 4).map((symptom) => (
+                {(profile.symptoms ?? []).slice(0, 4).map((symptom) => (
                   <span 
                     key={symptom}
                     className="text-xs bg-secondary text-secondary-foreground px-3 py-1.5 rounded-full capitalize font-medium"
@@ -388,9 +388,9 @@ export default function Profile() {
                     {symptom}
                   </span>
                 ))}
-                {profile.symptoms.length > 4 && (
+                {(profile.symptoms?.length ?? 0) > 4 && (
                   <span className="text-xs text-muted-foreground px-3 py-1.5">
-                    +{profile.symptoms.length - 4} more
+                    +{(profile.symptoms?.length ?? 0) - 4} more
                   </span>
                 )}
               </div>

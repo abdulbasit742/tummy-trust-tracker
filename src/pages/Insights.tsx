@@ -111,7 +111,7 @@ export default function Insights() {
       '',
       `IBS Type: ${profile.ibs_type}`,
       `Severity: ${profile.severity}`,
-      `Main Symptoms: ${profile.symptoms.length > 0 ? profile.symptoms.join(', ') : 'Not specified'}`,
+      `Main Symptoms: ${(profile.symptoms?.length ?? 0) > 0 ? profile.symptoms!.join(', ') : 'Not specified'}`,
       '',
     ];
 

@@ -255,17 +255,12 @@ export default function LogMeal() {
                 {/* Autocomplete Dropdown */}
                 {showSuggestions && foodName.length >= 1 && suggestions.length > 0 && (
                   <div 
-                    className="absolute top-full left-0 right-0 mt-2 rounded-xl shadow-elevated border border-border overflow-hidden max-h-[280px] flex flex-col"
-                    style={{ 
-                      backgroundColor: 'hsl(40 40% 99%)',
-                      zIndex: 9999,
-                      position: 'absolute'
-                    }}
+                    className="absolute top-full left-0 right-0 mt-2 rounded-xl shadow-elevated border border-border overflow-hidden max-h-[280px] flex flex-col bg-card"
+                    style={{ zIndex: 9999 }}
                   >
                     {/* Close button header */}
                     <div 
-                      className="flex items-center justify-between px-4 py-2 border-b border-border"
-                      style={{ backgroundColor: 'hsl(42 18% 96%)' }}
+                      className="flex items-center justify-between px-4 py-2 border-b border-border bg-muted"
                     >
                       <span className="text-xs text-muted-foreground font-medium">
                         {suggestions.length} {suggestions.length !== 1 ? t('logMeal.results') : t('logMeal.result')}
@@ -289,10 +284,7 @@ export default function LogMeal() {
                           setFoodName(food.name);
                           setShowSuggestions(false);
                         }}
-                          className="w-full text-left px-4 py-3.5 transition-colors flex items-center justify-between min-h-[52px]"
-                          style={{ backgroundColor: 'hsl(40 40% 99%)' }}
-                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(42 18% 94%)'}
-                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'hsl(40 40% 99%)'}
+                          className="w-full text-left px-4 py-3.5 transition-colors flex items-center justify-between min-h-[52px] bg-card hover:bg-muted"
                         >
                           <span className="text-sm text-foreground font-medium" dir="auto">
                             {getFoodDisplayName(food)}
