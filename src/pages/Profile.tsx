@@ -20,6 +20,7 @@ import { calculateToleranceScores } from '@/lib/toleranceEngine';
 import { MealLog, SymptomLog, ToleranceData, IBSType, SeverityLevel } from '@/types';
 import { IBS_TYPES, SYMPTOMS, SEVERITY_LEVELS } from '@/data/constants';
 import { User, LogOut, Trash2, Edit2, ChevronRight, Save, X, AlertCircle, Lightbulb, Globe, Moon, Sun } from 'lucide-react';
+import { SwipeToDelete } from '@/components/ui/SwipeToDelete';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -615,136 +616,129 @@ export default function Profile() {
           ) : mealLogs.length > 0 ? (
             <div className="space-y-3">
               {displayedLogs.map((meal) => (
-                <div 
+                <SwipeToDelete
                   key={meal.id}
-                  className="bg-card rounded-2xl p-4 border border-border shadow-soft"
+                  onDelete={() => handleDeleteMeal(meal.id)}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-foreground text-sm truncate">{meal.food_name}</span>
-                        <span className="text-xs text-muted-foreground font-medium">({meal.portion})</span>
+                  <div className="bg-card rounded-2xl p-4 border border-border shadow-soft">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-foreground text-sm truncate">{meal.food_name}</span>
+                          <span className="text-xs text-muted-foreground font-medium">({meal.portion})</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {format(new Date(meal.eaten_at), 'MMM d, h:mm a')}
+                        </p>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {format(new Date(meal.eaten_at), 'MMM d, h:mm a')}
-                      </p>
+                      <span className="text-xs text-muted-foreground">← swipe</span>
                     </div>
-                    
-                    <button
-                      onClick={() => handleDeleteMeal(meal.id)}
-                      className="p-2 text-muted-foreground hover:text-destructive transition-colors rounded-lg hover:bg-destructive/10"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
 
-                  {/* Symptom Logs for this meal */}
-                  {meal.symptom_logs && meal.symptom_logs.length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-border">
-                      {meal.symptom_logs.map((symptomLog) => (
-                        <div key={symptomLog.id}>
-                          {editingSymptomLog?.id === symptomLog.id ? (
-                            // Editing mode
-                            <div className="space-y-4 p-3 bg-muted/40 rounded-xl">
-                              <div className="flex items-center justify-between">
-                                <span className="text-sm font-semibold text-foreground">Edit Symptoms</span>
-                                <Button variant="ghost" size="sm" onClick={cancelEditingSymptom} className="h-8 w-8 p-0 rounded-lg">
-                                  <X className="w-4 h-4" />
+                    {/* Symptom Logs for this meal */}
+                    {meal.symptom_logs && meal.symptom_logs.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-border">
+                        {meal.symptom_logs.map((symptomLog) => (
+                          <div key={symptomLog.id}>
+                            {editingSymptomLog?.id === symptomLog.id ? (
+                              <div className="space-y-4 p-3 bg-muted/40 rounded-xl">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm font-semibold text-foreground">Edit Symptoms</span>
+                                  <Button variant="ghost" size="sm" onClick={cancelEditingSymptom} className="h-8 w-8 p-0 rounded-lg">
+                                    <X className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                                
+                                <div>
+                                  <div className="flex items-center justify-between mb-1">
+                                    <span className="text-xs text-muted-foreground">Bloating</span>
+                                    <span className={cn("text-xs font-medium", getSeverityColor(editBloating[0]))}>
+                                      {editBloating[0]}/10
+                                    </span>
+                                  </div>
+                                  <Slider
+                                    value={editBloating}
+                                    onValueChange={setEditBloating}
+                                    max={10}
+                                    step={1}
+                                    className="w-full"
+                                  />
+                                </div>
+                                
+                                <div>
+                                  <div className="flex items-center justify-between mb-1">
+                                    <span className="text-xs text-muted-foreground">Pain</span>
+                                    <span className={cn("text-xs font-medium", getSeverityColor(editPain[0]))}>
+                                      {editPain[0]}/10
+                                    </span>
+                                  </div>
+                                  <Slider
+                                    value={editPain}
+                                    onValueChange={setEditPain}
+                                    max={10}
+                                    step={1}
+                                    className="w-full"
+                                  />
+                                </div>
+                                
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs text-muted-foreground">Stool Issue</span>
+                                  <Switch
+                                    checked={editStoolIssue}
+                                    onCheckedChange={setEditStoolIssue}
+                                  />
+                                </div>
+                                
+                                <Button
+                                  onClick={handleSaveSymptom}
+                                  disabled={isSaving}
+                                  size="sm"
+                                  className="w-full h-10 text-sm rounded-xl font-semibold"
+                                >
+                                  {isSaving ? 'Saving...' : 'Save Changes'}
                                 </Button>
                               </div>
-                              
-                              <div>
-                                <div className="flex items-center justify-between mb-1">
-                                  <span className="text-xs text-muted-foreground">Bloating</span>
-                                  <span className={cn("text-xs font-medium", getSeverityColor(editBloating[0]))}>
-                                    {editBloating[0]}/10
-                                  </span>
+                            ) : (
+                              <div className="flex items-center justify-between py-1">
+                                <span className={cn(
+                                  "text-xs font-medium px-2 py-0.5 rounded-full",
+                                  symptomLog.bloating_0_10 + symptomLog.pain_0_10 <= 4 
+                                    ? "bg-success/15 text-success" 
+                                    : symptomLog.bloating_0_10 + symptomLog.pain_0_10 <= 10
+                                    ? "bg-caution/15 text-caution"
+                                    : "bg-destructive/15 text-destructive"
+                                )}>
+                                  B:{symptomLog.bloating_0_10} P:{symptomLog.pain_0_10} {symptomLog.stool_issue && '💩'}
+                                </span>
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    onClick={() => startEditingSymptom(symptomLog)}
+                                    className="p-1 text-muted-foreground hover:text-primary transition-colors"
+                                  >
+                                    <Edit2 className="w-3 h-3" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteSymptom(symptomLog.id)}
+                                    className="p-1 text-muted-foreground hover:text-destructive transition-colors"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </button>
                                 </div>
-                                <Slider
-                                  value={editBloating}
-                                  onValueChange={setEditBloating}
-                                  max={10}
-                                  step={1}
-                                  className="w-full"
-                                />
                               </div>
-                              
-                              <div>
-                                <div className="flex items-center justify-between mb-1">
-                                  <span className="text-xs text-muted-foreground">Pain</span>
-                                  <span className={cn("text-xs font-medium", getSeverityColor(editPain[0]))}>
-                                    {editPain[0]}/10
-                                  </span>
-                                </div>
-                                <Slider
-                                  value={editPain}
-                                  onValueChange={setEditPain}
-                                  max={10}
-                                  step={1}
-                                  className="w-full"
-                                />
-                              </div>
-                              
-                              <div className="flex items-center justify-between">
-                                <span className="text-xs text-muted-foreground">Stool Issue</span>
-                                <Switch
-                                  checked={editStoolIssue}
-                                  onCheckedChange={setEditStoolIssue}
-                                />
-                              </div>
-                              
-                              <Button
-                                onClick={handleSaveSymptom}
-                                disabled={isSaving}
-                                size="sm"
-                                className="w-full h-10 text-sm rounded-xl font-semibold"
-                              >
-                                {isSaving ? 'Saving...' : 'Save Changes'}
-                              </Button>
-                            </div>
-                          ) : (
-                            // View mode
-                            <div className="flex items-center justify-between py-1">
-                              <span className={cn(
-                                "text-xs font-medium px-2 py-0.5 rounded-full",
-                                symptomLog.bloating_0_10 + symptomLog.pain_0_10 <= 4 
-                                  ? "bg-success/15 text-success" 
-                                  : symptomLog.bloating_0_10 + symptomLog.pain_0_10 <= 10
-                                  ? "bg-caution/15 text-caution"
-                                  : "bg-destructive/15 text-destructive"
-                              )}>
-                                B:{symptomLog.bloating_0_10} P:{symptomLog.pain_0_10} {symptomLog.stool_issue && '💩'}
-                              </span>
-                              <div className="flex items-center gap-1">
-                                <button
-                                  onClick={() => startEditingSymptom(symptomLog)}
-                                  className="p-1 text-muted-foreground hover:text-primary transition-colors"
-                                >
-                                  <Edit2 className="w-3 h-3" />
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteSymptom(symptomLog.id)}
-                                  className="p-1 text-muted-foreground hover:text-destructive transition-colors"
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
-                  {/* No symptoms logged indicator */}
-                  {(!meal.symptom_logs || meal.symptom_logs.length === 0) && (
-                    <div className="mt-3 pt-3 border-t border-border">
-                      <span className="text-xs text-muted-foreground italic">
-                        No symptoms logged
-                      </span>
-                    </div>
-                  )}
-                </div>
+                    {(!meal.symptom_logs || meal.symptom_logs.length === 0) && (
+                      <div className="mt-3 pt-3 border-t border-border">
+                        <span className="text-xs text-muted-foreground italic">
+                          No symptoms logged
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </SwipeToDelete>
               ))}
               
               {mealLogs.length > 5 && (
