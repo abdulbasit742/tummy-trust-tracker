@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Search, PlusCircle, BarChart3, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -17,6 +17,26 @@ export function MobileLayout({ children, showNav = true }: MobileLayoutProps) {
   const { t, isUrdu } = useLanguage();
   const [activeTab, setActiveTab] = useState(location.pathname);
   const [isAnimating, setIsAnimating] = useState(false);
+  const navRef = useRef<HTMLDivElement>(null);
+  const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number }>({ left: 0, width: 0 });
+
+  // Update indicator position
+  const updateIndicator = useCallback(() => {
+    if (!navRef.current) return;
+    const activeBtn = navRef.current.querySelector('[data-active="true"]') as HTMLElement;
+    if (activeBtn) {
+      const navRect = navRef.current.getBoundingClientRect();
+      const btnRect = activeBtn.getBoundingClientRect();
+      setIndicatorStyle({
+        left: btnRect.left - navRect.left + btnRect.width / 2 - 12,
+        width: 24,
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    updateIndicator();
+  }, [activeTab, updateIndicator]);
 
   const navItems = [
     { path: '/', icon: LayoutDashboard, label: t('nav.home') },
@@ -58,7 +78,12 @@ export function MobileLayout({ children, showNav = true }: MobileLayoutProps) {
       
       {showNav && (
         <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-xl border-t border-border/50 safe-bottom z-50 shadow-elevated">
-          <div className="flex items-end justify-around px-2 pt-2 pb-1.5 max-w-md mx-auto">
+          <div ref={navRef} className="flex items-end justify-around px-2 pt-2 pb-1.5 max-w-md mx-auto relative">
+            {/* Sliding indicator */}
+            <div
+              className="absolute top-0 h-[3px] rounded-full bg-primary transition-all duration-300 ease-out"
+              style={{ left: indicatorStyle.left, width: indicatorStyle.width }}
+            />
             {navItems.map((item) => {
               const isActive = activeTab === item.path;
               const Icon = item.icon;
@@ -67,6 +92,7 @@ export function MobileLayout({ children, showNav = true }: MobileLayoutProps) {
                 return (
                   <button
                     key={item.path}
+                    data-active={isActive}
                     onClick={() => handleNavClick(item.path)}
                     className={cn(
                       "flex flex-col items-center justify-center -mt-6 transition-all duration-200"
@@ -98,6 +124,7 @@ export function MobileLayout({ children, showNav = true }: MobileLayoutProps) {
               return (
                 <button
                   key={item.path}
+                  data-active={isActive}
                   onClick={() => handleNavClick(item.path)}
                   className={cn(
                     "flex flex-col items-center justify-center px-3 py-2 rounded-xl transition-all duration-200",
