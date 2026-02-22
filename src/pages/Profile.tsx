@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -21,6 +21,7 @@ import { MealLog, SymptomLog, ToleranceData, IBSType, SeverityLevel } from '@/ty
 import { IBS_TYPES, SYMPTOMS, SEVERITY_LEVELS } from '@/data/constants';
 import { User, LogOut, Trash2, Edit2, ChevronRight, Save, X, AlertCircle, Lightbulb, Globe, Moon, Sun } from 'lucide-react';
 import { SwipeToDelete } from '@/components/ui/SwipeToDelete';
+import { CircularReveal } from '@/components/ui/CircularReveal';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -64,20 +65,40 @@ export default function Profile() {
     }
     return false;
   });
+  const [revealActive, setRevealActive] = useState(false);
+  const [revealOrigin, setRevealOrigin] = useState({ x: 0, y: 0 });
+  const [revealColor, setRevealColor] = useState('');
+  const toggleRef = useRef<HTMLDivElement>(null);
 
   const toggleDarkMode = useCallback((checked: boolean) => {
-    setIsDark(checked);
-    document.documentElement.style.transition = 'background-color 0.3s ease, color 0.3s ease';
-    if (checked) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
+    // Get toggle position for circular reveal origin
+    if (toggleRef.current) {
+      const rect = toggleRef.current.getBoundingClientRect();
+      setRevealOrigin({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
     }
+
+    // The reveal color should be the NEW theme's background
+    const newBg = checked
+      ? 'hsl(222, 24%, 6%)'    // dark mode --background
+      : 'hsl(42, 32%, 97%)';   // light mode --background
+    setRevealColor(newBg);
+    setRevealActive(true);
+
+    // Apply theme change shortly after reveal starts (so the reveal covers the flash)
     setTimeout(() => {
-      document.documentElement.style.transition = '';
-    }, 350);
+      setIsDark(checked);
+      if (checked) {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      }
+    }, 150);
+  }, []);
+
+  const handleRevealComplete = useCallback(() => {
+    setRevealActive(false);
   }, []);
 
   const loadData = useCallback(async () => {
@@ -354,8 +375,18 @@ export default function Profile() {
           </div>
         </div></StaggerItem>
 
+        {/* Circular Reveal Effect */}
+        <CircularReveal
+          active={revealActive}
+          x={revealOrigin.x}
+          y={revealOrigin.y}
+          color={revealColor}
+          duration={0.55}
+          onComplete={handleRevealComplete}
+        />
+
         {/* Dark Mode Toggle */}
-        <StaggerItem><div className="bg-card rounded-2xl p-5 border border-border shadow-soft">
+        <StaggerItem><div ref={toggleRef} className="bg-card rounded-2xl p-5 border border-border shadow-soft">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className={cn(
