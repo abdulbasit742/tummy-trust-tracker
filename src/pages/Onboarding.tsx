@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,6 +9,7 @@ import { ArrowRight, ArrowLeft, Heart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type Step = 'welcome' | 'ibs-type' | 'symptoms' | 'severity' | 'triggers';
 
@@ -24,10 +25,17 @@ export default function Onboarding() {
   const [triggers, setTriggers] = useState<string[]>([]);
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [direction, setDirection] = useState(1); // 1 = forward, -1 = back
 
   const steps: Step[] = ['welcome', 'ibs-type', 'symptoms', 'severity', 'triggers'];
   const currentIndex = steps.indexOf(step);
   const progress = ((currentIndex) / (steps.length - 1)) * 100;
+
+  const slideVariants = {
+    enter: (dir: number) => ({ x: dir > 0 ? 80 : -80, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (dir: number) => ({ x: dir > 0 ? -80 : 80, opacity: 0 }),
+  };
 
   const canContinue = () => {
     switch (step) {
@@ -43,6 +51,7 @@ export default function Onboarding() {
   const handleNext = () => {
     const nextIndex = currentIndex + 1;
     if (nextIndex < steps.length) {
+      setDirection(1);
       setStep(steps[nextIndex]);
     } else {
       handleComplete();
@@ -52,6 +61,7 @@ export default function Onboarding() {
   const handleBack = () => {
     const prevIndex = currentIndex - 1;
     if (prevIndex >= 0) {
+      setDirection(-1);
       setStep(steps[prevIndex]);
     }
   };
@@ -107,22 +117,53 @@ export default function Onboarding() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Progress bar */}
-      {step !== 'welcome' && (
-        <div className="px-4 pt-4">
-          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-primary rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${progress}%` }}
+      {/* Step indicator dots + progress bar */}
+      <div className="px-4 pt-4 space-y-3">
+        <div className="flex items-center justify-center gap-2">
+          {steps.map((s, i) => (
+            <motion.div
+              key={s}
+              className={cn(
+                "rounded-full transition-colors duration-300",
+                i === currentIndex
+                  ? "bg-primary"
+                  : i < currentIndex
+                    ? "bg-primary/40"
+                    : "bg-muted"
+              )}
+              animate={{
+                width: i === currentIndex ? 24 : 8,
+                height: 8,
+              }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            />
+          ))}
+        </div>
+        {step !== 'welcome' && (
+          <div className="h-1 bg-muted rounded-full overflow-hidden">
+            <motion.div
+              className="h-full bg-primary rounded-full"
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
             />
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      <div className="flex-1 flex flex-col px-4 py-6 overflow-y-auto">
+      <div className="flex-1 flex flex-col px-4 py-6 overflow-hidden">
+        <AnimatePresence mode="wait" custom={direction}>
         {/* Welcome Step */}
         {step === 'welcome' && (
-          <div className="flex-1 flex flex-col justify-center animate-fade-in">
+          <motion.div
+            key="welcome"
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="flex-1 flex flex-col justify-center"
+          >
             <div className="text-center mb-8">
               <div className="w-20 h-20 gradient-calm rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-elevated">
                 <Heart className="w-10 h-10 text-primary-foreground" />
@@ -154,12 +195,21 @@ export default function Onboarding() {
                 </label>
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* IBS Type Step */}
         {step === 'ibs-type' && (
-          <div className="flex-1 flex flex-col animate-fade-in">
+          <motion.div
+            key="ibs-type"
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="flex-1 flex flex-col overflow-y-auto"
+          >
             <h2 className="font-display text-xl font-bold text-foreground mb-2">
               What's your IBS type?
             </h2>
@@ -188,12 +238,21 @@ export default function Onboarding() {
                 </button>
               ))}
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Symptoms Step */}
         {step === 'symptoms' && (
-          <div className="flex-1 flex flex-col animate-fade-in">
+          <motion.div
+            key="symptoms"
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="flex-1 flex flex-col overflow-y-auto"
+          >
             <h2 className="font-display text-xl font-bold text-foreground mb-2">
               Common symptoms
             </h2>
@@ -219,12 +278,21 @@ export default function Onboarding() {
                 </button>
               ))}
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Severity Step */}
         {step === 'severity' && (
-          <div className="flex-1 flex flex-col animate-fade-in">
+          <motion.div
+            key="severity"
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="flex-1 flex flex-col overflow-y-auto"
+          >
             <h2 className="font-display text-xl font-bold text-foreground mb-2">
               Symptom severity
             </h2>
@@ -253,12 +321,21 @@ export default function Onboarding() {
                 </button>
               ))}
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Triggers Step */}
         {step === 'triggers' && (
-          <div className="flex-1 flex flex-col animate-fade-in">
+          <motion.div
+            key="triggers"
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="flex-1 flex flex-col overflow-y-auto"
+          >
             <h2 className="font-display text-xl font-bold text-foreground mb-2">
               Known triggers
             </h2>
@@ -282,8 +359,9 @@ export default function Onboarding() {
                 </button>
               ))}
             </div>
-          </div>
+          </motion.div>
         )}
+        </AnimatePresence>
 
         {/* Navigation buttons */}
         <div className="mt-8 flex gap-3">
