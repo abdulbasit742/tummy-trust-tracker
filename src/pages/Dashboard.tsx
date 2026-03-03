@@ -12,6 +12,7 @@ import { GrowthBanner, WelcomeCard } from '@/components/ui/FreeAccessBanner';
 import { ShareButton } from '@/components/ui/ShareButton';
 import { MotivationalTip } from '@/components/ui/MotivationalTip';
 import { WaterTracker } from '@/components/ui/WaterTracker';
+import { StreakCounter } from '@/components/ui/StreakCounter';
 import { WaterReminder } from '@/components/ui/WaterReminder';
 import { SyncStatusIndicator } from '@/components/ui/SyncStatusIndicator';
 import { Button } from '@/components/ui/button';
@@ -146,6 +147,11 @@ export default function Dashboard() {
                 <ShareButton variant="icon" />
               </div>
             </div>
+          </StaggerItem>
+
+          {/* Streak Counter */}
+          <StaggerItem>
+            <StreakCounter />
           </StaggerItem>
 
           {/* Quick Actions */}
